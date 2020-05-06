@@ -1,0 +1,2 @@
+python_template/_version.py export-subst
+aisim/_version.py export-subst
