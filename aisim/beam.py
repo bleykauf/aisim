@@ -68,8 +68,6 @@ class Wavefront():
 
         contour = ax.contourf(theta, rho, values)
         cbar = plt.colorbar(contour)
-        ax.set_xlabel('$x$ / mm')
-        ax.set_ylabel('$y$ / mm')
         cbar.set_label(r'Aberration / $\lambda$', rotation=90)
         plt.tight_layout()
 
@@ -92,7 +90,8 @@ class Wavefront():
             fig = ax.figure
 
         ax.bar(np.arange(len(self.coeff)), self.coeff)
-
+        ax.set_xlabel('Zernike polynomial $i$')
+        ax.set_ylabel(r'Zernike coefficient $Z_i$ / $\lambda$')
         return fig, ax
 
         
