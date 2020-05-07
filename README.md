@@ -179,10 +179,10 @@ For the simulation we need the objects created above and the timing of the inter
 
 
 ```python
-T = 260e-3
-t1 = 129.972e-3 # ms 
-t2 = t1 + T # ms
-t3 = t2 + T # ms
+T = 260e-3 # interferometer time in s
+t1 = 129.972e-3 # time of first pulse in s
+t2 = t1 + T
+t3 = t2 + T
 t = [t1, t2, t3]
 ```
 
