@@ -23,7 +23,7 @@ class Wavefront():
             list of 36 Zernike coefficients in multiples of the wavelength
         """
         self.r_beam = r_beam
-        self. coeff = coeff            
+        self.coeff = coeff  
     
     def get_value(self, pos):
         """"
@@ -119,6 +119,8 @@ class Wavefront():
         # precalculating values
         # powers of rho
         rho = rho/r_beam
+        if (rho > 1).any(): # Raise error if Zernike polynom is oustide its defined domain
+            raise ValueError("rho must be smaller than r_beam")
         rho2 = rho*rho
         rho3 = rho2*rho
         rho4 = rho3*rho
