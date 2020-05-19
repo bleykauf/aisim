@@ -164,3 +164,33 @@ def combine_weights(pos_weights, vel_weights):
     """
     # FIXME: replace with faster version, for example based on meshgrid
     return np.array([p * v for p in pos_weights for v in vel_weights])
+
+def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_samples):
+    """
+    Creates an AtomicEnsemble from randomly chosen and normal distributed samples 
+    in position and velocity space
+
+    Parameters
+    ----------
+    pos_params, vel_params : dict
+        Dictionary containing the parameters determining the position and velocity distributions of the 
+        atomic ensemble. 
+        Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y','mean_z', 'std_z'.
+        Entries for velocity space are 'mean_vx','std_vx' ,'mean_vy', 'std_vy','mean_vz', 'std_vz'.
+    N_samples : Number of random samples.
+    
+    Returns
+    -------
+    ensemble : AtomicEnsemble
+        Atomic ensemble containing the generated phase space vectors.
+    """
+    # initialize vector with phase-space entries and fill them
+    phase_space_vectors = np.zeros((N_samples, 6))
+    phase_space_vectors[:,0] = np.random.normal(loc = pos_params['mean_x'], scale = pos_params['std_x'], size=N_samples)
+    phase_space_vectors[:,1] = np.random.normal(loc = pos_params['mean_y'], scale = pos_params['std_y'], size=N_samples)
+    phase_space_vectors[:,2] = np.random.normal(loc = pos_params['mean_z'], scale = pos_params['std_z'], size=N_samples)
+    phase_space_vectors[:,3] = np.random.normal(loc = vel_params['mean_vx'], scale = vel_params['std_vx'], size=N_samples)
+    phase_space_vectors[:,4] = np.random.normal(loc = vel_params['mean_vy'], scale = vel_params['std_vy'], size=N_samples)
+    phase_space_vectors[:,5] = np.random.normal(loc = vel_params['mean_vz'], scale = vel_params['std_vz'], size=N_samples)
+    ensemble = AtomicEnsemble(phase_space_vectors)
+    return ensemble
