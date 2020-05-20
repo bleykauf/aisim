@@ -13,7 +13,7 @@ class Wavefront():
     coeff : list
         list of 36 Zernike coefficients in multiples of the wavelength
     """
-    def __init__(self, r_beam, coeff):
+    def __init__(self, r_beam, coeff, peak_Rabi_freq = None):
         """
         Parameters
         ----------
@@ -23,7 +23,8 @@ class Wavefront():
             list of 36 Zernike coefficients in multiples of the wavelength
         """
         self.r_beam = r_beam
-        self.coeff = coeff  
+        self.coeff = coeff
+        self.peak_Rabi_freq = peak_Rabi_freq
     
     def get_value(self, pos):
         """"
