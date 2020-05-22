@@ -33,7 +33,7 @@ class Wavefront():
         Parameters
         ----------
         pos : n × 3 array
-            array of position vectors (x, y, z) where there wavefront should be probed
+            array of position vectors (x, y, z) where the wavefront should be probed
             
         Returns
         -------
@@ -47,6 +47,25 @@ class Wavefront():
         values = self.zern_iso(rho, theta, coeff=self.coeff, r_beam=self.r_beam)
         return values
     
+    def get_Rabi_freq(self, pos):
+        """"
+        The Rabi frequency at position pos. The beam is assumed to be Gaussian shaped.
+        
+        Parameters
+        ----------
+        pos : n × 3 array
+            array of position vectors (x, y, z) where the beam should be probed
+            
+        Returns
+        -------
+        wf : nd array
+            The value of the Rabi frequency at the given positions
+        """
+        values = np.zeros(pos.shape[0])
+        for i in range(0, pos.shape[0]):
+            values[i] = self.peak_Rabi_freq*np.exp( -2*(pos[i][0]**2+pos[i][1]**2)/(self.r_beam)**2 )
+        return values
+
     def plot(self, ax=None):
         """
         Plot the wavefront
