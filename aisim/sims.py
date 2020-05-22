@@ -41,3 +41,38 @@ def mz_interferometer(t, wf, atoms, det):
     weighted_awf = np.sum(atoms.weights * awf) / np.sum(atoms.weights)
 
     return weighted_awf
+
+def ai_timepropagation(wf, atoms, t0, tau, psi0):
+    """
+    Calculates the change of an array of initial wave functions in the effective Raman
+    two-level system according to the timepropagator U as in Berman et. al.
+
+    Parameters
+    ----------
+    wf : Wavefront
+        wavefront aberrations and intensity distribution of the interferometry beam
+    atoms : AtomicEnsemble
+        atomic ensemble that probes the wavefront
+    t0 : time of pulse
+    tau: length of pulse
+    psi0: Array of initial wave function (Prbabillity amplitude in ground and excited state)
+        
+    Returns
+    -------
+    psi_return : Array with n entries of two complex probabillity amplitudes
+    """
+
+    assert(atoms.phase_space_vectors.shape[0] == psi0.shape[0]), "Number of atoms has to equal number of initial wave functions."
+    psi_return = np.zeros(psi0.shape, dtype='complex') # initizalize return array
+    Omega_R = wf.get_Rabi_freq(atoms.position(t0)) # calculate Rabi frequency at atoms' positions
+    phi = wf.get_value(atoms.position(t0)) # calculate phase at atoms' positions
+    # alculate matrix elements
+    U_ee = np.cos(Omega_R*tau/2)
+    U_eg = np.multiply(np.exp(-1j*phi), 1j*np.sin(Omega_R*tau/2) )
+    U_ge = np.multiply(np.exp(+1j*phi), 1j*np.sin(Omega_R*tau/2) )
+    U_gg = np.cos(Omega_R*tau/2)
+    U = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
+    # U*psi
+    for i in range(0, psi0.shape[0]):
+        psi_return[i,:,:] = np.matmul(U[:,:,i], psi0[i,:,:].T).T
+    return psi_return
