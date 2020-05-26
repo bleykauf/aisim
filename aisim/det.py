@@ -1,5 +1,7 @@
 import numpy as np
 from . import convert
+
+
 class Detector():
     """
     Parameters
@@ -7,6 +9,7 @@ class Detector():
     r_det : float
         radius of the detection area in the $x$, $y$ plane
     """
+
     def __init__(self, r_det, t_det):
         self.r_det = r_det
         self.t_det = t_det
@@ -15,7 +18,7 @@ class Detector():
         """
         Determines wheter a position is within the detection zone and returns the indices of the
         phase space vectors of an atomic ensemble that are detected
-        
+
         Parameters
         ----------
         atoms : AtomicEnsemble
@@ -25,7 +28,7 @@ class Detector():
         -------
         det_idx : nd array of bool
             boolean array for filtering an AtomicEnsemble; True if detected, otherwise False.
-        
+
         """
 
         # pylint: disable=unsubscriptable-object

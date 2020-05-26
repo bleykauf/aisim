@@ -2,6 +2,7 @@ import copy
 import numpy as np
 from . import convert
 
+
 class AtomicEnsemble():
     """
     Represents an atomic ensemble consisting of n atoms. Each atom is is defined by its phase space 
@@ -29,11 +30,11 @@ class AtomicEnsemble():
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
         if weights is None:
-            weights = np.ones(len(self)) # unity weight for each atom
+            weights = np.ones(len(self))  # unity weight for each atom
         else:
             assert len(weights) == self.phase_space_vectors.shape[0]
         self.weights = weights
-    
+
     def __getitem__(self, key):
         new_instance = AtomicEnsemble(self.phase_space_vectors[key, :], self.weights[key])
         return new_instance
@@ -66,8 +67,8 @@ def create_ensemble_from_grids(pos_params, vel_params):
     Parameters
     ----------
     pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and velocity distributions of the 
-        atomic ensemble. They each have to contain the arguments described in the docstring of 
+        Dictionary containing the parameters determining the position and velocity distributions of
+         the atomic ensemble. They each have to contain the arguments described in the docstring of 
         `make_grid`, i.e. `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
         `m_std_z`, `weight` (optional).
 
@@ -103,7 +104,7 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
         number of standard deviations for the rho and z distribution, respectively
     weight : {'gauss'}
         Weighting according to Gaussian distribution along rho and z
-    
+
     Returns
     -------
     grid : n × 3 array     
@@ -125,14 +126,15 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
     rhos = np.linspace(0, m_std_rho*std_rho, n_rho)
     thetas = np.linspace(0, 2*np.pi, n_theta)
     zs = np.linspace(-m_std_z*std_z/2, m_std_z*std_z/2, max(n_z*m_std_z, 1))
-    grid =  np.array(np.meshgrid(rhos, thetas, zs)).T.reshape(-1,3)
+    grid = np.array(np.meshgrid(rhos, thetas, zs)).T.reshape(-1, 3)
     # get weights before converting to carthesian coordinates
     weights = np.exp(-grid[:, 0]**2/(2*std_rho**2))
-    if std_z!=0:
+    if std_z != 0:
         # check if distribution is 2d to avoid divide by 0
         weights = weights * np.exp(-grid[:, 2]**2/(2*std_z**2))
     grid = convert.pol2cart(grid)
     return grid, weights
+
 
 def combine_grids(pos, vel):
     """
@@ -152,6 +154,7 @@ def combine_grids(pos, vel):
     phase_space_vectors = np.array([np.array((p, v)).flatten() for p in pos for v in vel])
     return phase_space_vectors
 
+
 def combine_weights(pos_weights, vel_weights):
     """
     Combine the weights of a position and velocity grid. Complements `_combine_grids`.
@@ -165,6 +168,7 @@ def combine_weights(pos_weights, vel_weights):
     # FIXME: replace with faster version, for example based on meshgrid
     return np.array([p * v for p in pos_weights for v in vel_weights])
 
+
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_samples):
     """
     Creates an AtomicEnsemble from randomly chosen and normal distributed samples 
@@ -173,12 +177,12 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_
     Parameters
     ----------
     pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and velocity distributions of the 
-        atomic ensemble. 
+        Dictionary containing the parameters determining the position and velocity distributions of
+         the atomic ensemble. 
         Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y','mean_z', 'std_z'.
         Entries for velocity space are 'mean_vx','std_vx' ,'mean_vy', 'std_vy','mean_vz', 'std_vz'.
     N_samples : Number of random samples.
-    
+
     Returns
     -------
     ensemble : AtomicEnsemble
@@ -186,11 +190,17 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_
     """
     # initialize vector with phase-space entries and fill them
     phase_space_vectors = np.zeros((N_samples, 6))
-    phase_space_vectors[:,0] = np.random.normal(loc = pos_params['mean_x'], scale = pos_params['std_x'], size=N_samples)
-    phase_space_vectors[:,1] = np.random.normal(loc = pos_params['mean_y'], scale = pos_params['std_y'], size=N_samples)
-    phase_space_vectors[:,2] = np.random.normal(loc = pos_params['mean_z'], scale = pos_params['std_z'], size=N_samples)
-    phase_space_vectors[:,3] = np.random.normal(loc = vel_params['mean_vx'], scale = vel_params['std_vx'], size=N_samples)
-    phase_space_vectors[:,4] = np.random.normal(loc = vel_params['mean_vy'], scale = vel_params['std_vy'], size=N_samples)
-    phase_space_vectors[:,5] = np.random.normal(loc = vel_params['mean_vz'], scale = vel_params['std_vz'], size=N_samples)
+    phase_space_vectors[:, 0] = np.random.normal(
+        loc=pos_params['mean_x'], scale=pos_params['std_x'], size=N_samples)
+    phase_space_vectors[:, 1] = np.random.normal(
+        loc=pos_params['mean_y'], scale=pos_params['std_y'], size=N_samples)
+    phase_space_vectors[:, 2] = np.random.normal(
+        loc=pos_params['mean_z'], scale=pos_params['std_z'], size=N_samples)
+    phase_space_vectors[:, 3] = np.random.normal(
+        loc=vel_params['mean_vx'], scale=vel_params['std_vx'], size=N_samples)
+    phase_space_vectors[:, 4] = np.random.normal(
+        loc=vel_params['mean_vy'], scale=vel_params['std_vy'], size=N_samples)
+    phase_space_vectors[:, 5] = np.random.normal(
+        loc=vel_params['mean_vz'], scale=vel_params['std_vz'], size=N_samples)
     ensemble = AtomicEnsemble(phase_space_vectors)
     return ensemble
