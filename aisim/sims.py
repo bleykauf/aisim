@@ -44,38 +44,50 @@ def mz_interferometer(t, wf, atoms, det):
     return weighted_awf
 
 
-def ai_timepropagation(wf, atoms, t0, tau, psi0):
+def ai_time_propagation(intensity_profile, atoms, state_vectors, t0, tau, wf=None):
     """
     Calculates the change of an array of initial wave functions in the effective Raman
-    two-level system according to the timepropagator U as in Berman et. al.
+    two-level system according to the time propagator U as in [1].
 
     Parameters
     ----------
-    wf : Wavefront
-        wavefront aberrations and intensity distribution of the interferometry beam
+    beam_profile : BeamProfile
+        Intensity profile of the interferometry lasers
     atoms : AtomicEnsemble
         atomic ensemble that probes the wavefront
-    t0 : time of pulse
-    tau: length of pulse
-    psi0: Array of initial wave function (Prbabillity amplitude in ground and excited state)
+    t0 : float
+        time of pulse
+    tau: float
+        length of pulse
+    wf : Wavefront (optional)
+        wavefront aberrations of the interferometry beam
 
     Returns
     -------
-    psi_return : Array with n entries of two complex probabillity amplitudes
+    psi : Array with n entries of two complex probabillity amplitudes
+
+    References
+    ----------
+    [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom interferometry with light 
+    pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363–406). Academic Press. 
+    https://doi.org/10.1016/B978-012092460-8/50010-2
     """
 
-    assert atoms.phase_space_vectors.shape[0] == psi0.shape[0], \
-        "Number of atoms has to equal number of initial wave functions."
-    psi_return = np.zeros(psi0.shape, dtype='complex')  # initizalize return array
-    Omega_R = wf.get_rabi_freq(atoms.position(t0))  # calculate Rabi frequency at atoms' positions
-    phi = wf.get_value(atoms.position(t0))  # calculate phase at atoms' positions
-    # alculate matrix elements
-    U_ee = np.cos(Omega_R*tau/2)
-    U_eg = np.multiply(np.exp(-1j*phi), 1j*np.sin(Omega_R*tau/2))
-    U_ge = np.multiply(np.exp(+1j*phi), 1j*np.sin(Omega_R*tau/2))
-    U_gg = np.cos(Omega_R*tau/2)
-    U = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
+     # calculate Rabi frequency at atoms' positions
+    Omega_R = intensity_profile.get_rabi_freq(atoms.position(t0))
+
+    if wf is None:
+        phase = 0
+    else:
+        phase = wf.get_value(atoms.position(t0))  # calculate phase at atoms' positions
+
+    # calculate matrix elements
+    U_ee = np.cos(Omega_R * tau / 2)
+    U_eg = np.multiply(np.exp(-1j * phase), 1j * np.sin(Omega_R * tau / 2))
+    U_ge = np.multiply(np.exp(+1j * phase), 1j * np.sin(Omega_R * tau / 2))
+    U_gg = np.cos(Omega_R * tau / 2)
+    propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
     # U*psi
-    for i in range(0, psi0.shape[0]):
-        psi_return[i, :, :] = np.matmul(U[:, :, i], psi0[i, :, :].T).T
-    return psi_return
+    # FIXME: Vectorize this
+    new_state_vectors = state_vectors.propagate(propagator)
+    return new_state_vectors

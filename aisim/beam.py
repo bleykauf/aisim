@@ -3,6 +3,33 @@ import matplotlib.pyplot as plt
 from . import convert
 
 
+class IntensityProfile():
+
+    def __init__(self, r_beam, peak_rabi_freq):
+        self.r_beam = r_beam
+        self.peak_rabi_freq = peak_rabi_freq
+
+    def get_rabi_freq(self, pos):
+        """"
+        The Rabi frequency at position pos. The beam is assumed to be Gaussian shaped.
+
+        Parameters
+        ----------
+        pos : n × 3 array
+            array of position vectors (x, y, z) where the beam should be probed
+
+        Returns
+        -------
+        wf : nd array
+            The value of the Rabi frequency at the given positions
+        """
+        values = np.zeros(pos.shape[0])
+        # FIXME: vectorize this
+        for i in range(0, pos.shape[0]):
+            values[i] = self.peak_rabi_freq * np.exp(-2*(pos[i][0]**2 + pos[i][1]**2) / self.r_beam**2)
+        return values
+
+
 class Wavefront():
     """
     Class that defines a wavefront.
@@ -15,7 +42,7 @@ class Wavefront():
         list of 36 Zernike coefficients in multiples of the wavelength
     """
 
-    def __init__(self, r_beam, coeff, peak_rabi_freq=None):
+    def __init__(self, r_beam, coeff):
         """
         Parameters
         ----------
@@ -26,7 +53,6 @@ class Wavefront():
         """
         self.r_beam = r_beam
         self.coeff = coeff
-        self.peak_rabi_freq = peak_rabi_freq
 
     def get_value(self, pos):
         """"
@@ -47,25 +73,6 @@ class Wavefront():
         rho = pos[:, 0]
         theta = pos[:, 1]
         values = self.zern_iso(rho, theta, coeff=self.coeff, r_beam=self.r_beam)
-        return values
-
-    def get_rabi_freq(self, pos):
-        """"
-        The Rabi frequency at position pos. The beam is assumed to be Gaussian shaped.
-
-        Parameters
-        ----------
-        pos : n × 3 array
-            array of position vectors (x, y, z) where the beam should be probed
-
-        Returns
-        -------
-        wf : nd array
-            The value of the Rabi frequency at the given positions
-        """
-        values = np.zeros(pos.shape[0])
-        for i in range(0, pos.shape[0]):
-            values[i] = self.peak_rabi_freq*np.exp(-2*(pos[i][0]**2+pos[i][1]**2)/(self.r_beam)**2)
         return values
 
     def plot(self, ax=None):

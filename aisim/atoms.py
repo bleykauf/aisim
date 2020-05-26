@@ -29,6 +29,7 @@ class AtomicEnsemble():
     def __init__(self, phase_space_vectors, weights=None):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
+
         if weights is None:
             weights = np.ones(len(self))  # unity weight for each atom
         else:
@@ -54,10 +55,37 @@ class AtomicEnsemble():
 
     def position(self, t):
         """
-        n × 3 dimensional array representing the positions (x, y, z) of the
-        atoms in an atomic ensemble after freely propagating for a time t
+        n × 3 dimensional array representing the positions (x, y, z) of the atoms in an atomic 
+        ensemble after freely propagating for a time t
         """
         return self.initial_position + self.velocity * t
+
+
+class StateVectors():
+    def __init__(self, n, states=[0, 1]):
+        # this is not a very good check...
+        if isinstance(states, list):
+            self.states = np.repeat(np.array([[states]]), n, axis=0)
+        else:
+            self.states = states
+
+    def __len__(self):
+        return self.states.shape[0]
+
+    def __getitem__(self, key):
+        new_instance = StateVectors(len(self.states[key, :, :]))
+        return new_instance
+
+    def propagate(self, propagator):
+        psi = np.zeros(self.states.shape, dtype='complex')  # initizalize return array
+
+        for i in range(0, len(self)):
+            psi[i, :, :] = np.matmul(propagator[:, :, i], self.states[i, :, :].T).T
+        psi = StateVectors(len(self), states=psi)
+        return psi
+
+    def occupation(self, state):
+        return np.mean(np.abs(self.states[:, 0, state])**2)
 
 
 def create_ensemble_from_grids(pos_params, vel_params):
@@ -169,7 +197,7 @@ def combine_weights(pos_weights, vel_weights):
     return np.array([p * v for p in pos_weights for v in vel_weights])
 
 
-def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_samples):
+def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_samples):
     """
     Creates an AtomicEnsemble from randomly chosen and normal distributed samples 
     in position and velocity space
@@ -181,7 +209,7 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_
          the atomic ensemble. 
         Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y','mean_z', 'std_z'.
         Entries for velocity space are 'mean_vx','std_vx' ,'mean_vy', 'std_vy','mean_vz', 'std_vz'.
-    N_samples : Number of random samples.
+    n_samples : Number of random samples.
 
     Returns
     -------
@@ -189,18 +217,18 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, N_
         Atomic ensemble containing the generated phase space vectors.
     """
     # initialize vector with phase-space entries and fill them
-    phase_space_vectors = np.zeros((N_samples, 6))
+    phase_space_vectors = np.zeros((n_samples, 6))
     phase_space_vectors[:, 0] = np.random.normal(
-        loc=pos_params['mean_x'], scale=pos_params['std_x'], size=N_samples)
+        loc=pos_params['mean_x'], scale=pos_params['std_x'], size=n_samples)
     phase_space_vectors[:, 1] = np.random.normal(
-        loc=pos_params['mean_y'], scale=pos_params['std_y'], size=N_samples)
+        loc=pos_params['mean_y'], scale=pos_params['std_y'], size=n_samples)
     phase_space_vectors[:, 2] = np.random.normal(
-        loc=pos_params['mean_z'], scale=pos_params['std_z'], size=N_samples)
+        loc=pos_params['mean_z'], scale=pos_params['std_z'], size=n_samples)
     phase_space_vectors[:, 3] = np.random.normal(
-        loc=vel_params['mean_vx'], scale=vel_params['std_vx'], size=N_samples)
+        loc=vel_params['mean_vx'], scale=vel_params['std_vx'], size=n_samples)
     phase_space_vectors[:, 4] = np.random.normal(
-        loc=vel_params['mean_vy'], scale=vel_params['std_vy'], size=N_samples)
+        loc=vel_params['mean_vy'], scale=vel_params['std_vy'], size=n_samples)
     phase_space_vectors[:, 5] = np.random.normal(
-        loc=vel_params['mean_vz'], scale=vel_params['std_vz'], size=N_samples)
+        loc=vel_params['mean_vz'], scale=vel_params['std_vz'], size=n_samples)
     ensemble = AtomicEnsemble(phase_space_vectors)
     return ensemble
