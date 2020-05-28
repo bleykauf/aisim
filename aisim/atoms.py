@@ -1,6 +1,8 @@
-import copy
+"""Classes and functions related to the atomic cloud"""
+
 import numpy as np
 from . import convert
+
 
 class AtomicEnsemble():
     """
@@ -15,6 +17,14 @@ class AtomicEnsemble():
     phase_space_vectors : ndarray
         n × 6 dimensional array representing the phase space vectors (x0, y0, z0, vx, vy, vz) of 
         the atoms in an atomic ensemble
+    state_vectors : 1 × m or n × m array or list (optional)
+        vector(s) representing the `m` internal degrees of freedom of the atoms. If the list or
+        array is one-dimensional, all atoms are initialized in the same internal state.
+        Alternatively, each atom can be initialized with a different state vector by passing an 
+        array of state vectors for every atom. E.g. to initialize all atoms in the ground state of
+        a two-level system, pass `[1, 0]` which is the default.
+    time : float (optional)
+        the initial time (default 0) when the phase space and state vectors are initialized
     weights : 1darray (optional)
         Optional weights for each of the n atoms in the ensemble
 
@@ -25,25 +35,63 @@ class AtomicEnsemble():
         the atoms in an atomic ensemble
     """
 
-    def __init__(self, phase_space_vectors, weights=None):
+    def __init__(self, phase_space_vectors, state_vectors=[1, 0], time=0, weights=None):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
+        self.state_vectors = state_vectors
+        self.time = time
+        self.initial_position = self.phase_space_vectors[:, 0:3]
+        self.initial_velocity = self.phase_space_vectors[:, 3:6] # for the future when we might implement forces
+
         if weights is None:
-            weights = np.ones(len(self)) # unity weight for each atom
+            weights = np.ones(len(self))  # unity weight for each atom
         else:
             assert len(weights) == self.phase_space_vectors.shape[0]
         self.weights = weights
-    
+
     def __getitem__(self, key):
-        new_instance = AtomicEnsemble(self.phase_space_vectors[key, :], self.weights[key])
+        new_instance = AtomicEnsemble(
+            phase_space_vectors=self.phase_space_vectors[key][:],
+            state_vectors=self.state_vectors[key][:],
+            weights=self.weights[key])
         return new_instance
 
     def __len__(self):
         return self.phase_space_vectors.shape[0]
 
     @property
-    def initial_position(self):
-        """The initial positions of the ensemble"""
+    def time(self):
+        """time changes when propagating the atomic ensemble"""
+        return self._time
+
+    @time.setter
+    def time(self, value):
+        self._time = value
+
+    @property
+    def state_vectors(self):
+        """
+        optional n × m array, representing the internal state of the m level system of each atom
+        """
+        return self._state_vectors
+
+    @state_vectors.setter
+    def state_vectors(self, new_state_vectors):
+        new_state_vectors = np.array(new_state_vectors)
+        if new_state_vectors.ndim == 1:
+            # state vector is the same for all atoms
+            self.state_vectors = np.repeat(np.array([new_state_vectors]), len(self), axis=0)
+        else:
+            # there has to be a state vector for every atom in the ensemble
+            assert new_state_vectors.shape[0] == len(self)
+            self._state_vectors = new_state_vectors
+
+    @property
+    def position(self):
+        """
+        n × 3 dimensional array representing the current positions (x, y, z) of the atoms in the
+        ensemble
+        """
         return self.phase_space_vectors[:, 0:3]
 
     @property
@@ -51,25 +99,79 @@ class AtomicEnsemble():
         """The velocities of the ensemble"""
         return self.phase_space_vectors[:, 3:6]
 
-    def position(self, t):
+    def calc_position(self, t):
         """
-        n × 3 dimensional array representing the positions (x, y, z) of the
-        atoms in an atomic ensemble after freely propagating for a time t
+        n × 3 dimensional array representing the positions (x, y, z) of the atoms in an atomic 
+        ensemble after freely propagating for a time t
+
+        Parameters
+        ----------
+        t : float
+            time when the positions should be calculated
+        Returns
+        -------
+        pos : array
+            n × 3 dimensional array of the positions (x, y, z) 
         """
-        return self.initial_position + self.velocity * t
+        return self.initial_position + self.initial_velocity * t
+
+    def state_occupation(self, state):
+        return np.abs(self.state_vectors[:, state])**2
 
 
-def create_ensemble_from_grids(pos_params, vel_params):
+def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_samples, **kwargs):
+    """
+    Creates an AtomicEnsemble from randomly chosen and normal distributed samples 
+    in position and velocity space
+
+    Parameters
+    ----------
+    pos_params, vel_params : dict
+        Dictionary containing the parameters determining the position and velocity distributions of
+         the atomic ensemble. 
+        Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y','mean_z', 'std_z'.
+        Entries for velocity space are 'mean_vx','std_vx' ,'mean_vy', 'std_vy','mean_vz', 'std_vz'.
+    n_samples : float
+        Number of random samples.
+    **kwargs : 
+        Optional keyworded arguments pased to `AtomicEnsemble`    
+
+    Returns
+    -------
+    ensemble : AtomicEnsemble
+        Atomic ensemble containing the generated phase space vectors.
+    """
+    # initialize vector with phase-space entries and fill them
+    phase_space_vectors = np.zeros((n_samples, 6))
+    phase_space_vectors[:, 0] = np.random.normal(
+        loc=pos_params['mean_x'], scale=pos_params['std_x'], size=n_samples)
+    phase_space_vectors[:, 1] = np.random.normal(
+        loc=pos_params['mean_y'], scale=pos_params['std_y'], size=n_samples)
+    phase_space_vectors[:, 2] = np.random.normal(
+        loc=pos_params['mean_z'], scale=pos_params['std_z'], size=n_samples)
+    phase_space_vectors[:, 3] = np.random.normal(
+        loc=vel_params['mean_vx'], scale=vel_params['std_vx'], size=n_samples)
+    phase_space_vectors[:, 4] = np.random.normal(
+        loc=vel_params['mean_vy'], scale=vel_params['std_vy'], size=n_samples)
+    phase_space_vectors[:, 5] = np.random.normal(
+        loc=vel_params['mean_vz'], scale=vel_params['std_vz'], size=n_samples)
+    ensemble = AtomicEnsemble(phase_space_vectors, **kwargs)
+    return ensemble
+
+
+def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
     """
     Creates an AtomicEnsemble from evenly spaced position and velocity grids (in polar coordinates) 
 
     Parameters
     ----------
     pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and velocity distributions of the 
-        atomic ensemble. They each have to contain the arguments described in the docstring of 
+        Dictionary containing the parameters determining the position and velocity distributions of
+         the atomic ensemble. They each have to contain the arguments described in the docstring of 
         `make_grid`, i.e. `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
         `m_std_z`, `weight` (optional).
+    **kwargs : 
+        Optional keyworded arguments pased to `AtomicEnsemble`
 
     Returns
     -------
@@ -83,7 +185,7 @@ def create_ensemble_from_grids(pos_params, vel_params):
     vel_grid, vel_weights = make_grid(**vel_params)
     grid = combine_grids(pos_grid, vel_grid)
     weights = combine_weights(pos_weights, vel_weights)
-    ensemble = AtomicEnsemble(grid, weights)
+    ensemble = AtomicEnsemble(grid, weights=weights, **kwargs)
     return ensemble
 
 
@@ -103,7 +205,7 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
         number of standard deviations for the rho and z distribution, respectively
     weight : {'gauss'}
         Weighting according to Gaussian distribution along rho and z
-    
+
     Returns
     -------
     grid : n × 3 array     
@@ -125,14 +227,15 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
     rhos = np.linspace(0, m_std_rho*std_rho, n_rho)
     thetas = np.linspace(0, 2*np.pi, n_theta)
     zs = np.linspace(-m_std_z*std_z/2, m_std_z*std_z/2, max(n_z*m_std_z, 1))
-    grid =  np.array(np.meshgrid(rhos, thetas, zs)).T.reshape(-1,3)
+    grid = np.array(np.meshgrid(rhos, thetas, zs)).T.reshape(-1, 3)
     # get weights before converting to carthesian coordinates
     weights = np.exp(-grid[:, 0]**2/(2*std_rho**2))
-    if std_z!=0:
+    if std_z != 0:
         # check if distribution is 2d to avoid divide by 0
         weights = weights * np.exp(-grid[:, 2]**2/(2*std_z**2))
     grid = convert.pol2cart(grid)
     return grid, weights
+
 
 def combine_grids(pos, vel):
     """
@@ -151,6 +254,7 @@ def combine_grids(pos, vel):
     # FIXME: replace with faster version, for example based on meshgrid
     phase_space_vectors = np.array([np.array((p, v)).flatten() for p in pos for v in vel])
     return phase_space_vectors
+
 
 def combine_weights(pos_weights, vel_weights):
     """
