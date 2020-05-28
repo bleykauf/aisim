@@ -40,6 +40,8 @@ class AtomicEnsemble():
         self.phase_space_vectors = phase_space_vectors
         self.state_vectors = state_vectors
         self.time = time
+        self.initial_position = self.phase_space_vectors[:, 0:3]
+        self.initial_velocity = self.phase_space_vectors[:, 3:6] # for the future when we might implement forces
 
         if weights is None:
             weights = np.ones(len(self))  # unity weight for each atom
@@ -85,17 +87,12 @@ class AtomicEnsemble():
             self._state_vectors = new_state_vectors
 
     @property
-    def initial_position(self):
-        """The initial positions of the ensemble"""
-        return self.phase_space_vectors[:, 0:3]
-
-    @property
     def position(self):
         """
         n × 3 dimensional array representing the current positions (x, y, z) of the atoms in the
         ensemble
         """
-        return self.calc_position(self.time)
+        return self.phase_space_vectors[:, 0:3]
 
     @property
     def velocity(self):
@@ -116,7 +113,7 @@ class AtomicEnsemble():
         pos : array
             n × 3 dimensional array of the positions (x, y, z) 
         """
-        return self.initial_position + self.velocity * t
+        return self.initial_position + self.initial_velocity * t
 
     def state_occupation(self, state):
         return np.abs(self.state_vectors[:, state])**2

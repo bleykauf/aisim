@@ -19,9 +19,10 @@ def free_evolution(atoms, dt):
     atoms : AtomicEnsemble
         the initial atomic ensemble propagated by the timestep
     """
-
     atoms = copy.deepcopy(atoms)
+
     atoms.time += dt
+    atoms.phase_space_vectors[:, 0:3] += atoms.phase_space_vectors[:, 3:6]*dt
     return atoms
 
 
@@ -77,5 +78,5 @@ def transition(atoms, intensity_profile, tau, wf=None):
         # U*psi
         psi[i, :] = np.matmul(propagator[i][:, :], atoms.state_vectors[i][:].T).T
     atoms.state_vectors = psi
-    atoms.time += tau
+    atoms = free_evolution(atoms, tau)
     return atoms
