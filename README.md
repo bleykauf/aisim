@@ -33,7 +33,7 @@ Checking the currently installed version:
 print(ais.__version__)
 ```
 
-    v0.2.0
+    v0.2.0+10.g4b4256c
     
 
 ## Examples
@@ -64,7 +64,7 @@ Creating `Wavefront` objects and removing piston, tip and tilt from the data:
 
 
 ```python
-r_beam = 11e-3 # 1/e^2 beam radius in m
+r_beam = 11e-3 # radius of the available wavefront data in m
 
 wf2 = ais.Wavefront(r_beam, coeff_window2)
 wf5 = ais.Wavefront(r_beam, coeff_window5)
@@ -129,7 +129,7 @@ vel_params = {
     'weight' : 'gauss'                   # each point on the grid is weighted according to a Guassian distribution
 }
 
-atoms = ais.create_ensemble_from_grids(pos_params, vel_params)
+atoms = ais.create_ensemble_from_grids(pos_params, vel_params, state_vectors=[0, 1])
 ```
 
 Plotting the grid and the weights:
@@ -144,9 +144,17 @@ y = atoms.initial_position[:, 1]
 ```python
 fig, ax = plt.subplots()
 ax.scatter(1e3*x, 1e3*y)
+ax.set_aspect('equal', 'box')
 ax.set_xlabel('x / mm')
 ax.set_ylabel('y / mm')
 ```
+
+
+
+
+    Text(0, 0.5, 'y / mm')
+
+
 
 
 ![png](docs/output_20_1.png)
@@ -159,6 +167,13 @@ ax.scatter(1e3*x, atoms.weights)
 ax.set_xlabel('x / mm')
 ax.set_ylabel('weights')
 ```
+
+
+
+
+    Text(0, 0.5, 'weights')
+
+
 
 
 ![png](docs/output_21_1.png)
@@ -195,8 +210,8 @@ for r_det in r_dets:
     # creating detector with new detection radius
     det = ais.Detector(r_det, t_det)
     
-    awf_win2.append(ais.mz_interferometer(t, wf2, atoms, det))
-    awf_win5.append(ais.mz_interferometer(t, wf5, atoms, det))
+    awf_win2.append(ais.wavefront_simulation(t, wf2, atoms, det))
+    awf_win5.append(ais.wavefront_simulation(t, wf5, atoms, det))
 ```
 
 
@@ -209,5 +224,196 @@ ax.set_ylabel('Gravity bias / $nm/s^2');
 ax.legend()
 ```
 
+
+
+
+    <matplotlib.legend.Legend at 0x22a88308d88>
+
+
+
+
 ![png](docs/output_27_1.png)
 
+
+### Rabi oscillations with a Gaussian beam
+
+We simulate the decay of Rabi oscillation in the presence of thermal motion. Note that at the moment this only includes the motion within the $x$-$y$ plane and the motion in the $z$ is neglected.
+
+#### Detector
+
+Setting up da detector with a fixed detection radius and time.
+
+
+```python
+t_det = 778e-3 # time of the detection in s
+r_det = 5e-3 # size of detected region in x-y plane
+
+det = ais.Detector(r_det, t_det) # set detection region
+```
+
+#### Atomic cloud and state vectors
+
+Here we use a Monte-Carlo method by randomly drawing positions and velocities from a distribution. We initialize all atoms in the excited state, represented by a state vector `[0, 1]`.
+
+
+```python
+pos_params = {
+     'mean_x': 0.0,
+     'std_x' : 3.0e-3, # cloud radius in m
+     'mean_y': 0.0,
+     'std_y' : 3.0e-3, # cloud radius in m
+     'mean_z': 0.0,
+     'std_z' : 0,        # ignore z dimension, its not relevant here
+}
+vel_params = {
+     'mean_vx': 0.0,
+     'std_vx' : ais.convert.vel_from_temp(3.0e-6), # cloud velocity spread in m/s at tempearture of 3 uK
+     'mean_vy': 0.0,
+     'std_vy' : ais.convert.vel_from_temp(3.0e-6), # cloud velocity spread in m/s at tempearture of 3 uK
+     'mean_vz': 0.0,
+     'std_vz' : 0,        # ignore z dimension, its not relevant here
+}
+
+atoms = ais.create_random_ensemble_from_gaussian_distribution(
+    pos_params,
+    vel_params, int(1e4),
+    state_vectors=[0, 1])
+```
+
+We visualize the spread of the atomic ensemble and its convolution with the detector.
+
+
+```python
+x0 = atoms.initial_position[:, 0]
+y0 = atoms.initial_position[:, 1]
+
+x_det = atoms.calc_position(t_det)[:, 0]
+y_det = atoms.calc_position(t_det)[:, 1]
+
+fig, ax = plt.subplots()
+ax.scatter(1e3*x_det, 1e3*y_det, label='cloud at detection')
+ax.scatter(1e3*x0, 1e3*y0, label='initial cloud')
+angle = np.linspace(0, 2*np.pi, 100)
+ax.plot(1e3*r_det*np.cos(angle), 1e3*r_det*np.sin(angle), c='C2', label='detection region')
+
+ax.set_aspect('equal', 'box')
+
+ax.set_xlabel('x / mm')
+ax.set_ylabel('y / mm')
+```
+
+
+
+
+    Text(0, 0.5, 'y / mm')
+
+
+
+
+![png](docs/output_34_1.png)
+
+
+
+```python
+n_init = len(atoms)
+atoms = det.detected_atoms(atoms)
+
+print("{} of the initial {} atoms are detected. That's {}%".format(len(atoms), n_init, len(atoms)/n_init*100))
+```
+
+    631 of the initial 10000 atoms are detected. That's 6.3100000000000005%
+    
+
+#### Intensity profile
+
+We set up an intensity profile of the interferometry laser, defined by the center Rabi frequency
+
+
+```python
+center_rabi_freq = 2*np.pi*12.5e3 # center Rabi frequency in Hz
+r_beam = 29.5e-3/2 # 1/e^2 beam radius in m
+intensity_profile = ais.IntensityProfile(r_beam, center_rabi_freq)
+```
+
+#### Simulation
+
+First, we freely propagate the atomic ensemble to the time when we start the Rabi oscillations by applying a light pulse.
+
+
+```python
+t1 = 129.972e-3 # time of first pulse in s
+atoms = ais.prop.free_evolution(atoms, t1)
+```
+
+The current position of the atoms is stored in `atoms.positions` and the `tim` attribute has changed accordingly:
+
+
+```python
+atoms.time
+```
+
+
+
+
+    0.129972
+
+
+
+We now simulate the effect of the pulse length in two different ways. First, we neglect the motion of the atoms during the pulse by starting each run of the simulation with the initial state vector and atomic ensemble:
+
+
+```python
+state_occupation_simple = []
+taus = np.arange(200)*1e-6
+for tau in taus:
+    # acting on the states in `atom` at each run
+    propagated_atoms = ais.prop.transition(atoms, intensity_profile, tau, wf=None)
+    # mean occupation of the excited state
+    state_occupation_simple.append(np.mean(propagated_atoms.state_occupation(state=1))) 
+```
+
+The `atoms` object is still at the initial time but `propagated_atoms` has changed:
+
+
+```python
+print(atoms.time)
+print(propagated_atoms.time)
+```
+
+    0.129972
+    0.130171
+    
+
+
+```python
+state_occupation_motion = []
+taus = np.arange(200)*1e-6
+for tau in taus:
+    # mean occupation of the excited state, include tau=0
+    state_occupation_motion.append(np.mean(atoms.state_occupation(state=1))) 
+    # propagating 1 us at a time, changing the `atoms` object at each step
+    atoms = ais.prop.transition(atoms, intensity_profile, 1e-6, wf=None)
+```
+
+
+```python
+fig, ax = plt.subplots()
+ax.plot(1e6*taus, state_occupation_simple, label='simple')
+ax.plot(1e6*taus, state_occupation_motion, label='motion')
+ax.set_xlabel('Pulse duration / μs')
+ax.set_ylabel('Occupation of excited state');
+ax.legend()
+```
+
+
+
+
+    <matplotlib.legend.Legend at 0x22a883763c8>
+
+
+
+
+![png](docs/output_47_1.png)
+
+
+As expected, the motion during the pulse can be neglected.
