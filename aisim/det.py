@@ -1,3 +1,5 @@
+"""Classes and functions related to the detection system"""
+
 import numpy as np
 from . import convert
 
@@ -32,7 +34,7 @@ class Detector():
         """
 
         # pylint: disable=unsubscriptable-object
-        rho = convert.cart2pol(atoms.position(self.t_det))[:, 0]
+        rho = convert.cart2pol(atoms.calc_position(self.t_det))[:, 0]
         return np.where(rho <= self.r_det, True, False)
 
     def detected_atoms(self, atoms):

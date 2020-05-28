@@ -1,3 +1,5 @@
+"""Classes and functions related to the interferometry lasers"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from . import convert
@@ -5,9 +7,9 @@ from . import convert
 
 class IntensityProfile():
 
-    def __init__(self, r_beam, peak_rabi_freq):
+    def __init__(self, r_beam, center_rabi_freq):
         self.r_beam = r_beam
-        self.peak_rabi_freq = peak_rabi_freq
+        self.center_rabi_freq = center_rabi_freq
 
     def get_rabi_freq(self, pos):
         """"
@@ -26,7 +28,8 @@ class IntensityProfile():
         values = np.zeros(pos.shape[0])
         # FIXME: vectorize this
         for i in range(0, pos.shape[0]):
-            values[i] = self.peak_rabi_freq * np.exp(-2*(pos[i][0]**2 + pos[i][1]**2) / self.r_beam**2)
+            values[i] = self.center_rabi_freq * \
+                np.exp(-2*(pos[i][0]**2 + pos[i][1]**2) / self.r_beam**2)
         return values
 
 

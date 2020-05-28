@@ -1,3 +1,5 @@
+"""Functions to convert various quantities"""
+
 import numpy as np
 
 mass = {'Rb87':  1.443161e-25}
