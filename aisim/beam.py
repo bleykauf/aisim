@@ -4,6 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from . import convert
 
+class Wavevectors():
+
+    def __init__(self, k1 = 8.052945514e6, k2 = 8.052802263e6):
+        self.k1 = k1
+        self.k2 = k2
+        self.omega1 = np.abs(self.k1)*299792458
+        self.omega2 = np.abs(self.k2)*299792458
+        self.f1 = self.omega1/(2*np.pi)
+        self.f2 = self.omega2/(2*np.pi)
+
 
 class IntensityProfile():
 
