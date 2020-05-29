@@ -39,6 +39,9 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
         Intensity profile of the interferometry lasers
     tau: float
         length of pulse
+    wave_vectors: Wavevectors
+        wave vectors of the two Raman beams for calculation
+        of Doppler shifts
     wf : Wavefront (optional)
         wavefront aberrations of the interferometry beam
 
