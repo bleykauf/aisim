@@ -72,8 +72,9 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
     else:
         k1 = wave_vectors.k1
         k2 = wave_vectors.k2
-        velocity_z = atoms.velocity[:,2]
-        delta = -velocity_z * (k1 - k2)  # calculate two photon detuning for atoms' velocity (-v*k_eff)
+        velocity_z = atoms.velocity[:, 2]
+        # calculate two photon detuning for atoms' velocity (-v*k_eff)
+        delta = -velocity_z * (k1 - k2)
 
     # calculate Rabi frequency
     Omega_R = np.sqrt(Omega_eff**2 + delta**2)
@@ -85,13 +86,13 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
     cos_theta = -delta/Omega_R
 
     U_ee = np.cos(Omega_R * tau / 2) - 1j * cos_theta * np.sin(Omega_R * tau / 2)
-    U_ee *= np.exp(-1j * delta * tau/2)    
+    U_ee *= np.exp(-1j * delta * tau/2)
 
     U_eg = np.exp(-1j * (delta*t0 + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
-    U_eg *= np.exp(-1j * delta * tau/2) 
+    U_eg *= np.exp(-1j * delta * tau/2)
 
     U_ge = np.exp(+1j * (delta*t0 + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
-    U_ge *= np.exp(1j * delta * tau/2) 
+    U_ge *= np.exp(1j * delta * tau/2)
 
     U_gg = np.cos(Omega_R * tau / 2) + 1j * cos_theta * np.sin(Omega_R * tau / 2)
     U_gg *= np.exp(1j * delta * tau/2)

@@ -16,7 +16,8 @@ class Wavevectors():
     k2 : float
         1D wave vector in z-direction of second Raman beam
     """
-    def __init__(self, k1 = 8.052945514e6, k2 = -8.052802263e6):
+
+    def __init__(self, k1=8.052945514e6, k2=-8.052802263e6):
         self.k1 = k1
         self.k2 = k2
         self.omega1 = np.abs(self.k1)*299792458
@@ -36,6 +37,7 @@ class IntensityProfile():
     center_rabi_freq : float
         Rabi frequency at center of intensity profile
     """
+
     def __init__(self, r_beam, center_rabi_freq):
         self.r_beam = r_beam
         self.center_rabi_freq = center_rabi_freq
