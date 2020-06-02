@@ -49,6 +49,13 @@ class IntensityProfile():
     """
     Class that defines a intensity profile.
 
+    Parameters
+    ----------
+    r_beam : float
+        beam radius in m
+    center_rabi_freq : float
+        Rabi frequency at center of intensity profile
+
     Attributes
     ----------
     r_beam : float
@@ -63,18 +70,10 @@ class IntensityProfile():
 
     def get_rabi_freq(self, pos):
         """"
-        The Rabi frequency at position pos. The beam is assumed to be Gaussian shaped.
-
-        Parameters
-        ----------
-        pos : n × 3 array
-            array of position vectors (x, y, z) where the beam should be probed
-
-        Returns
-        -------
-        wf : nd array
-            The value of the Rabi frequency at the given positions
+        The Rabi frequency at position pos. The beam is assumed to be Gaussian 
+        shaped.
         """
+
         values = np.zeros(pos.shape[0])
         # FIXME: vectorize this
         for i in range(0, pos.shape[0]):

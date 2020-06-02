@@ -32,8 +32,8 @@ def vel_from_temp(temp, species='Rb87'):
     """
     Calculates the velocity spread (1 sigma) from the temperature of the cloud.
 
-    Parameteres
-    -----------
+    Parameters
+    ----------
     temp : float
         temperature of the cloud in Kelvin
     species : str
