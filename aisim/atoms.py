@@ -40,8 +40,9 @@ class AtomicEnsemble():
         self.phase_space_vectors = phase_space_vectors
         self.state_vectors = state_vectors
         self.time = time
+        # for the future when we might implement forces
         self.initial_position = self.phase_space_vectors[:, 0:3]
-        self.initial_velocity = self.phase_space_vectors[:, 3:6] # for the future when we might implement forces
+        self.initial_velocity = self.phase_space_vectors[:, 3:6]
 
         if weights is None:
             weights = np.ones(len(self))  # unity weight for each atom
@@ -134,7 +135,7 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_
     n_samples : float
         Number of random samples.
     **kwargs : 
-        Optional keyworded arguments pased to `AtomicEnsemble`    
+        Optional keyworded arguments passed to `AtomicEnsemble`    
 
     Returns
     -------
@@ -171,7 +172,7 @@ def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
         `make_grid`, i.e. `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
         `m_std_z`, `weight` (optional).
     **kwargs : 
-        Optional keyworded arguments pased to `AtomicEnsemble`
+        Optional keyworded arguments passed to `AtomicEnsemble`
 
     Returns
     -------

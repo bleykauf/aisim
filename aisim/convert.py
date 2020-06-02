@@ -15,11 +15,10 @@ def temp(sigma_v, species='Rb87'):
 
     Parameters
     ----------
-
-    :param sigma_v : float
-    velocity spread (1 sigma) in meters per second
+    sigma_v : float
+        velocity spread (1 sigma) in meters per second
     species : str
-    the atomic species, has to be a key in `mass`
+        the atomic species, has to be a key in `mass`
 
     Returns
     ------- 
@@ -36,9 +35,9 @@ def vel_from_temp(temp, species='Rb87'):
     Parameteres
     -----------
     temp : float
-    temperature of the cloud in Kelvin
+        temperature of the cloud in Kelvin
     species : str
-    the atomic species, has to be a key in `mass`
+        the atomic species, has to be a key in `mass`
 
     Returns
     -------

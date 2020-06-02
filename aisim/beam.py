@@ -12,12 +12,13 @@ class Wavevectors():
     Parameters
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams, defaults to 2*pi/780e-9
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams  in rad/m, defaults to
+        2*pi/780e-9
 
     Attributes
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams in rad/m
     """
 
     def __init__(self, k1=8055366, k2=-8055366):
@@ -36,7 +37,7 @@ class Wavevectors():
         Returns
         -------
         dopler_shift : 1d array
-            Doppler shift of each atom in the ensemble
+            Doppler shift of each atom in the ensemble in rad/s
         """
         # calculate two photon detuning for atoms' velocity (-v*k_eff)
         velocity_z = atoms.velocity[:, 2]
@@ -51,7 +52,7 @@ class IntensityProfile():
     Attributes
     ----------
     r_beam : float
-        beam radius in mm
+        beam radius in m
     center_rabi_freq : float
         Rabi frequency at center of intensity profile
     """
@@ -89,7 +90,7 @@ class Wavefront():
     Attributes
     ----------
     r_beam : float
-        beam radius in mm
+        beam radius in m
     coeff : list
         list of 36 Zernike coefficients in multiples of the wavelength
     """
@@ -99,7 +100,7 @@ class Wavefront():
         Parameters
         ----------
         r_beam : float
-            beam radius in mm
+            beam radius in m
         coeff : list
             list of 36 Zernike coefficients in multiples of the wavelength
         """
@@ -277,7 +278,7 @@ def gen_wavefront(r_beam, std=0):
     Parameters
     ----------
     r_beam : float
-        Beam radius in mm
+        beam radius in m
     std : float
         standard deviation of each Zernike polynomial coefficient in multiples of the wavelength.
 
