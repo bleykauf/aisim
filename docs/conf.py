@@ -22,8 +22,9 @@ copyright = '2020, Bastian Leykauf, Sascha Vowe'
 author = 'Bastian Leykauf, Sascha Vowe'
 
 # The full version, including alpha/beta/rc tags
-release = '0.4.0'
-
+from aisim import __version__ as _version
+release = _version
+version = _version.split('+')[0]
 
 # -- General configuration ---------------------------------------------------
 
