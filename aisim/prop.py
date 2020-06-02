@@ -70,11 +70,8 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
     if wave_vectors is None:
         delta = 0
     else:
-        k1 = wave_vectors.k1
-        k2 = wave_vectors.k2
-        velocity_z = atoms.velocity[:, 2]
         # calculate two photon detuning for atoms' velocity (-v*k_eff)
-        delta = -velocity_z * (k1 - k2)
+        delta = wave_vectors.doppler_shift(atoms)
 
     # calculate Rabi frequency
     Omega_R = np.sqrt(Omega_eff**2 + delta**2)
