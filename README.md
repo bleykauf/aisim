@@ -33,7 +33,7 @@ Checking the currently installed version:
 print(ais.__version__)
 ```
 
-    v0.2.0+10.g4b4256c
+    v0.4.0
     
 
 ## Examples
@@ -225,13 +225,6 @@ ax.legend()
 ```
 
 
-
-
-    <matplotlib.legend.Legend at 0x22a88308d88>
-
-
-
-
 ![png](docs/output_27_1.png)
 
 
@@ -263,7 +256,7 @@ pos_params = {
      'mean_y': 0.0,
      'std_y' : 3.0e-3, # cloud radius in m
      'mean_z': 0.0,
-     'std_z' : 0,        # ignore z dimension, its not relevant here
+     'std_z' : 0.0,        # ignore z dimension, its not relevant here
 }
 vel_params = {
      'mean_vx': 0.0,
@@ -271,7 +264,7 @@ vel_params = {
      'mean_vy': 0.0,
      'std_vy' : ais.convert.vel_from_temp(3.0e-6), # cloud velocity spread in m/s at tempearture of 3 uK
      'mean_vz': 0.0,
-     'std_vz' : 0,        # ignore z dimension, its not relevant here
+     'std_vz' : ais.convert.vel_from_temp(160e-9),        # after velocity selection, velocity in z direction is 160 nK
 }
 
 atoms = ais.create_random_ensemble_from_gaussian_distribution(
@@ -321,7 +314,7 @@ atoms = det.detected_atoms(atoms)
 print("{} of the initial {} atoms are detected. That's {}%".format(len(atoms), n_init, len(atoms)/n_init*100))
 ```
 
-    631 of the initial 10000 atoms are detected. That's 6.3100000000000005%
+    621 of the initial 10000 atoms are detected. That's 6.21%
     
 
 #### Intensity profile
@@ -335,6 +328,15 @@ r_beam = 29.5e-3/2 # 1/e^2 beam radius in m
 intensity_profile = ais.IntensityProfile(r_beam, center_rabi_freq)
 ```
 
+#### Wave vectors
+
+We set up the two wavevectors used to drive the Raman transitions:
+
+
+```python
+wave_vectors = ais.Wavevectors( k1 = 2*np.pi/780e-9, k2 = -2*np.pi/780e-9)
+```
+
 #### Simulation
 
 First, we freely propagate the atomic ensemble to the time when we start the Rabi oscillations by applying a light pulse.
@@ -345,7 +347,7 @@ t1 = 129.972e-3 # time of first pulse in s
 atoms = ais.prop.free_evolution(atoms, t1)
 ```
 
-The current position of the atoms is stored in `atoms.positions` and the `tim` attribute has changed accordingly:
+The current position of the atoms is stored in `atoms.positions` and the `time` attribute has changed accordingly:
 
 
 ```python
@@ -359,7 +361,7 @@ atoms.time
 
 
 
-We now simulate the effect of the pulse length in two different ways. First, we neglect the motion of the atoms during the pulse by starting each run of the simulation with the initial state vector and atomic ensemble:
+We now simulate the effect of the pulse length in two different ways. First, we neglect the motion of the atoms in the $z$ direction, then we incorporate the Doppler effect caused by the finite temperature in $z$.
 
 
 ```python
@@ -369,10 +371,10 @@ for tau in taus:
     # acting on the states in `atom` at each run
     propagated_atoms = ais.prop.transition(atoms, intensity_profile, tau, wf=None)
     # mean occupation of the excited state
-    state_occupation_simple.append(np.mean(propagated_atoms.state_occupation(state=1))) 
+    state_occupation_simple.append(np.mean(propagated_atoms.state_occupation(state=1)))
 ```
 
-The `atoms` object is still at the initial time but `propagated_atoms` has changed:
+The `atoms` object is still at the initial time but `propagated_atoms` has changed, so we can use the `atoms` object for our second simulation.
 
 
 ```python
@@ -386,34 +388,24 @@ print(propagated_atoms.time)
 
 
 ```python
-state_occupation_motion = []
+state_occupation_doppler = []
 taus = np.arange(200)*1e-6
 for tau in taus:
-    # mean occupation of the excited state, include tau=0
-    state_occupation_motion.append(np.mean(atoms.state_occupation(state=1))) 
-    # propagating 1 us at a time, changing the `atoms` object at each step
-    atoms = ais.prop.transition(atoms, intensity_profile, 1e-6, wf=None)
+    # acting on the states in `atom` at each run
+    propagated_atoms = ais.prop.transition(atoms, intensity_profile, tau, wf=None, wave_vectors=wave_vectors)
+    # mean occupation of the excited state
+    state_occupation_doppler.append(np.mean(propagated_atoms.state_occupation(state=1)))
 ```
 
 
 ```python
 fig, ax = plt.subplots()
-ax.plot(1e6*taus, state_occupation_simple, label='simple')
-ax.plot(1e6*taus, state_occupation_motion, label='motion')
+ax.plot(1e6*taus, state_occupation_simple, label='w/o Doppler shift')
+ax.plot(1e6*taus, state_occupation_doppler, label='with Doppler shift')
 ax.set_xlabel('Pulse duration / μs')
 ax.set_ylabel('Occupation of excited state');
 ax.legend()
 ```
 
 
-
-
-    <matplotlib.legend.Legend at 0x22a883763c8>
-
-
-
-
-![png](docs/output_47_1.png)
-
-
-As expected, the motion during the pulse can be neglected.
+![png](docs/output_49_1.png)
