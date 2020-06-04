@@ -12,12 +12,13 @@ class Wavevectors():
     Parameters
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams, defaults to 2*pi/780e-9
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams  in rad/m, defaults to
+        2*pi/780e-9
 
     Attributes
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams in rad/m
     """
 
     def __init__(self, k1=8055366, k2=-8055366):
@@ -36,7 +37,7 @@ class Wavevectors():
         Returns
         -------
         dopler_shift : 1d array
-            Doppler shift of each atom in the ensemble
+            Doppler shift of each atom in the ensemble in rad/s
         """
         # calculate two photon detuning for atoms' velocity (-v*k_eff)
         velocity_z = atoms.velocity[:, 2]
@@ -48,10 +49,17 @@ class IntensityProfile():
     """
     Class that defines a intensity profile.
 
+    Parameters
+    ----------
+    r_beam : float
+        beam radius in m
+    center_rabi_freq : float
+        Rabi frequency at center of intensity profile
+
     Attributes
     ----------
     r_beam : float
-        beam radius in mm
+        beam radius in m
     center_rabi_freq : float
         Rabi frequency at center of intensity profile
     """
@@ -62,18 +70,10 @@ class IntensityProfile():
 
     def get_rabi_freq(self, pos):
         """"
-        The Rabi frequency at position pos. The beam is assumed to be Gaussian shaped.
-
-        Parameters
-        ----------
-        pos : n × 3 array
-            array of position vectors (x, y, z) where the beam should be probed
-
-        Returns
-        -------
-        wf : nd array
-            The value of the Rabi frequency at the given positions
+        The Rabi frequency at position pos. The beam is assumed to be Gaussian 
+        shaped.
         """
+
         values = np.zeros(pos.shape[0])
         # FIXME: vectorize this
         for i in range(0, pos.shape[0]):
@@ -89,7 +89,7 @@ class Wavefront():
     Attributes
     ----------
     r_beam : float
-        beam radius in mm
+        beam radius in m
     coeff : list
         list of 36 Zernike coefficients in multiples of the wavelength
     """
@@ -99,7 +99,7 @@ class Wavefront():
         Parameters
         ----------
         r_beam : float
-            beam radius in mm
+            beam radius in m
         coeff : list
             list of 36 Zernike coefficients in multiples of the wavelength
         """
@@ -277,7 +277,7 @@ def gen_wavefront(r_beam, std=0):
     Parameters
     ----------
     r_beam : float
-        Beam radius in mm
+        beam radius in m
     std : float
         standard deviation of each Zernike polynomial coefficient in multiples of the wavelength.
 

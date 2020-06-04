@@ -40,8 +40,9 @@ class AtomicEnsemble():
         self.phase_space_vectors = phase_space_vectors
         self.state_vectors = state_vectors
         self.time = time
+        # for the future when we might implement forces
         self.initial_position = self.phase_space_vectors[:, 0:3]
-        self.initial_velocity = self.phase_space_vectors[:, 3:6] # for the future when we might implement forces
+        self.initial_velocity = self.phase_space_vectors[:, 3:6]
 
         if weights is None:
             weights = np.ones(len(self))  # unity weight for each atom
@@ -128,13 +129,13 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_
     ----------
     pos_params, vel_params : dict
         Dictionary containing the parameters determining the position and velocity distributions of
-         the atomic ensemble. 
+        the atomic ensemble. 
         Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y','mean_z', 'std_z'.
         Entries for velocity space are 'mean_vx','std_vx' ,'mean_vy', 'std_vy','mean_vz', 'std_vz'.
     n_samples : float
         Number of random samples.
     **kwargs : 
-        Optional keyworded arguments pased to `AtomicEnsemble`    
+        Optional keyworded arguments passed to `AtomicEnsemble`    
 
     Returns
     -------
@@ -167,11 +168,11 @@ def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
     ----------
     pos_params, vel_params : dict
         Dictionary containing the parameters determining the position and velocity distributions of
-         the atomic ensemble. They each have to contain the arguments described in the docstring of 
+        the atomic ensemble. They each have to contain the arguments described in the docstring of 
         `make_grid`, i.e. `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
         `m_std_z`, `weight` (optional).
     **kwargs : 
-        Optional keyworded arguments pased to `AtomicEnsemble`
+        Optional keyworded arguments passed to `AtomicEnsemble`
 
     Returns
     -------
@@ -211,15 +212,15 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
     grid : n × 3 array     
         Grid of n vectors in carthesian coordinates  (x, y, z). In polar coordinates, the grid has 
         this form:
-            [[dRho, 0, -m_std_z*sigma_z/2]
-            [dRho, dTheta, ...]
-            [dRho   , 2*dTheta, ...]
-            [...    , ..., 0]
-            [dRho   , <2*pi, ...]
-            [2*dRho , 0, ...]
-            [2*dRho , dTheta, ...]
-            [...    , ..., ...
-            [m_std_rho*sigma_rho , <2*pi, +m_std_z*sigma_z/2]]
+        [[dRho, 0, -m_std_z*sigma_z/2]
+        [dRho, dTheta, ...]
+        [dRho   , 2*dTheta, ...]
+        [...    , ..., 0]
+        [dRho   , <2*pi, ...]
+        [2*dRho , 0, ...]
+        [2*dRho , dTheta, ...]
+        [...    , ..., ...
+        [m_std_rho*sigma_rho , <2*pi, +m_std_z*sigma_z/2]]
     weights : 1 × n array
         weights for each vector in the grid
     """

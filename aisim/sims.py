@@ -12,7 +12,7 @@ def wavefront_simulation(t, wf, atoms, det):
     Parameters
     ----------
     t : list of float
-        times three interferometer pulses [t1, t2, t3] in s.
+        times of the three interferometer pulses [t1, t2, t3] in s.
     wf : Wavefront
         wavefront aberrations of the interferometry beam
     atoms : AtomicEnsemble
@@ -24,7 +24,7 @@ def wavefront_simulation(t, wf, atoms, det):
     -------
     weighted_awf : float
         Complex amplitude factor from which contrast and phase shift can be determined via `abs()` 
-        and `np.angle`
+        and `np.angle()`
     """
 
     # unpack the times of detection and the interferometer pulses

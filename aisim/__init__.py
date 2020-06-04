@@ -1,3 +1,5 @@
+"""aisim is a python package for simulating light-pulse atom interferometers"""
+
 from .sims import *
 from .prop import *
 from .det import *
