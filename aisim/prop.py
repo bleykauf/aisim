@@ -22,7 +22,7 @@ def free_evolution(atoms, dt):
     atoms = copy.deepcopy(atoms)
 
     atoms.time += dt
-    atoms.phase_space_vectors[:, 0:3] += atoms.phase_space_vectors[:, 3:6]*dt
+    atoms.position += atoms.velocity * dt
     return atoms
 
 
