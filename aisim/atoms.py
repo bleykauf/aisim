@@ -88,6 +88,13 @@ class AtomicEnsemble():
             self._state_vectors = new_state_vectors
 
     @property
+    def density_matrices(self):
+        """
+        n × m x m array, representing the density matrix of the m level system of the n atoms
+        """
+        return np.einsum('ij,il->ijl', self.state_vectors, self.state_vectors)
+
+    @property
     def position(self):
         """
         n × 3 dimensional array representing the current positions (x, y, z) of the atoms in the
