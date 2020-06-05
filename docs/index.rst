@@ -13,6 +13,7 @@ Welcome to aisim's documentation!
 
    readme_link.rst
    aisim.rst
+   dev.rst
 
 Indices and tables
 ==================

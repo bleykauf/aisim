@@ -1,3 +1,6 @@
+
+.. _apiref:
+
 API / Code Reference
 ====================
 
