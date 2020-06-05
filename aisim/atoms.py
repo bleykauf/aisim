@@ -90,9 +90,19 @@ class AtomicEnsemble():
     @property
     def density_matrices(self):
         """
-        n × m x m array, representing the density matrix of the m level system of the n atoms
+        n × m x m array, representing the density matrix of the m level system of the n atoms.
+        These are pure states.
         """
         return np.einsum('ij,il->ijl', self.state_vectors, self.state_vectors)
+
+    @property
+    def density_matrix(self):
+        """
+        m x m array, representing the density matrix of the AtomicEnsemble's m level system
+        """
+        pure_dm = self.density_matrices
+        N_atoms = self.state_vectors.shape[0]
+        return 1/N_atoms * np.einsum('ijk->jk', pure_dm) # sum over pure state's density matrices
 
     @property
     def position(self):
