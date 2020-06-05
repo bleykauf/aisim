@@ -26,7 +26,7 @@ def free_evolution(atoms, dt):
     return atoms
 
 
-def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
+def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None, phase_scan=0):
     """
     Calculates the change of an array of initial wave functions in the effective Raman two-level 
     system according to the time propagator U as in [1].
@@ -44,6 +44,8 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
         of Doppler shifts
     wf : Wavefront (optional)
         wavefront aberrations of the interferometry beam
+    phase_scan : float
+        effective phase for fringe scans
 
     Returns
     -------
@@ -65,7 +67,10 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
     if wf is None:
         phase = 0
     else:
-        phase = wf.get_value(atoms.position)  # calculate phase at atoms' positions
+        # calculate phase at atoms' positions
+        phase = wf.get_value(atoms.position)
+
+    phase += phase_scan
 
     if wave_vectors is None:
         delta = 0
@@ -82,26 +87,32 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
     sin_theta = Omega_eff/Omega_R
     cos_theta = -delta/Omega_R
 
-    U_ee = np.cos(Omega_R * tau / 2) - 1j * cos_theta * np.sin(Omega_R * tau / 2)
+    U_ee = np.cos(Omega_R * tau / 2) - 1j * \
+        cos_theta * np.sin(Omega_R * tau / 2)
     U_ee *= np.exp(-1j * delta * tau/2)
 
-    U_eg = np.exp(-1j * (delta*t0 + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
+    U_eg = np.exp(-1j * (delta*t0 + phase)) * -1j * \
+        sin_theta * np.sin(Omega_R * tau / 2)
     U_eg *= np.exp(-1j * delta * tau/2)
 
-    U_ge = np.exp(+1j * (delta*t0 + phase)) * -1j * sin_theta * np.sin(Omega_R * tau / 2)
+    U_ge = np.exp(+1j * (delta*t0 + phase)) * -1j * \
+        sin_theta * np.sin(Omega_R * tau / 2)
     U_ge *= np.exp(1j * delta * tau/2)
 
-    U_gg = np.cos(Omega_R * tau / 2) + 1j * cos_theta * np.sin(Omega_R * tau / 2)
+    U_gg = np.cos(Omega_R * tau / 2) + 1j * \
+        cos_theta * np.sin(Omega_R * tau / 2)
     U_gg *= np.exp(1j * delta * tau/2)
 
     propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
     propagator = np.transpose(propagator, (2, 0, 1))
-    psi = np.zeros(atoms.state_vectors.shape, dtype='complex')  # initizalize return array
+    # initizalize return array
+    psi = np.zeros(atoms.state_vectors.shape, dtype='complex')
 
     # FIXME: Vectorize this
     for i in range(0, len(atoms)):
         # U*psi
-        psi[i, :] = np.matmul(propagator[i][:, :], atoms.state_vectors[i][:].T).T
+        psi[i, :] = np.matmul(propagator[i][:, :],
+                              atoms.state_vectors[i][:].T).T
     atoms.state_vectors = psi
     atoms = free_evolution(atoms, tau)
     return atoms
