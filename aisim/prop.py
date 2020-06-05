@@ -96,12 +96,9 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None):
 
     propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
     propagator = np.transpose(propagator, (2, 0, 1))
-    psi = np.zeros(atoms.state_vectors.shape, dtype='complex')  # initizalize return array
-
-    # FIXME: Vectorize this
-    for i in range(0, len(atoms)):
-        # U*psi
-        psi[i, :] = np.matmul(propagator[i][:, :], atoms.state_vectors[i][:].T).T
-    atoms.state_vectors = psi
+    propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
+    propagator = np.transpose(propagator, (2, 0, 1))
+    # U*Psi
+    atoms.state_vectors = np.einsum('ijk,ki ->ij', propagator, atoms.state_vectors.T)
     atoms = free_evolution(atoms, tau)
     return atoms
