@@ -133,7 +133,7 @@ class Wavefront():
 
         Parameters
         ----------
-        ax : Axis (optional)
+        ax : Axis , optional
             If axis is provided, they will be used for the plot. if not 
             provided, a new plot will automatically be created.
 
@@ -161,7 +161,7 @@ class Wavefront():
 
         Parameters
         ----------
-        ax : Axis (optional)
+        ax : Axis , optional
             If axis is provided, they will be used for the plot. if not provided, a new plot will 
             automatically be created.
         """
@@ -277,7 +277,7 @@ def gen_wavefront(r_beam, std=0):
     Parameters
     ----------
     r_beam : float
-        beam radius in m
+        beam radius
     std : float
         standard deviation of each Zernike polynomial coefficient in multiples of the wavelength.
 

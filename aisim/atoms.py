@@ -17,15 +17,15 @@ class AtomicEnsemble():
     phase_space_vectors : ndarray
         n × 6 dimensional array representing the phase space vectors (x0, y0, z0, vx, vy, vz) of 
         the atoms in an atomic ensemble
-    state_vectors : 1 × m or n × m array or list (optional)
+    state_vectors : 1 × m or n × m array or list, optional
         vector(s) representing the `m` internal degrees of freedom of the atoms. If the list or
         array is one-dimensional, all atoms are initialized in the same internal state.
         Alternatively, each atom can be initialized with a different state vector by passing an 
         array of state vectors for every atom. E.g. to initialize all atoms in the ground state of
         a two-level system, pass `[1, 0]` which is the default.
-    time : float (optional)
+    time : float, optional
         the initial time (default 0) when the phase space and state vectors are initialized
-    weights : 1darray (optional)
+    weights : 1darray , optional
         Optional weights for each of the n atoms in the ensemble
 
     Attributes
@@ -109,6 +109,7 @@ class AtomicEnsemble():
         ----------
         t : float
             time when the positions should be calculated
+
         Returns
         -------
         pos : array
@@ -170,7 +171,7 @@ def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
         Dictionary containing the parameters determining the position and velocity distributions of
         the atomic ensemble. They each have to contain the arguments described in the docstring of 
         `make_grid`, i.e. `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
-        `m_std_z`, `weight` (optional).
+        `m_std_z`, `weight` , optional.
     **kwargs : 
         Optional keyworded arguments passed to `AtomicEnsemble`
 
@@ -198,7 +199,7 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
     Parameters
     ----------
     std_rho, std_sigma : float
-        1/e radius (in m or m/s) of the position or velocity distribution.
+        1/e radius of the position or velocity distribution.
     n_rho, n_theta, n_z : int
         number of grid points per standard deviation along rho and z direction and total number of
         points along theta, respectively

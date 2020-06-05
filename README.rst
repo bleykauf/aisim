@@ -43,6 +43,10 @@ Import AISim plus numpy and matplotlib and print current version:
 As an example, we simulate Rabi oscillations driven by stimulated Raman
 transitions in the presence of thermal motion.
 
+.. note::
+    If not explicitly stated otherwise in the docstring, units are assumed to be SI units
+    **without** prefixes, i.e. meters or Kelvin. The only exception is kilogram.
+
 First, we define a ``AtomicEnsemble`` object for atoms from a
 magneto-optical trap after sub-Doppler cooling:
 
