@@ -203,7 +203,6 @@ class Wavefront():
             raise ValueError("rho must be smaller than r_beam")
         # precalculating values
         # powers of rho
-        rho = rho / r_beam
         rho2 = rho * rho
         rho3 = rho2 * rho
         rho4 = rho3 * rho
