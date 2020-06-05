@@ -197,19 +197,20 @@ class Wavefront():
         values : float or array of float
             value(s) of the wavefront at the probed position
         """
-        # precalculating values
-        # powers of rho
+    
         rho = rho/r_beam
         if (rho > 1).any():  # Raise error if Zernike polynom is oustide its defined domain
             raise ValueError("rho must be smaller than r_beam")
-        rho2 = np.multiply(rho, rho)
-        rho3 = np.multiply(rho2, rho)
-        rho4 = np.multiply(rho3, rho)
-        rho5 = np.multiply(rho4, rho)
-        rho6 = np.multiply(rho5, rho)
-        rho7 = np.multiply(rho6, rho)
-        rho8 = np.multiply(rho7, rho)
-        rho9 = np.multiply(rho8, rho)
+        # precalculating values
+        # powers of rho
+        rho2 = rho * rho
+        rho3 = rho2 * rho
+        rho4 = rho3 * rho
+        rho5 = rho4 * rho
+        rho6 = rho5 * rho
+        rho7 = rho6 * rho
+        rho8 = rho7 * rho
+        rho9 = rho8 * rho
         # cos and sin of n*theta
         costh = np.cos(theta)
         sinth = np.sin(theta)
@@ -223,50 +224,42 @@ class Wavefront():
         coeff = np.array(coeff)
 
         zern_vals = \
-            np.multiply(coeff[0], np.ones(rho.shape)) + \
-            np.multiply(coeff[1], np.multiply(rho, costh)) + \
-            np.multiply(coeff[2], np.multiply(rho, sinth)) + \
-            np.multiply(coeff[3], (2 * rho2-1)) + \
-            np.multiply(coeff[4], np.multiply(rho2, cos2th)) + \
-            np.multiply(coeff[5], np.multiply(rho2, sin2th)) + \
-            np.multiply(coeff[6], np.multiply((3 * rho3 - 2 * rho), costh)) + \
-            np.multiply(coeff[7], np.multiply((3 * rho3 - 2 * rho), sinth)) + \
-            np.multiply(coeff[8], (6 * rho4 - 6 * rho2 + 1)) + \
-            np.multiply(coeff[9], np.multiply(rho3, cos3th)) + \
-            np.multiply(coeff[10], np.multiply(rho3, sin3th)) + \
-            np.multiply(coeff[11], np.multiply((4 * rho4 - 3 * rho2), cos2th)) + \
-            np.multiply(coeff[12], np.multiply((4 * rho4-3*rho2), sin2th)) + \
-            np.multiply(coeff[13], np.multiply((10 * rho5 - 12 * rho3 + 3 * rho), costh)) + \
-            np.multiply(coeff[14], np.multiply((10 * rho5 - 12 * rho3 + 3 * rho), sinth)) + \
-            np.multiply(coeff[15], (20 * rho6 - 30 * rho4 + 12 * rho2 - 1)) + \
-            np.multiply(coeff[16], np.multiply(rho4, cos4th)) + \
-            np.multiply(coeff[17], np.multiply(rho4, sin4th)) + \
-            np.multiply(coeff[18], np.multiply((5 * rho5 - 4 * rho3), cos3th)) + \
-            np.multiply(coeff[19], np.multiply((5 * rho5 - 4 * rho3), sin3th)) + \
-            np.multiply(coeff[20], np.multiply((15 * rho6 - 20 * rho4 + 6 * rho2), cos2th)) + \
-            np.multiply(coeff[21], np.multiply((15 * rho6 - 20 * rho4 + 6 * rho2), sin2th)) + \
-            np.multiply(coeff[22], np.multiply((35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho),
-                                               costh)) + \
-            np.multiply(coeff[23], np.multiply((35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho),
-                                               sinth)) + \
-            np.multiply(coeff[24], (70 * rho8 - 140 * rho6 + 90 * rho4 - 20 * rho2 + 1)) + \
-            np.multiply(coeff[25], np.multiply(rho5, np.cos(5 * theta))) + \
-            np.multiply(coeff[26], np.multiply(rho5, np.sin(5 * theta))) + \
-            np.multiply(coeff[27], np.multiply((6 * rho6 - 5 * rho4), cos4th)) + \
-            np.multiply(coeff[28], np.multiply((6 * rho6 - 5 * rho4), sin4th)) + \
-            np.multiply(coeff[29], np.multiply((21 * rho7 - 30 * rho5 + 10 * rho3), cos3th)) + \
-            np.multiply(coeff[30], np.multiply((21 * rho7 - 30 * rho5 + 10 * rho3), sin3th)) + \
-            np.multiply(coeff[31], np.multiply((56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2),
-                                               costh)) + \
-            np.multiply(coeff[32], np.multiply((56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2),
-                                               sinth)) + \
-            np.multiply(coeff[33], np.multiply((126 * rho9 - 280 * rho7 + 210 *
-                                                rho5 - 60 * rho3 + 5 * rho), costh)) + \
-            np.multiply(coeff[34], np.multiply((126 * rho9 - 280 * rho7 + 210 *
-                                                rho5 - 60 * rho3 + 5 * rho),
-                                               sinth)) + \
-            np.multiply(coeff[35], (252 * rho**10 - 630 * rho8 +
-                                    560 * rho6 - 210 * rho4 + 30 * rho2 - 1))
+        coeff[0] * np.ones(rho.shape) + \
+        coeff[1] * rho * costh + \
+        coeff[2] * rho * sinth + \
+        coeff[3] * (2 * rho2-1) + \
+        coeff[4] * rho2 * cos2th + \
+        coeff[5] * rho2 * sin2th + \
+        coeff[6] * (3 * rho3 - 2 * rho) * costh + \
+        coeff[7] * (3 * rho3 - 2 * rho) * sinth + \
+        coeff[8] * (6 * rho4 - 6 * rho2 + 1) + \
+        coeff[9] * rho3 * cos3th + \
+        coeff[10] * rho3 * sin3th + \
+        coeff[11] * (4 * rho4 - 3 * rho2) * cos2th + \
+        coeff[12] * (4 * rho4-3*rho2) * sin2th + \
+        coeff[13] * (10 * rho5- 12 * rho3 + 3 * rho) * costh + \
+        coeff[14] * (10 * rho5 - 12 * rho3 + 3 * rho) * sinth + \
+        coeff[15] * (20 * rho6- 30 * rho4 + 12 *rho2 - 1) + \
+        coeff[16] * rho4 * cos4th + \
+        coeff[17] * rho4 * sin4th + \
+        coeff[18] * (5 * rho5 - 4 * rho3) * cos3th + \
+        coeff[19] * (5 * rho5 - 4 * rho3) * sin3th + \
+        coeff[20] * (15 * rho6 - 20 * rho4 + 6 * rho2) * cos2th + \
+        coeff[21] * (15 * rho6 - 20 * rho4 + 6 * rho2) * sin2th + \
+        coeff[22] * (35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho) * costh + \
+        coeff[23] * (35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho) * sinth + \
+        coeff[24] * (70 * rho8 - 140 *rho6 + 90 * rho4 - 20 * rho2 + 1) + \
+        coeff[25] * rho5 * np.cos(5 * theta) + \
+        coeff[26] * rho5 * np.sin(5 * theta) + \
+        coeff[27] * (6 * rho6 - 5 * rho4) * cos4th + \
+        coeff[28] * (6 * rho6 - 5 * rho4) * sin4th + \
+        coeff[29] * (21 * rho7 - 30 * rho5 + 10 * rho3) * cos3th + \
+        coeff[30] * (21 * rho7 - 30 * rho5 + 10 * rho3) * sin3th + \
+        coeff[31] * (56 * rho8 - 105 *rho6 + 60 *rho4 -10*rho2) * costh + \
+        coeff[32] * (56 * rho8 - 105 *rho6 + 60 *rho4 -10*rho2) * sinth + \
+        coeff[33] * (126 * rho9 -280 *rho7 + 210 *rho5-60 * rho3+5 * rho) * costh + \
+        coeff[34] * (126 * rho9 -280 *rho7+ 210 *rho5-60 * rho3+5 * rho) * sinth + \
+        coeff[35] * (252 * rho**10 - 630 * rho8 + 560 * rho6 - 210 * rho4 + 30 * rho2 - 1)
         return zern_vals
 
 

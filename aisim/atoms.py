@@ -94,6 +94,9 @@ class AtomicEnsemble():
         ensemble
         """
         return self.phase_space_vectors[:, 0:3]
+    @position.setter
+    def position(self, new_position):
+        self.phase_space_vectors[:, 0:3] = new_position
 
     @property
     def velocity(self):
