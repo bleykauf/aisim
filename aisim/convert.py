@@ -42,7 +42,7 @@ def vel_from_temp(temp, species='Rb87'):
     Returns
     -------
     vel : float
-        velocity spread (1 sigma) in meters per second
+        velocity spread (1 sigma)
     """
     return np.sqrt(temp * kb / mass[species])
 

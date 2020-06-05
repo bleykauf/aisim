@@ -1,5 +1,8 @@
-aisim package
-=============
+
+.. _apiref:
+
+API / Code Reference
+====================
 
 .. automodule:: aisim
    :members:
