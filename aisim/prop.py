@@ -105,7 +105,7 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None, phase_
 
     propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
     propagator = np.transpose(propagator, (2, 0, 1))
-    # U*Psi
-    atoms.state_vectors = np.einsum('ijk,ki ->ij', propagator, atoms.state_vectors.T)
+    # U*|Psi>
+    atoms.state_vectors = np.einsum('ijk,ki ->ij', propagator, np.conjugate(atoms.state_vectors).T)
     atoms = free_evolution(atoms, tau)
     return atoms
