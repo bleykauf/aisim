@@ -3,15 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to aisim's documentation!
-=================================
+AISim ‒ Simulations for light-pulse atom interferometry
+==========================================================
 
+AISim is a Python package for simulating light-pulse atom
+interferometers.
+
+It uses dedicated objects to model the lasers beams, the atomic ensemble
+and the detection system and store experimental parameters in a neat
+way. After you define these objects you can use built-in propagators to
+simulate internal and external degrees of freedom of cold atoms.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   readme_link.rst
+   install.rst
+   usage.rst
    aisim.rst
    dev.rst
 

@@ -10,11 +10,6 @@ the `napoleon extension <https://www.sphinx-doc.org/en/master/usage/extensions/n
 Examples provided as `Jupyter <https://jupyter.org/>`__ notebooks are rendered with the 
 `nbsphinx  <https://nbsphinx.readthedocs.io/en/0.7.0/>`__ extension. 
 
-.. note::
-    Symlinks are used to get relative paths to images and notebooks right when including the 
-    `README.rst` in the sphinx documentation. Specifically, the :code:`docs/examples` is a symlink
-    to :code:`examples`. Make sure your git installation handles symlinks correctly, especially 
-    under Windows.
 
 Building docs locally
 ^^^^^^^^^^^^^^^^^^^^^
