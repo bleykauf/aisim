@@ -102,9 +102,9 @@ class AtomicEnsemble():
         m x m array, representing the density matrix of the AtomicEnsemble's m level system
         """
         pure_dm = self.density_matrices
-        N_atoms = self.state_vectors.shape[0]
+        n_atoms = self.state_vectors.shape[0]
         # sum over pure |Psi><Psi| and divide by N
-        return 1/N_atoms * np.einsum('ijk->jk', pure_dm) # sum over pure state's density matrices
+        return 1/n_atoms * np.einsum('ijk->jk', pure_dm)  # sum over pure state's density matrices
 
     @property
     def position(self):
@@ -113,6 +113,7 @@ class AtomicEnsemble():
         ensemble
         """
         return self.phase_space_vectors[:, 0:3]
+
     @position.setter
     def position(self, new_position):
         self.phase_space_vectors[:, 0:3] = new_position
