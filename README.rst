@@ -33,6 +33,8 @@ Alternatively, if you plan to make changes to the code, use
 Usage
 -----
 
+The full documentation can be found `here <https://aisim.readthedocs.io>`__.
+
 Import AISim plus numpy and matplotlib and print current version:
 
 .. code:: python
