@@ -88,12 +88,32 @@ class AtomicEnsemble():
             self._state_vectors = new_state_vectors
 
     @property
+    def density_matrices(self):
+        """
+        n × m x m array, representing the density matrix of the m level system of the n atoms.
+        These are pure states.
+        """
+        # |Psi><Psi|
+        return np.einsum('ji,il->ijl', np.conjugate(self.state_vectors).T, self.state_vectors)
+
+    @property
+    def density_matrix(self):
+        """
+        m x m array, representing the density matrix of the AtomicEnsemble's m level system
+        """
+        pure_dm = self.density_matrices
+        n_atoms = self.state_vectors.shape[0]
+        # sum over pure |Psi><Psi| and divide by N
+        return 1/n_atoms * np.einsum('ijk->jk', pure_dm)  # sum over pure state's density matrices
+
+    @property
     def position(self):
         """
         n × 3 dimensional array representing the current positions (x, y, z) of the atoms in the
         ensemble
         """
         return self.phase_space_vectors[:, 0:3]
+
     @position.setter
     def position(self, new_position):
         self.phase_space_vectors[:, 0:3] = new_position
