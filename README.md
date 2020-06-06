@@ -28,7 +28,7 @@ Usage
 -----
 
 For basic usage and code reference, see the
-[´documentation](https://aisim.readthedocs.io).
+[documentation](https://aisim.readthedocs.io).
 
 Examples
 --------
