@@ -1,3 +1,5 @@
+.. image:: https://readthedocs.org/projects/aisim/badge/?version=latest
+
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================
 
