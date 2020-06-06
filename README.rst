@@ -1,3 +1,7 @@
+.. image:: https://readthedocs.org/projects/aisim/badge/?version=latest
+    :target: https://aisim.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================
 
@@ -8,6 +12,8 @@ It uses dedicated objects to model the lasers beams, the atomic ensemble
 and the detection system and store experimental parameters in a neat
 way. After you define these objects you can use built-in propagators to
 simulate internal and external degrees of freedom of cold atoms.
+
+
 
 Installation
 ------------
@@ -26,6 +32,8 @@ Alternatively, if you plan to make changes to the code, use
 
 Usage
 -----
+
+The full documentation can be found `here <https://aisim.readthedocs.io>`__.
 
 Import AISim plus numpy and matplotlib and print current version:
 
