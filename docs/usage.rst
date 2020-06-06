@@ -102,6 +102,5 @@ More examples
 The notebooks containing the following exampels can also be found 
 `here <https://github.com/bleykauf/aisim/blob/master/examples>`__:
 
--  `Effect of wavefront aberrations in atom interferometry <https://github.com/bleykauf/aisim/blob/master/docs/examples/wavefront-aberrations.ipynb>`__
--  `Rabi oscillations with a Gaussian beam and thermal
-   atoms <https://github.com/bleykauf/aisim/blob/master/docs/examples/rabi-oscillations.ipynb>`__
+-  `Effect of wavefront aberrations in atom interferometry <examples/wavefront-aberrations.ipynb>`__
+-  `Rabi oscillations with a Gaussian beam and thermal atoms <examples/rabi-oscillations.ipynb>`__
