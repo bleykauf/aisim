@@ -149,7 +149,7 @@ class AtomicEnsemble():
         return self.initial_position + self.initial_velocity * t
 
     def state_occupation(self, state):
-        return np.einsum('ijk,ikj->ij' , self.state_bras, self.state_kets)[:,state]
+        return np.real(np.einsum('ijk,ikj->ij' , self.state_bras, self.state_kets)[:,state])
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_samples, **kwargs):
