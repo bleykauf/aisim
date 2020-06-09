@@ -24,8 +24,15 @@ def temp(sigma_v, species='Rb87'):
     ------- 
     temp : float
         temperature of the cloud in Kelvin
+
+    Raises
+    ------
+    ValueError
+        If negative velocity spread is passed
     """
-    return mass[species] * sigma_v ** 2 / kb
+    if sigma_v < 0:
+        raise ValueError('sigma_v must be non-negative')
+    return mass[species] * sigma_v**2 / kb
 
 
 def vel_from_temp(temp, species='Rb87'):
@@ -43,7 +50,14 @@ def vel_from_temp(temp, species='Rb87'):
     -------
     vel : float
         velocity spread (1 sigma)
+
+    Raises
+    ------
+    ValueError
+        If negative temperature is passed
     """
+    if temp < 0:
+        raise ValueError('temp must be non-negative')
     return np.sqrt(temp * kb / mass[species])
 
 
