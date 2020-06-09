@@ -4,12 +4,13 @@ python:
     - 3.5
     - 3.6
     - 3.7
+    - 3.8
 install:
     - pip install tox-travis
+    - pip install pytest-cov
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then pip install coveralls; fi
 script:
     - tox
-    - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; coverage run -m pytest; fi
 after_success:
     - coveralls
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then coveralls; fi
