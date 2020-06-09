@@ -42,7 +42,7 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None, phase_
     wave_vectors: Wavevectors
         wave vectors of the two Raman beams for calculation
         of Doppler shifts
-    wf : Wavefront , optional
+    wf : Wavefront (optional)
         wavefront aberrations of the interferometry beam
     phase_scan : float
         effective phase for fringe scans
@@ -106,6 +106,6 @@ def transition(atoms, intensity_profile, tau, wave_vectors=None, wf=None, phase_
     propagator = np.array([[U_ee, U_eg], [U_ge, U_gg]], dtype='complex')
     propagator = np.transpose(propagator, (2, 0, 1))
     # U*|Psi>
-    atoms.state_vectors = np.conjugate(np.einsum('ijk,ki ->ij', propagator, np.conjugate(atoms.state_vectors).T))
+    atoms.state_kets = np.einsum('ijk,ikl ->ijl', propagator, atoms.state_kets)
     atoms = free_evolution(atoms, tau)
     return atoms
