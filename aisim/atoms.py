@@ -17,7 +17,7 @@ class AtomicEnsemble():
     phase_space_vectors : ndarray
         n × 6 dimensional array representing the phase space vectors (x0, y0, z0, vx, vy, vz) of 
         the atoms in an atomic ensemble
-    state_kets : 1 × m or n × 1 x m array or list, optional
+    state_kets : m × 1 or n × m x 1 array or list, optional
         vector(s) representing the `m` internal degrees of freedom of the atoms. If the list or
         array is one-dimensional, all atoms are initialized in the same internal state.
         Alternatively, each atom can be initialized with a different state vector by passing an 
@@ -78,8 +78,8 @@ class AtomicEnsemble():
 
     @state_kets.setter
     def state_kets(self, new_state_kets):
-        new_state_kets = np.array([new_state_kets])
-        if len(new_state_kets) == 1:
+        new_state_kets = np.array([new_state_kets]).T
+        if len(new_state_kets) == 2:
             # state vector is the same for all atoms
             self._state_kets = np.repeat([new_state_kets], len(self), axis=0)
         else:
@@ -149,7 +149,7 @@ class AtomicEnsemble():
         return self.initial_position + self.initial_velocity * t
 
     def state_occupation(self, state):
-        return np.real(np.einsum('ijk,ikj->ij' , self.state_bras, self.state_kets)[:,state])
+        return np.real(np.einsum('ijk,ijk->ij' , self.state_bras, self.state_kets)[:,state])
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_samples, **kwargs):
