@@ -10,6 +10,6 @@ install:
 script:
     - tox
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then pytest --cov aisim/ fi
-  after_success:
+after_success:
     - coveralls
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then coveralls; fi
