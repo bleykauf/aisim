@@ -1,3 +1,4 @@
+[![PyPI version](https://badge.fury.io/py/aisim.svg)](https://badge.fury.io/py/aisim)
 [![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
 
