@@ -67,8 +67,8 @@ class TwoLevelTransitionPropagator(Propagator):
         pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363–406). Academic Press. 
         https://doi.org/10.1016/B978-012092460-8/50010-2
         """
-        super().__init__(time_delta, intensity_profile=intensity_profile, wave_vectors=None,
-                         wf=None, phase_scan=0)
+        super().__init__(time_delta, intensity_profile=intensity_profile, 
+        wave_vectors=wave_vectors, wf=None, phase_scan=0)
 
     def prop_matrix(self, atoms):
         # calculate the effective Rabi frequency at atoms' positions
