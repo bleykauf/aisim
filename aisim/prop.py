@@ -68,7 +68,7 @@ class TwoLevelTransitionPropagator(Propagator):
         https://doi.org/10.1016/B978-012092460-8/50010-2
         """
         super().__init__(time_delta, intensity_profile=intensity_profile, 
-        wave_vectors=wave_vectors, wf=None, phase_scan=0)
+        wave_vectors=wave_vectors, wf=wf, phase_scan=phase_scan)
 
     def prop_matrix(self, atoms):
         # calculate the effective Rabi frequency at atoms' positions
