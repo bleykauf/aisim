@@ -2,6 +2,7 @@ import pytest
 import aisim as ais
 import numpy as np
 
+
 def test_AtomicEnsemble_methods():
     '''
     This tests the AtomicEnsemble class' methods for
@@ -18,18 +19,20 @@ def test_AtomicEnsemble_methods():
         assert atoms.state_bras.shape == (n_atom, 1, n_int)
         assert atoms.phase_space_vectors.shape == (n_atom, 6)
         assert atoms.phase_space_vectors.shape == (n_atom, 6)
-        assert (atoms.phase_space_vectors[:,0:3] == atoms.position).all()
+        assert (atoms.phase_space_vectors[:, 0:3] == atoms.position).all()
         assert (atoms.calc_position(0) == atoms.position).all()
-        assert (atoms.phase_space_vectors[:,3:6] == atoms.velocity).all()
+        assert (atoms.phase_space_vectors[:, 3:6] == atoms.velocity).all()
         # Test duality of Kets and Bras
         np.testing.assert_array_almost_equal(atoms.state_kets, np.conjugate(
             np.transpose(atoms.state_bras, (0, 2, 1))))
         # Test whether the trace of every density matrix is equal to one
         np.testing.assert_almost_equal(
             np.trace(atoms.density_matrices, axis1=1, axis2=2), 1)
-        # Test whether every single atoms density matrix satisfies rho^2 = rho (condition for pure states)
+        # Test whether every single atoms density matrix satisfies
+        # rho^2 = rho (condition for pure states)
         np.testing.assert_array_almost_equal(np.matmul(
-            atoms.density_matrices, atoms.density_matrices), atoms.density_matrices)
+            atoms.density_matrices, atoms.density_matrices),
+            atoms.density_matrices)
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000
@@ -48,7 +51,8 @@ def test_AtomicEnsemble_methods():
             random_phase_space_vectors, norm_random_kets)
         atomic_ensemble_test_function(random_atoms)
 
-    # Test AtomicEnsemble from create_random_ensemble_from_gaussian_distribution method
+    # Test AtomicEnsemble from
+    # create_random_ensemble_from_gaussian_distribution method
     pos_params = {
         'mean_x': 1.0,
         'std_x': 1.0,
@@ -66,5 +70,5 @@ def test_AtomicEnsemble_methods():
         'std_vz': ais.convert.vel_from_temp(0*.2e-6),
     }
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_atom, state_kets=norm_random_kets )
+        pos_params, vel_params, n_atom, state_kets=norm_random_kets)
     atomic_ensemble_test_function(atoms)
