@@ -38,10 +38,7 @@ class AtomicEnsemble():
     def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0, weights=None):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
-        if isinstance(state_kets, list):
-            self.state_kets = np.array([state_kets]).T
-        else:
-            self.state_kets = state_kets
+        self.state_kets = state_kets
         self.time = time
         # for the future when we might implement forces
         self.initial_position = self.phase_space_vectors[:, 0:3]
