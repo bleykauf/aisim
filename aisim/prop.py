@@ -1,6 +1,7 @@
 """Classes to propagate atomic ensembles"""
 
 import numpy as np
+from scipy.linalg import block_diag
 import copy
 
 class Propagator():
@@ -29,7 +30,7 @@ class Propagator():
         atoms.time += self.time_delta
         atoms.position += atoms.velocity * self.time_delta
         # U*|Psi>
-        atoms.state_kets = np.einsum('ijk,ikl ->ijl', self.prop_matrix(atoms), atoms.state_kets )
+        atoms.state_kets = np.einsum('ijk,ikl ->ijl', self.prop_matrix(atoms, **kwargs), atoms.state_kets )
         return atoms
 
 
@@ -114,4 +115,53 @@ class TwoLevelTransitionPropagator(Propagator):
 
         u = np.array([[u_ee, u_eg], [u_ge, u_gg]], dtype='complex')
         u = np.transpose(u, (2, 0, 1))
+        return u
+
+class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
+
+    def __init__(self, time_delta, intensity_profile, wave_vectors=None, wf=None, phase_scan=0, n_pulses = 3):
+        """
+        Implements an effective Raman two-level system as a time propagator as defined in [1].
+        In addition to class TwoLevelTransitionPropagator, this adds spatial superpositions
+        in z-direction that occour at each pulse.
+
+        Parameters
+        ----------
+        time_delta: float
+            length of pulse
+        intensity_profile : IntensityProfile
+            Intensity profile of the interferometry lasers
+        wave_vectors: Wavevectors
+            wave vectors of the two Raman beams for calculation of Doppler shifts
+        wf : Wavefront , optional
+            wavefront aberrations of the interferometry beam
+        phase_scan : float
+            effective phase for fringe scans
+        n_pulses : int
+            number of intended light pulses in symmetric atom-interferometry sequennce.
+            Each pulse adds two spatial eigenstates.
+
+        References
+        ----------
+        [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom interferometry with light 
+        pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363–406). Academic Press. 
+        https://doi.org/10.1016/B978-012092460-8/50010-2
+        """
+        self.n_pulses = n_pulses
+        super().__init__(time_delta, intensity_profile=intensity_profile, 
+        wave_vectors=wave_vectors, wf=wf, phase_scan=phase_scan)
+        
+    def _twoLeveltransition(self, atoms):
+        # Internal function for two-level transitions
+        return super().prop_matrix(atoms)
+
+    def prop_matrix(self, atoms, n_pulse):
+        self.n_pulse = n_pulse
+        n_atoms = len(atoms)
+        u_internal = self._twoLeveltransition(atoms)
+        u = np.zeros((n_atoms, 2*self.n_pulses, 2*self.n_pulses), dtype="complex")
+        eye1 = np.eye(self.n_pulses-self.n_pulse)
+        eye2 = np.eye(self.n_pulse)
+        for i in range(0, n_atoms):
+            u[i] = block_diag(eye1, np.kron(eye2, u_internal[i]), eye1)
         return u
