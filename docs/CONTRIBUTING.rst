@@ -13,7 +13,7 @@ check your contributions with `flask8 <https://flake8.pycqa.org>`__ and the
 Configuration of :code:`flake8` is stored in the :code:`setup.cfg`. 
 
 `Autopep8 <https://pypi.org/project/autopep8/>`__ is helpful and uses the same configuration as 
-:code:`flakes8`.
+:code:`flake8`.
 
 Testing
 -------
