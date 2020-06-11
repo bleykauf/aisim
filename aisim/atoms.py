@@ -186,7 +186,8 @@ class AtomicEnsemble():
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
-                                                      n_samples, **kwargs):
+                                                      n_samples, seed=None,
+                                                      **kwargs):
     """
     Random atomic ensemble from normal position and velocity distributions.
 
@@ -199,7 +200,10 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
         'mean_z', 'std_z'. Entries for velocity space are 'mean_vx','std_vx',
         'mean_vy', 'std_vy','mean_vz', 'std_vz'.
     n_samples : float
-        Number of random samples.
+        number of random samples
+    seed : int or 1-d array_like, optional
+        Set the seed of the random number generator to get predictable samples.
+        If set, this number is passed to `numpy.random.seed`.
     **kwargs :
         Optional keyworded arguments passed to `AtomicEnsemble`
 
@@ -208,6 +212,9 @@ def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
     ensemble : AtomicEnsemble
         Atomic ensemble containing the generated phase space vectors.
     """
+    if seed is not None:
+        np.random.seed(seed)
+
     # initialize vector with phase-space entries and fill them
     phase_space_vectors = np.zeros((n_samples, 6))
     phase_space_vectors[:, 0] = np.random.normal(
