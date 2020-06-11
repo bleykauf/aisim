@@ -1,4 +1,4 @@
-"""Classes and functions related to the detection system"""
+"""Classes and functions related to the detection system."""
 
 import numpy as np
 from . import convert
@@ -6,10 +6,21 @@ from . import convert
 
 class Detector():
     """
+    A circular detection area.
+
     Parameters
     ----------
     r_det : float
-        radius of the detection area in the $x$, $y$ plane
+        radius of the detection area in the x, y plane
+    t_det : float
+        time of the detection
+
+    Attributes
+    ----------
+    r_det : float
+        radius of the detection area in the x, y plane
+    t_det : float
+        time of the detection
     """
 
     def __init__(self, r_det, t_det):
@@ -18,8 +29,11 @@ class Detector():
 
     def detected_idx(self, atoms):
         """
-        Determines wheter a position is within the detection zone and returns the indices of the
-        phase space vectors of an atomic ensemble that are detected
+        Return indices of the detected atoms.
+
+        Determines wheter a position is within the detection zone and returns
+        the indices of the phase space vectors of an atomic ensemble that are
+        detected.
 
         Parameters
         ----------
@@ -29,18 +43,19 @@ class Detector():
         Returns
         -------
         det_idx : nd array of bool
-            boolean array for filtering an AtomicEnsemble; True if detected, otherwise False.
+            boolean array for filtering an AtomicEnsemble; True if detected,
+            otherwise False.
 
         """
-
-        # pylint: disable=unsubscriptable-object
         rho = convert.cart2pol(atoms.calc_position(self.t_det))[:, 0]
         return np.where(rho <= self.r_det, True, False)
 
     def detected_atoms(self, atoms):
         """
-        Determines wheter a position is within the detection zone and returns a new AtomicEnsemble
-        object containing only the detected phase space vectors.
+        Determine wheter a position is within the detection zone.
+
+        Returns a new AtomicEnsemble object containing only the detected phase
+        space vectors.
 
         Parameters
         ----------
@@ -50,6 +65,7 @@ class Detector():
         Returns
         -------
         detected_atoms : AtomicEnsemble
-            atomic ensemble containing only phase space vectors that are eventually detected
+            atomic ensemble containing only phase space vectors that are
+            eventually detected
         """
         return atoms[self.detected_idx(atoms)]
