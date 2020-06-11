@@ -80,9 +80,7 @@ class AtomicEnsemble():
     def state_kets(self, new_state_kets):
         if isinstance(new_state_kets, list):
             new_state_kets = np.array([new_state_kets]).T
-        else:
-            new_state_kets = new_state_kets
-        if len(new_state_kets) == 2:
+        if new_state_kets.ndim == 2:
             # state vector is the same for all atoms
             self._state_kets = np.repeat([new_state_kets], len(self), axis=0)
         else:
