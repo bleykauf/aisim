@@ -17,7 +17,7 @@ class AtomicEnsemble():
     phase_space_vectors : ndarray
         n × 6 dimensional array representing the phase space vectors (x0, y0, z0, vx, vy, vz) of 
         the atoms in an atomic ensemble
-    state_vectors : 1 × m or n × m array or list, optional
+    state_kets : m × 1 or n × m x 1 array or list, optional
         vector(s) representing the `m` internal degrees of freedom of the atoms. If the list or
         array is one-dimensional, all atoms are initialized in the same internal state.
         Alternatively, each atom can be initialized with a different state vector by passing an 
@@ -35,10 +35,10 @@ class AtomicEnsemble():
         the atoms in an atomic ensemble
     """
 
-    def __init__(self, phase_space_vectors, state_vectors=[1, 0], time=0, weights=None):
+    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0, weights=None):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
-        self.state_vectors = state_vectors
+        self.state_kets = state_kets
         self.time = time
         # for the future when we might implement forces
         self.initial_position = self.phase_space_vectors[:, 0:3]
@@ -53,7 +53,7 @@ class AtomicEnsemble():
     def __getitem__(self, key):
         new_instance = AtomicEnsemble(
             phase_space_vectors=self.phase_space_vectors[key][:],
-            state_vectors=self.state_vectors[key][:],
+            state_kets=self.state_kets[key][:],
             weights=self.weights[key])
         return new_instance
 
@@ -70,22 +70,31 @@ class AtomicEnsemble():
         self._time = value
 
     @property
-    def state_vectors(self):
+    def state_kets(self):
         """
-        optional n × m array, representing the internal state of the m level system of each atom
+        optional n × 1 x m array, representing the ket vectors of the m level system of each atom
         """
-        return self._state_vectors
+        return self._state_kets
 
-    @state_vectors.setter
-    def state_vectors(self, new_state_vectors):
-        new_state_vectors = np.array(new_state_vectors)
-        if new_state_vectors.ndim == 1:
+    @state_kets.setter
+    def state_kets(self, new_state_kets):
+        if isinstance(new_state_kets, list):
+            new_state_kets = np.array([new_state_kets]).T
+        if new_state_kets.ndim == 2:
             # state vector is the same for all atoms
-            self.state_vectors = np.repeat(np.array([new_state_vectors]), len(self), axis=0)
+            self._state_kets = np.repeat([new_state_kets], len(self), axis=0)
         else:
             # there has to be a state vector for every atom in the ensemble
-            assert new_state_vectors.shape[0] == len(self)
-            self._state_vectors = new_state_vectors
+            assert new_state_kets.shape[0] == len(self)
+            self._state_kets = new_state_kets
+
+    @property
+    def state_bras(self):
+        """
+        optional n × m x 1 array, representing the bra vectors of the m level system of each atom
+        """
+        #exchange second and third index, then complex conjugate
+        return np.conjugate(np.einsum('ijk->ikj', self.state_kets)) 
 
     @property
     def density_matrices(self):
@@ -94,7 +103,7 @@ class AtomicEnsemble():
         These are pure states.
         """
         # |Psi><Psi|
-        return np.einsum('ji,il->ijl', np.conjugate(self.state_vectors).T, self.state_vectors)
+        return np.einsum('ijk,ijk->ijk', self.state_kets, self.state_bras)
 
     @property
     def density_matrix(self):
@@ -102,9 +111,9 @@ class AtomicEnsemble():
         m x m array, representing the density matrix of the AtomicEnsemble's m level system
         """
         pure_dm = self.density_matrices
-        n_atoms = self.state_vectors.shape[0]
+        n_atoms = self.state_kets.shape[0]
         # sum over pure |Psi><Psi| and divide by N
-        return 1/n_atoms * np.einsum('ijk->jk', pure_dm)  # sum over pure state's density matrices
+        return 1/n_atoms * np.einsum('ijk->jk', pure_dm)
 
     @property
     def position(self):
@@ -141,7 +150,7 @@ class AtomicEnsemble():
         return self.initial_position + self.initial_velocity * t
 
     def state_occupation(self, state):
-        return np.abs(self.state_vectors[:, state])**2
+        return np.real(np.einsum('ijk,ijk->ij' , self.state_bras, self.state_kets)[:,state])
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params, n_samples, **kwargs):

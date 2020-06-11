@@ -3,7 +3,6 @@
 import numpy as np
 import copy
 
-
 class Propagator():
     def __init__(self, time_delta, **kwargs):
         """
@@ -30,15 +29,13 @@ class Propagator():
         atoms.time += self.time_delta
         atoms.position += atoms.velocity * self.time_delta
         # U*|Psi>
-        atoms.state_vectors = np.conjugate(
-            np.einsum('ijk,ki ->ij', self.prop_matrix(atoms),
-                      np.conjugate(atoms.state_vectors).T))
+        atoms.state_kets = np.einsum('ijk,ikl ->ijl', self.prop_matrix(atoms), atoms.state_kets )
         return atoms
 
 
 class FreePropagator(Propagator):
     def prop_matrix(self, atoms):
-        n_levels = atoms.state_vectors[0].shape[0]
+        n_levels = atoms.state_kets[0].shape[0]
         return np.repeat([np.eye(n_levels)], repeats=len(atoms), axis=0)
 
 
@@ -118,4 +115,3 @@ class TwoLevelTransitionPropagator(Propagator):
         u = np.array([[u_ee, u_eg], [u_ge, u_gg]], dtype='complex')
         u = np.transpose(u, (2, 0, 1))
         return u
-
