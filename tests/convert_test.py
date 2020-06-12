@@ -1,4 +1,4 @@
-import pytest
+import pytest  # noqa
 import numpy as np
 import aisim as ais
 
