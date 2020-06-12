@@ -130,7 +130,6 @@ class Wavefront():
         wf : nd array
             The value of the wavefront at the positions
         """
-
         pos = convert.cart2pol(pos)
         rho = pos[:, 0]
         theta = pos[:, 1]
