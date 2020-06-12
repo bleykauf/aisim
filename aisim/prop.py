@@ -119,7 +119,7 @@ class TwoLevelTransitionPropagator(Propagator):
 
 class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
 
-    def __init__(self, time_delta, intensity_profile, wave_vectors=None, wf=None, phase_scan=0, n_pulses = 3):
+    def __init__(self, time_delta, n_pulses, intensity_profile=None, wave_vectors=None, wf=None, phase_scan=0):
         """
         Implements an effective Raman two-level system as a time propagator as defined in [1].
         In addition to class TwoLevelTransitionPropagator, this adds spatial superpositions
@@ -151,17 +151,58 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         super().__init__(time_delta, intensity_profile=intensity_profile, 
         wave_vectors=wave_vectors, wf=wf, phase_scan=phase_scan)
         
+    def _block_diag(self, u, num):
+        '''
+        Fast generation of diagonal block matrices as described
+
+        Parameters
+        ----------
+        u : numpy array
+            Shape is n_atoms x n_int x n_int, were n_atoms is the
+            number of atoms and n_int the number of internal states
+        num : int
+            number of times the internal propagation matrix is
+            stacked into the diagonal block matrix
+        '''
+        n, rows, cols = u.shape
+        result = np.zeros((n, num, rows, num, cols), dtype="complex")
+        diag = np.einsum('hijik->hijk', result)
+        for i in range(0, n):
+            diag[i, :] = u[i]
+        return result.reshape((n, rows * num, cols * num))
+
+
     def _twoLeveltransition(self, atoms):
         # Internal function for two-level transitions
         return super().prop_matrix(atoms)
 
-    def prop_matrix(self, atoms, n_pulse):
-        self.n_pulse = n_pulse
-        n_atoms = len(atoms)
-        u_internal = self._twoLeveltransition(atoms)
-        u = np.zeros((n_atoms, 2*self.n_pulses, 2*self.n_pulses), dtype="complex")
-        eye1 = np.eye(self.n_pulses-self.n_pulse)
-        eye2 = np.eye(self.n_pulse)
-        for i in range(0, n_atoms):
-            u[i] = block_diag(eye1, np.kron(eye2, u_internal[i]), eye1)
+    def prop_matrix(self, atoms):
+        u_two_level = self._twoLeveltransition(atoms)
+        u = self._block_diag(u_two_level, self.n_pulses)
         return u
+    
+class SpatialSuperpositionFreePropagator(Propagator):
+
+    def __init__(self, time_delta, n_pulses):
+        """
+        Free propagator of SpatialSuperpositionTransitionPropagator class
+
+        Parameters
+        ----------
+        time_delta: float
+            length of pulse
+        n_pulses : int
+            number of intended light pulses in symmetric atom-interferometry sequennce.
+            Each pulse adds two spatial eigenstates.
+        """
+        self.n_pulses = n_pulses
+        self.time_delta = time_delta
+
+    def prop_matrix(self, atoms):
+        freeprop_matrix = np.zeros((2*self.n_pulses,2*self.n_pulses))
+        for i in range(1,len(freeprop_matrix)):
+            if i%2 == 1:
+                freeprop_matrix[i,i] = 1
+            else:
+                freeprop_matrix[i-2,i] = 1
+        return np.repeat(np.array([freeprop_matrix]), len(atoms), axis=0)
