@@ -314,6 +314,7 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3,
     weights = np.exp(-grid[:, 0]**2/(2*std_rho**2))
     if std_z != 0:
         # check if distribution is 2d to avoid divide by 0
+        # FIXME: check if this is ever called
         weights = weights * np.exp(-grid[:, 2]**2/(2*std_z**2))
     grid = convert.pol2cart(grid)
     return grid, weights
