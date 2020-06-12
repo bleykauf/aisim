@@ -130,7 +130,7 @@ class Wavefront():
         wf : nd array
             The value of the wavefront at the positions
         """
-        # pylint: disable=unsubscriptable-object
+
         pos = convert.cart2pol(pos)
         rho = pos[:, 0]
         theta = pos[:, 1]
