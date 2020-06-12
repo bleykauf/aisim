@@ -152,8 +152,8 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         
     def _block_diag(self, u, num):
         '''
-        Fast generation of diagonal block matrices as described
-
+        Fast generation of diagonal block matrices describing internal
+        state dynamics.
         Parameters
         ----------
         u : numpy array
@@ -169,7 +169,6 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         for i in range(0, n):
             diag[i, :] = u[i]
         return result.reshape((n, rows * num, cols * num))
-
 
     def _twoLeveltransition(self, atoms):
         # Internal function for two-level transitions
@@ -195,7 +194,6 @@ class SpatialSuperpositionFreePropagator(Propagator):
             Each pulse adds two spatial eigenstates.
         """
         self.n_pulses = n_pulses
-        self.time_delta = time_delta
 
     def prop_matrix(self, atoms):
         freeprop_matrix = np.zeros((2*self.n_pulses,2*self.n_pulses))
