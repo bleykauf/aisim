@@ -64,7 +64,7 @@ def test_AtomicEnsemble_methods():
         'mean_vy': 1.0,
         'std_vy': ais.convert.vel_from_temp(3.0e-6),
         'mean_vz': 1.0,
-        'std_vz': ais.convert.vel_from_temp(0*.2e-6),
+        'std_vz': ais.convert.vel_from_temp(0.2e-6),
     }
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
         pos_params, vel_params, n_atom, state_kets=norm_random_kets)
