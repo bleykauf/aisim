@@ -57,12 +57,14 @@ def test_two_level_transition_propagator():
 
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
         pos_params, vel_params, 100)
-    
+
     intensity_profile = ais.IntensityProfile(1, 1)
 
-    prop = ais.TwoLevelTransitionPropagator(time_delta=1, intensity_profile=intensity_profile)
+    prop = ais.TwoLevelTransitionPropagator(
+        time_delta=1, intensity_profile=intensity_profile)
 
     matrices = prop._prop_matrix(atoms)
-    
+
     for matrix in matrices:
-        np.testing.assert_almost_equal(np.matmul(matrix, np.conjugate(matrix.T)), np.eye(2))
+        np.testing.assert_almost_equal(
+            np.matmul(matrix, np.conjugate(matrix.T)), np.eye(2))
