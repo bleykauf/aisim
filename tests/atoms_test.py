@@ -1,18 +1,15 @@
-import pytest
+import pytest  # noqa
 import aisim as ais
 import numpy as np
 
 
 def test_AtomicEnsemble_methods():
-    '''
-    This tests the AtomicEnsemble class' methods for
-    consistency.
-    It creates ensembles of atoms with random internal
-    and external states.
-    Methods of AtomicEnsemble that are tested:
-        state_kets, state_bras, density_matrices,
-        density_matrix
-    '''
+    # This tests the AtomicEnsemble class' methods for
+    # consistency.
+    # It creates ensembles of atoms with random internal
+    # and external states.
+    # Methods of AtomicEnsemble that are tested:
+    #     state_kets, state_bras, density_matrices, density_matrix
     def atomic_ensemble_test_function(atoms):
         # Testing AtomicEnsemble properties
         assert atoms.state_kets.shape == (n_atom, n_int, 1)
