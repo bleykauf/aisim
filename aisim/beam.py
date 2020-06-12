@@ -96,6 +96,13 @@ class Wavefront():
     """
     Class that defines a wavefront.
 
+    Parameters
+    ----------
+    r_beam : float
+        beam radius in m
+    coeff : list
+        list of 36 Zernike coefficients in multiples of the wavelength
+
     Attributes
     ----------
     r_beam : float
@@ -105,20 +112,13 @@ class Wavefront():
     """
 
     def __init__(self, r_beam, coeff):
-        """
-        Parameters
-        ----------
-        r_beam : float
-            beam radius in m
-        coeff : list
-            list of 36 Zernike coefficients in multiples of the wavelength
-        """
+
         self.r_beam = r_beam
         self.coeff = coeff
 
     def get_value(self, pos):
         """
-        The wavefront at a position.
+        Get the wavefront at a position.
 
         Parameters
         ----------
@@ -169,7 +169,7 @@ class Wavefront():
 
     def plot_coeff(self, ax=None):
         """
-        Plot the coefficients as a bar chart
+        Plot the coefficients as a bar chart.
 
         Parameters
         ----------
