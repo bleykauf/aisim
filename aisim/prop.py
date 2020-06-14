@@ -118,7 +118,7 @@ class TwoLevelTransitionPropagator(Propagator):
 
 class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
 
-    def __init__(self, time_delta, n_pulses, intensity_profile=None, wave_vectors=None, wf=None, phase_scan=0):
+    def __init__(self, time_delta, n_pulses, n_pulse, intensity_profile=None, wave_vectors=None, wf=None, phase_scan=0):
         """
         Implements an effective Raman two-level system as a time propagator as defined in [1].
         In addition to class TwoLevelTransitionPropagator, this adds spatial superpositions
@@ -137,8 +137,10 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         phase_scan : float
             effective phase for fringe scans
         n_pulses : int
-            number of intended light pulses in symmetric atom-interferometry sequennce.
+            overall number of intended light pulses in symmetric atom-interferometry sequennce.
             Each pulse adds two spatial eigenstates.
+        n_pulse : int
+            number of light pulse of symmetric atom-interferometry sequennce.
 
         References
         ----------
@@ -147,6 +149,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         https://doi.org/10.1016/B978-012092460-8/50010-2
         """
         self.n_pulses = n_pulses
+        self.n_pulse = n_pulse
         super().__init__(time_delta, intensity_profile=intensity_profile, 
         wave_vectors=wave_vectors, wf=wf, phase_scan=phase_scan)
         
@@ -174,32 +177,17 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         # Internal function for two-level transitions
         return super().prop_matrix(atoms)
 
+    def _index_shift(self):
+        index_shift_matrix = np.eye(2*self.n_pulses)
+        for i in range(0,len(index_shift_matrix)):
+            if i%2 == 0:
+                index_shift_matrix[i,:] = np.roll(index_shift_matrix[i,:], 2)
+        return index_shift_matrix
+
     def prop_matrix(self, atoms):
         u_two_level = self._twoLeveltransition(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
-        return u
+        shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
+        shift_back = np.linalg.matrix_power(self._index_shift(), self.n_pulses-self.n_pulse)
+        return np.einsum('ij,ajk,kl->ail', shift_back, u, shift_forth)
     
-class SpatialSuperpositionFreePropagator(Propagator):
-
-    def __init__(self, time_delta, n_pulses):
-        """
-        Free propagator of SpatialSuperpositionTransitionPropagator class
-
-        Parameters
-        ----------
-        time_delta: float
-            length of pulse
-        n_pulses : int
-            number of intended light pulses in symmetric atom-interferometry sequennce.
-            Each pulse adds two spatial eigenstates.
-        """
-        self.n_pulses = n_pulses
-
-    def prop_matrix(self, atoms):
-        freeprop_matrix = np.zeros((2*self.n_pulses,2*self.n_pulses))
-        for i in range(1,len(freeprop_matrix)):
-            if i%2 == 1:
-                freeprop_matrix[i,i] = 1
-            else:
-                freeprop_matrix[i-2,i] = 1
-        return np.repeat(np.array([freeprop_matrix]), len(atoms), axis=0)
