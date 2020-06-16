@@ -172,7 +172,7 @@ class AtomicEnsemble():
 
         Parameters
         ----------
-        state : int
+        state : int or array
             specifies which state population should be calculated, e.e. 1 for
             the excited state of a two-level system.
 
@@ -269,7 +269,7 @@ def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
 
 
 def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3,
-              m_std_z=0, weight='gauss'):
+              m_std_z=0):
     """
     Evenly spaced grid of positions (or velocities) and weights.
 
@@ -286,8 +286,6 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3,
         points along theta, respectively
     m_std_rho, m_std_z : int
         number of standard deviations for the rho and z distribution
-    weight : {'gauss'}
-        Weighting according to Gaussian distribution along rho and z
 
     Returns
     -------
@@ -314,7 +312,6 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3,
     weights = np.exp(-grid[:, 0]**2/(2*std_rho**2))
     if std_z != 0:
         # check if distribution is 2d to avoid divide by 0
-        # FIXME: check if this is ever called
         weights = weights * np.exp(-grid[:, 2]**2/(2*std_z**2))
     grid = convert.pol2cart(grid)
     return grid, weights

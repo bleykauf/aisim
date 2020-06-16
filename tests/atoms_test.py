@@ -3,11 +3,9 @@ import aisim as ais
 import numpy as np
 
 
-def test_AtomicEnsemble_methods():
-    # This tests the AtomicEnsemble class' methods for
-    # consistency.
-    # It creates ensembles of atoms with random internal
-    # and external states.
+def test_atomic_ensemble_methods():
+    # This tests the AtomicEnsemble class' methods for consistency. It creates
+    # ensembles of atoms with random internal and external states.
     # Methods of AtomicEnsemble that are tested:
     #     state_kets, state_bras, density_matrices, density_matrix
     def atomic_ensemble_test_function(atoms):
@@ -25,11 +23,13 @@ def test_AtomicEnsemble_methods():
         # Test whether the trace of every density matrix is equal to one
         np.testing.assert_almost_equal(
             np.trace(atoms.density_matrices, axis1=1, axis2=2), 1)
-        # Test whether every single atoms density matrix satisfies
-        # rho^2 = rho (condition for pure states)
+        # Test whether every single atoms density matrix satisfiesrho^2 = rho
+        # (condition for pure states)
         np.testing.assert_array_almost_equal(np.matmul(
             atoms.density_matrices, atoms.density_matrices),
             atoms.density_matrices)
+        # test for the density matrix (mixed states)
+        np.testing.assert_almost_equal(np.trace(atoms.density_matrix), 1)
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000
@@ -69,3 +69,12 @@ def test_AtomicEnsemble_methods():
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
         pos_params, vel_params, n_atom, state_kets=norm_random_kets)
     atomic_ensemble_test_function(atoms)
+
+
+def test_make_grid():
+    # test the one case (finite z) not covered by wf_test.py
+    atomic_ensemble, weights = ais.make_grid(
+        std_rho=1, n_z=10, std_z=3, m_std_z=2)
+    assert atomic_ensemble[:, 2].min() == -3.0
+    assert atomic_ensemble[:, 2].max() == 3.0
+    np.testing.assert_almost_equal(atomic_ensemble[:, 2].mean(), 0.0)

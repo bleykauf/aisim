@@ -21,7 +21,6 @@ pos_params = {
     'n_z': 1,          # use one value for the distribution along z
     'm_std_rho': 3,    # use 3 standard deviations of the distribution
     'm_std_z': 0,      # ignore z dimension, its not relevant here
-    'weight': 'gauss'  # each point on the grid is weighted by Guassian
 }
 
 vel_params = {
@@ -34,7 +33,6 @@ vel_params = {
     'n_z': 1,        # use one value for the distribution along z
     'm_std_rho': 3,  # use 3 standard deviations of the distribution
     'm_std_z': 0,    # ignore z dimension, its not relevant here
-    'weight': 'gauss'  # weight by Gaussian
 }
 
 atoms = ais.create_ensemble_from_grids(pos_params, vel_params)
