@@ -97,7 +97,7 @@ class AtomicEnsemble():
 
     @property
     def state_kets(self):
-        """(n × 1 x m) array: The ket vectors of the m level system."""
+        """(n × m x 1) array: The ket vectors of the m level system."""
         return self._state_kets
 
     @state_kets.setter
@@ -114,7 +114,7 @@ class AtomicEnsemble():
 
     @property
     def state_bras(self):
-        """(n × m x 1 ) array: The bra vectors of the m level system."""
+        """(n × 1 x m) array: The bra vectors of the m level system."""
         # exchange second and third index, then complex conjugate
         return np.conjugate(np.einsum('ijk->ikj', self.state_kets))
 
@@ -172,17 +172,29 @@ class AtomicEnsemble():
 
         Parameters
         ----------
-        state : int or array
-            specifies which state population should be calculated, e.e. 1 for
-            the excited state of a two-level system.
+        state : int or list_like
+            Specifies which state population should be calculated. E.g. the
+            excited state of a two-level system can be calculated by passing
+            either 1 or [0, 1].
 
         Returns
         -------
         array :
             n dimensional array of the state population of each of the n atom
         """
-        return np.real(np.einsum('ijk,ijk->ij', self.state_bras,
-                                 self.state_kets)[:, state])
+        # create bra on which the kets of the atomic ensemble are projected
+        if isinstance(state, int):
+            state_vector = np.zeros(self.state_kets.shape[1])
+            state_vector[state] = 1
+        elif isinstance(state, list):
+            # check that bases match
+            assert len(state) == self.state_kets.shape[1]
+            state_vector = np.array(state)
+
+        projection_bras = np.repeat(
+            np.array([[state_vector]]), len(self), axis=0)
+        # |<i|Psi>|^2
+        return np.abs(np.matmul(projection_bras, self.state_kets))**2
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
