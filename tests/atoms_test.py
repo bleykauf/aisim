@@ -30,6 +30,12 @@ def test_atomic_ensemble_methods():
             atoms.density_matrices)
         # test for the density matrix (mixed states)
         np.testing.assert_almost_equal(np.trace(atoms.density_matrix), 1)
+        # test whether the sum of all state occupation is 1
+        m_levels = np.arange(atoms.state_kets.shape[1])  # number of levels
+        state_occupation = 0
+        for m in m_levels:
+            state_occupation += atoms.state_occupation(m)
+        np.testing.assert_almost_equal(state_occupation, 1)
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000

@@ -179,22 +179,24 @@ class AtomicEnsemble():
 
         Returns
         -------
-        array :
+        occupation : array
             n dimensional array of the state population of each of the n atom
         """
         # create bra on which the kets of the atomic ensemble are projected
-        if isinstance(state, int):
-            state_vector = np.zeros(self.state_kets.shape[1])
-            state_vector[state] = 1
-        elif isinstance(state, list):
+        if isinstance(state, (int, np.integer)):
+            # list of zeros
+            zeros = [0] * self.state_kets.shape[1]
+            # set entry to 1, overwrite state variable
+            zeros[state] = 1
+            state = zeros
+        if isinstance(state, list):
             # check that bases match
             assert len(state) == self.state_kets.shape[1]
-            state_vector = np.array(state)
-
-        projection_bras = np.repeat(
-            np.array([[state_vector]]), len(self), axis=0)
+            state = np.array(state)
+        projection_bras = np.repeat(np.array([[state]]), len(self), axis=0)
         # |<i|Psi>|^2
-        return np.abs(np.matmul(projection_bras, self.state_kets))**2
+        occupation = np.abs(np.matmul(projection_bras, self.state_kets))**2
+        return occupation.flatten()
 
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
