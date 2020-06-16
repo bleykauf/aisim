@@ -49,7 +49,7 @@ magneto-optical trap after sub-Doppler cooling:
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
         pos_params,
         vel_params, int(1e4),
-        state_vectors=[1, 0])
+        state_kets=[1, 0])
 
 Only a fraction of these atoms will be detected after a time-of-flight
 of 800 ms. We model the detection region with radius of 5 mm:
