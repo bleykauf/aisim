@@ -1,24 +1,23 @@
 """Classes and functions related to the detection system."""
 
 import numpy as np
-from . import convert
 
 
 class Detector():
     """
-    A circular detection area.
+    A spherical detection area.
 
     Parameters
     ----------
     r_det : float
-        radius of the detection area in the x, y plane
+        radius of the detection area
     t_det : float
         time of the detection
 
     Attributes
     ----------
     r_det : float
-        radius of the detection area in the x, y plane
+        radius of the detection area
     t_det : float
         time of the detection
     """
@@ -47,7 +46,9 @@ class Detector():
             otherwise False.
 
         """
-        rho = convert.cart2pol(atoms.calc_position(self.t_det))[:, 0]
+        det_pos = atoms.calc_position(self.t_det)
+        x, y, z = det_pos[:, 0], det_pos[:, 1], det_pos[:, 2]
+        rho = np.sqrt(x**2 + y**2 + z**2)
         return np.where(rho <= self.r_det, True, False)
 
     def detected_atoms(self, atoms):
