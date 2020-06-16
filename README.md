@@ -44,6 +44,11 @@ notebooks](https://jupyter.org/):
 -   [Rabi oscillations with a Gaussian beam and thermal
     atoms](https://github.com/bleykauf/aisim/blob/master/docs/examples/rabi-oscillations.ipynb)
 
+Contributing
+------------
+
+Contributions are very welcome. If you want to help, check out [our contributions guide](https://github.com/bleykauf/aisim/blob/master/docs/CONTRIBUTING.rst).
+
 Authors
 -------
 
