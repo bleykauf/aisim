@@ -9,7 +9,7 @@ AISim ‒ Simulations for light-pulse atom interferometry
 AISim is a Python package for simulating light-pulse atom
 interferometers.
 
-It uses dedicated objects to model the lasers beams, the atomic ensemble
+It uses dedicated objects to model the laser beams, the atomic ensemble
 and the detection system and store experimental parameters in a neat
 way. After you define these objects you can use built-in propagators to
 simulate internal and external degrees of freedom of cold atoms.
