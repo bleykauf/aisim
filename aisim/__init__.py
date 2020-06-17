@@ -1,12 +1,10 @@
-"""aisim is a python package for simulating light-pulse atom interferometers"""
+"""Python package for simulating light-pulse atom interferometers."""
 
-from .sims import *
-from .prop import *
-from .det import *
-from .convert import *
-from .beam import *
-from .atoms import *
-from . import atoms, beam, convert, det, sims, prop
+from .atoms import *    # noqa
+from .beam import *     # noqa
+from .convert import *  # noqa
+from .det import *      # noqa
+from .prop import *     # noqa
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions

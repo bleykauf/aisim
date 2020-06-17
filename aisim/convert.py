@@ -1,4 +1,4 @@
-"""Functions to convert various quantities"""
+"""Functions to convert various quantities."""
 
 import numpy as np
 
@@ -11,7 +11,7 @@ kb = 1.3806488e-23
 
 def temp(sigma_v, species='Rb87'):
     """
-    Calculates the temperature of an atomic cloud from its velocity spread.
+    Calculate the temperature of an atomic cloud from its velocity spread.
 
     Parameters
     ----------
@@ -21,7 +21,7 @@ def temp(sigma_v, species='Rb87'):
         the atomic species, has to be a key in `mass`
 
     Returns
-    ------- 
+    -------
     temp : float
         temperature of the cloud in Kelvin
 
@@ -37,7 +37,7 @@ def temp(sigma_v, species='Rb87'):
 
 def vel_from_temp(temp, species='Rb87'):
     """
-    Calculates the velocity spread (1 sigma) from the temperature of the cloud.
+    Calculate the velocity spread (1 sigma) from the temperature of the cloud.
 
     Parameters
     ----------
@@ -63,16 +63,16 @@ def vel_from_temp(temp, species='Rb87'):
 
 def cart2pol(cart):
     """
-    Converts vectors in cartesian coordinates to polar coordinates.
+    Convert vectors in cartesian coordinates to polar coordinates.
 
     Parameters
     ----------
-    cart : n × 3 array  
+    cart : n × 3 array
         array of n vectors in cartesian coordinates (x, y, z)
 
     Returns
     -------
-    pol : n × 3 array  
+    pol : n × 3 array
         array of n vectors in polar coordinates (rho, theta, z)
     """
     x = cart[:, 0]
@@ -86,16 +86,16 @@ def cart2pol(cart):
 
 def pol2cart(pol):
     """
-    Converts vectors in polar coordinates to cartesian coordinates.
+    Convert vectors in polar coordinates to cartesian coordinates.
 
     Parameters
     ----------
-    pol : n × 3 array  
+    pol : n × 3 array
         array of n vectors in polar coordinates (rho, theta, z)
 
     Returns
     -------
-    cart : n × 3 array  
+    cart : n × 3 array
         array of n vectors in cartesian coordinates (x, y, z)
     """
     rho = pol[:, 0]
@@ -107,14 +107,25 @@ def pol2cart(pol):
     return np.array([x, y, z]).T
 
 
-def rad_to_grav(phase, T=260, keff=1.610574779769):
+def phase_to_grav(phase, T, keff):
     """
-    Converts a phase shift to the corresponding effect of in $g$ in $nm/s^2$.
+    Convert a phase shift to gravitational acceleration.
+
+    Takes the phase shift measured in a Mach Zehnder atom interferometer and
+    converts it to the corresponding gravtional accleration.
 
     Parameters
     ----------
     phase : float
-        Interferometer phase in radian
+        Interferometer phase
+    T : float
+        interferometer time
+    keff : float
+        effective wavenumber
 
+    Returns
+    -------
+    float :
+        gravitational acceleration in m/s²
     """
-    return phase/keff/(T**2) * 1e9
+    return phase/keff/(T**2)
