@@ -11,7 +11,7 @@ install:
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then pip install coveralls; fi
 script:
     - tox
-    - flake8
+    - flake8 aisim
 after_success:
     - coveralls
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then coveralls; fi
