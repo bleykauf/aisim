@@ -148,56 +148,63 @@ class TwoLevelTransitionPropagator(Propagator):
         u = np.transpose(u, (2, 0, 1))
         return u
 
+
 class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
+    """
+    An effective Raman two-level system.
 
-    def __init__(self, time_delta, n_pulses, n_pulse, intensity_profile=None, wave_vectors=None, wf=None, phase_scan=0):
-        """
-        Implements an effective Raman two-level system as a time propagator as defined in [1].
-        In addition to class TwoLevelTransitionPropagator, this adds spatial superpositions
-        in z-direction that occour at each pulse.
+    It is implemented as a time propagator as defined in [1]. In addition to
+    class TwoLevelTransitionPropagator, this adds spatial superpositions
+    in z-direction that occour at each pulse.
 
-        Parameters
-        ----------
-        time_delta: float
-            length of pulse
-        intensity_profile : IntensityProfile
-            Intensity profile of the interferometry lasers
-        wave_vectors: Wavevectors
-            wave vectors of the two Raman beams for calculation of Doppler shifts
-        wf : Wavefront , optional
-            wavefront aberrations of the interferometry beam
-        phase_scan : float
-            effective phase for fringe scans
-        n_pulses : int
-            overall number of intended light pulses in symmetric atom-interferometry sequennce.
-            Each pulse adds two spatial eigenstates.
-        n_pulse : int
-            number of light pulse of symmetric atom-interferometry sequennce.
+    Parameters
+    ----------
+    time_delta: float
+        length of pulse
+    intensity_profile : IntensityProfile
+        Intensity profile of the interferometry lasers
+    wave_vectors: Wavevectors
+        wave vectors of the two Raman beams for calculation of Doppler shifts
+    wf : Wavefront , optional
+        wavefront aberrations of the interferometry beam
+    phase_scan : float
+        effective phase for fringe scans
+    n_pulses : int
+        overall number of intended light pulses in symmetric atom
+        interferometry sequennce. Each pulse adds two spatial eigenstates.
+    n_pulse : int
+        number of light pulse of symmetric atom-interferometry sequennce.
 
-        References
-        ----------
-        [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom interferometry with light 
-        pulses. In P. R. Berman (Ed.), Atom Interferometry (pp. 363–406). Academic Press. 
-        https://doi.org/10.1016/B978-012092460-8/50010-2
-        """
+    References
+    ----------
+    [1] Young, B. C., Kasevich, M., & Chu, S. (1997). Precision atom
+    interferometry with light pulses. In P. R. Berman (Ed.), Atom
+    Interferometry (pp. 363–406). Academic Press.
+    https://doi.org/10.1016/B978-012092460-8/50010-2
+    """
+
+    def __init__(self, time_delta, n_pulses, n_pulse, intensity_profile=None,
+                 wave_vectors=None, wf=None, phase_scan=0):
+
         self.n_pulses = n_pulses
         self.n_pulse = n_pulse
-        super().__init__(time_delta, intensity_profile=intensity_profile, 
-        wave_vectors=wave_vectors, wf=wf, phase_scan=phase_scan)
-        
+        super().__init__(time_delta, intensity_profile=intensity_profile,
+                         wave_vectors=wave_vectors, wf=wf,
+                         phase_scan=phase_scan)
+
     def _block_diag(self, u, num):
-        '''
-        Fast generation of diagonal block matrices describing internal
-        state dynamics.
+        """
+        Fast generation of diagonal block matrices of internal state dynamics.
+
         Parameters
         ----------
         u : numpy array
-            Shape is n_atoms x n_int x n_int, were n_atoms is the
-            number of atoms and n_int the number of internal states
+            Shape is n_atoms x n_int x n_int, were n_atoms is the number of
+            atoms and n_int the number of internal states
         num : int
-            number of times the internal propagation matrix is
-            stacked into the diagonal block matrix
-        '''
+            number of times the internal propagation matrix is stacked into the
+            diagonal block matrix
+        """
         n, rows, cols = u.shape
         result = np.zeros((n, num, rows, num, cols), dtype="complex")
         diag = np.einsum('hijik->hijk', result)
@@ -205,21 +212,21 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
             diag[i, :] = u[i]
         return result.reshape((n, rows * num, cols * num))
 
-    def _twoLeveltransition(self, atoms):
+    def _two_level_transition(self, atoms):
         # Internal function for two-level transitions
         return super().prop_matrix(atoms)
 
     def _index_shift(self):
         index_shift_matrix = np.eye(2*self.n_pulses)
-        for i in range(0,len(index_shift_matrix)):
-            if i%2 == 0:
-                index_shift_matrix[i,:] = np.roll(index_shift_matrix[i,:], 2)
+        for i in range(0, len(index_shift_matrix)):
+            if i % 2 == 0:
+                index_shift_matrix[i, :] = np.roll(index_shift_matrix[i, :], 2)
         return index_shift_matrix
 
     def prop_matrix(self, atoms):
         u_two_level = self._twoLeveltransition(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
-        shift_back = np.linalg.matrix_power(self._index_shift(), self.n_pulses-self.n_pulse)
+        shift_back = np.linalg.matrix_power(
+            self._index_shift(), self.n_pulses-self.n_pulse)
         return np.einsum('ij,ajk,kl->ail', shift_back, u, shift_forth)
-    
