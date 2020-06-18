@@ -212,10 +212,6 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
             diag[i, :] = u[i]
         return result.reshape((n, rows * num, cols * num))
 
-    def _two_level_transition(self, atoms):
-        # Internal function for two-level transitions
-        return super().prop_matrix(atoms)
-
     def _index_shift(self):
         index_shift_matrix = np.eye(2*self.n_pulses)
         for i in range(0, len(index_shift_matrix)):
@@ -223,8 +219,8 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
                 index_shift_matrix[i, :] = np.roll(index_shift_matrix[i, :], 2)
         return index_shift_matrix
 
-    def prop_matrix(self, atoms):
-        u_two_level = self._twoLeveltransition(atoms)
+    def _prop_matrix(self, atoms):
+        u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
         shift_back = np.linalg.matrix_power(
