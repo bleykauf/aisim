@@ -171,9 +171,9 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         effective phase for fringe scans
     n_pulses : int
         overall number of intended light pulses in symmetric atom
-        interferometry sequennce. Each pulse adds two spatial eigenstates.
+        interferometry sequence. Each pulse adds two spatial eigenstates.
     n_pulse : int
-        number of light pulse of symmetric atom-interferometry sequennce.
+        number of light pulse of symmetric atom-interferometry sequence.
 
     References
     ----------
@@ -220,6 +220,10 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         return index_shift_matrix
 
     def _prop_matrix(self, atoms):
+
+        assert atoms.state_kets.shape[1] == 2 * self.n_pulses,\
+            'Number of states must be twice the number of pulses.'
+
         u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
