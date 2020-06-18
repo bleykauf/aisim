@@ -7,9 +7,11 @@ python:
 install:
     - pip install tox-travis
     - pip install pytest-cov
+    - pip install flake8
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then pip install coveralls; fi
 script:
     - tox
+    - flake8
 after_success:
     - coveralls
     - if [ "$TRAVIS_PYTHON_VERSION" = "3.7" ]; then coveralls; fi
