@@ -183,7 +183,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
     https://doi.org/10.1016/B978-012092460-8/50010-2
     """
 
-    def __init__(self, time_delta, n_pulses, n_pulse, intensity_profile=None,
+    def __init__(self, time_delta, intensity_profile, n_pulses, n_pulse,
                  wave_vectors=None, wf=None, phase_scan=0):
 
         self.n_pulses = n_pulses
@@ -198,19 +198,30 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
 
         Parameters
         ----------
-        u : numpy array
-            Shape is n_atoms x n_int x n_int, were n_atoms is the number of
-            atoms and n_int the number of internal states
+        u : n × m × m array
+            propagation matrices for the n atoms with m levels
         num : int
-            number of times the internal propagation matrix is stacked into the
+            number of times the internal propagation matrix is repeated in the
             diagonal block matrix
+
+        Returns
+        -------
+        matrix : n × m*num × m*num
+            block matrix mediating the interactions of the n atoms with m*num
+            levels
         """
-        n, rows, cols = u.shape
-        result = np.zeros((n, num, rows, num, cols), dtype="complex")
-        diag = np.einsum('hijik->hijk', result)
+        # since u is a square matrix, row = cols = n_states
+        n, m, m = u.shape
+        matrix = np.zeros((n, num, m, num, m), dtype="complex")
+        # Note that diag is a view of matrix, so matrix is changed.
+        # n is index for atoms, m and k for the levels and i for num
+        diag = np.einsum('nimik->nimk', matrix)
         for i in range(0, n):
+            # diag[i, :] has shape (num, n_int, n_int), u[i] has shape
+            # (n_int, n_int), i.e. so u[i] is copied num times in each loop
             diag[i, :] = u[i]
-        return result.reshape((n, rows * num, cols * num))
+        # bring matrix into final form
+        return matrix.reshape((n, m * num, m * num))
 
     def _index_shift(self):
         index_shift_matrix = np.eye(2*self.n_pulses)
@@ -227,6 +238,6 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
-        shift_back = np.linalg.matrix_power(
-            self._index_shift(), self.n_pulses-self.n_pulse)
-        return np.einsum('ij,ajk,kl->ail', shift_back, u, shift_forth)
+        shift_back = np.linalg.matrix_power(self._index_shift(),
+                                            self.n_pulses-self.n_pulse)
+        return np.einsum('ij,njk,kl->nil', shift_back, u, shift_forth)
