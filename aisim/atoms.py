@@ -1,6 +1,7 @@
 """Classes and functions related to the atomic cloud."""
 
 import numpy as np
+from scipy.linalg import sqrtm
 from . import convert
 
 
@@ -198,6 +199,26 @@ class AtomicEnsemble():
         occupation = np.abs(np.matmul(projection_bras, self.state_kets))**2
         return occupation.flatten()
 
+    def fidelity(self, rho_target):
+        """
+        Calculate the fidelity of the AtomicEnsemble's density matrix
+        and target density matrix [1].
+        Parameters
+        ----------
+        rho_target : array
+            target density matrix as m x m array
+
+        Returns
+        -------
+        fidelity : float
+            fidelity of AtomicEnsemble's compared to
+            target density matrix
+
+        References
+        ----------
+        [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
+        """
+        return _fidelity(self.density_matrix, rho_target)
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
                                                       n_samples, seed=None,
@@ -366,3 +387,27 @@ def combine_weights(pos_weights, vel_weights):
     """
     # FIXME: replace with faster version, for example based on meshgrid
     return np.array([p * v for p in pos_weights for v in vel_weights])
+
+def _fidelity(rhoA, rhoB):
+    """
+    Calculate the fidelity of two density matrices [1].
+    Parameters
+    ----------
+    rhoA : array
+        density matrix as m x m array
+    rhoB : array
+        density matrix as m x m array
+
+    Returns
+    -------
+    fidelity : float
+        fidelity of both density matrices
+
+    References
+    ----------
+    [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
+    """
+    sqrt_rhoA = sqrtm(rhoA)
+    sqrtF = np.trace(sqrtm(
+        sqrt_rhoA @ rhoB @ sqrt_rhoA))
+    return np.real(sqrtF)**2
