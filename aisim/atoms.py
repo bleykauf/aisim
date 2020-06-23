@@ -203,6 +203,7 @@ class AtomicEnsemble():
         """
         Calculate the fidelity of the AtomicEnsemble's density matrix
         and target density matrix [1].
+
         Parameters
         ----------
         rho_target : array
@@ -219,6 +220,7 @@ class AtomicEnsemble():
         [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
         """
         return _fidelity(self.density_matrix, rho_target)
+
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
                                                       n_samples, seed=None,
@@ -387,6 +389,7 @@ def combine_weights(pos_weights, vel_weights):
     """
     # FIXME: replace with faster version, for example based on meshgrid
     return np.array([p * v for p in pos_weights for v in vel_weights])
+
 
 def _fidelity(rhoA, rhoB):
     """
