@@ -1,7 +1,7 @@
 """Classes and functions related to the atomic cloud."""
 
 import numpy as np
-from scipy.linalg import sqrtm
+import scipy.linalg as splin
 from . import convert
 
 
@@ -408,7 +408,6 @@ def _fidelity(rhoA, rhoB):
     [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
     """
     assert rhoA.shape == rhoB.shape
-    sqrt_rhoA = sqrtm(rhoA)
-    sqrtF = np.trace(sqrtm(
-        sqrt_rhoA @ rhoB @ sqrt_rhoA))
+    sqrt_rhoA = splin.sqrtm(rhoA)
+    sqrtF = np.trace(splin.sqrtm(sqrt_rhoA @ rhoB @ sqrt_rhoA))
     return np.real(sqrtF)**2
