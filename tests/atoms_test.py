@@ -36,6 +36,9 @@ def test_atomic_ensemble_methods():
         for m in m_levels:
             state_occupation += atoms.state_occupation(m)
         np.testing.assert_almost_equal(state_occupation, 1)
+        # Test properties of the fidelity function
+        ## fidelity of density matrix with itself is 1
+        np.testing.assert_almost_equal(1, atoms.fidelity(atoms.density_matrix))
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000
@@ -84,3 +87,13 @@ def test_make_grid():
     assert atomic_ensemble[:, 2].min() == -3.0
     assert atomic_ensemble[:, 2].max() == 3.0
     np.testing.assert_almost_equal(atomic_ensemble[:, 2].mean(), 0.0)
+
+def test_fidelity():
+    for i in [2,3,10,50]: # Test for different matrix sizes
+        m1 = np.random.rand(i,i)
+        m2 = np.random.rand(i,i)
+        # Test that return is float
+        assert isinstance(ais.atoms._fidelity(m1, m2), float)
+        # Test symmetry F(m1,m2) == F(m2,m1)
+        np.testing.assert_almost_equal(ais.atoms._fidelity(m1, m2),
+            ais.atoms._fidelity(m2, m1))

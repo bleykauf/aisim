@@ -407,6 +407,7 @@ def _fidelity(rhoA, rhoB):
     ----------
     [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
     """
+    assert rhoA.shape == rhoB.shape
     sqrt_rhoA = sqrtm(rhoA)
     sqrtF = np.trace(sqrtm(
         sqrt_rhoA @ rhoB @ sqrt_rhoA))
