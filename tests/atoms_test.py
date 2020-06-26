@@ -2,6 +2,19 @@ import pytest  # noqa
 import aisim as ais
 import numpy as np
 
+def generate_random_atoms(n_atom, n_int):
+        random_phase_space_vectors = np.random.rand(n_atom, 6)
+        random_kets = np.random.rand(n_atom, n_int)
+        # normalize random ket
+        norm = np.einsum('ij,ij->i', random_kets, random_kets)
+        norm_random_kets = np.einsum('ij,i->ij', random_kets, 1/norm**(1/2))
+        # apply random phase shifts
+        random_phases = 2*np.pi*np.random.rand(n_atom, n_int)
+        norm_random_kets = np.exp(1j*random_phases) * norm_random_kets
+        norm_random_kets = np.reshape(norm_random_kets, (n_atom, n_int, 1))
+        random_atoms = ais.AtomicEnsemble(
+            random_phase_space_vectors, norm_random_kets)
+        return random_atoms
 
 def test_atomic_ensemble_methods():
     # This tests the AtomicEnsemble class' methods for consistency. It creates
@@ -44,17 +57,7 @@ def test_atomic_ensemble_methods():
     n_atom = 1000
     n_ints = [2, 3, 5, 10, 20, 100]
     for n_int in n_ints:
-        random_phase_space_vectors = np.random.rand(n_atom, 6)
-        random_kets = np.random.rand(n_atom, n_int)
-        # normalize random ket
-        norm = np.einsum('ij,ij->i', random_kets, random_kets)
-        norm_random_kets = np.einsum('ij,i->ij', random_kets, 1/norm**(1/2))
-        # apply random phase shifts
-        random_phases = 2*np.pi*np.random.rand(n_atom, n_int)
-        norm_random_kets = np.exp(1j*random_phases) * norm_random_kets
-        norm_random_kets = np.reshape(norm_random_kets, (n_atom, n_int, 1))
-        random_atoms = ais.AtomicEnsemble(
-            random_phase_space_vectors, norm_random_kets)
+        random_atoms = generate_random_atoms(n_atom, n_int)
         atomic_ensemble_test_function(random_atoms)
 
     # Test AtomicEnsemble from
@@ -76,7 +79,7 @@ def test_atomic_ensemble_methods():
         'std_vz': ais.convert.vel_from_temp(0.2e-6),
     }
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_atom, state_kets=norm_random_kets)
+        pos_params, vel_params, n_atom, state_kets=random_atoms.state_kets)
     atomic_ensemble_test_function(atoms)
 
 
@@ -89,11 +92,17 @@ def test_make_grid():
     np.testing.assert_almost_equal(atomic_ensemble[:, 2].mean(), 0.0)
 
 def test_fidelity():
-    for i in [2,3,10,50]: # Test for different matrix sizes
-        m1 = np.random.rand(i,i)
-        m2 = np.random.rand(i,i)
-        # Test that return is float
-        assert isinstance(ais.atoms._fidelity(m1, m2), float)
-        # Test symmetry F(m1,m2) == F(m2,m1)
-        np.testing.assert_almost_equal(ais.atoms._fidelity(m1, m2),
-            ais.atoms._fidelity(m2, m1))
+    for n_atom in [1,3,1000]:
+        for n_int in [2,3,10,50]:
+            # Generate random density matrices
+            rhoA = generate_random_atoms(n_atom, n_int).density_matrix
+            rhoB = generate_random_atoms(n_atom, n_int).density_matrix
+            # Test that return is float
+            assert isinstance(ais.atoms._fidelity(rhoA, rhoB), float)
+            # Test symmetry F(rhoA,rhoB) == F(rhoB,rhoA)
+            np.testing.assert_almost_equal(ais.atoms._fidelity(rhoA, rhoB),
+                ais.atoms._fidelity(rhoB, rhoA))
+            # Test if F(rhoA, rhoB) is equal or less than 1
+            assert np.all(ais.atoms._fidelity(rhoA, rhoB) <= 1)
+            # Test if F(rhoA, rhoA) is equal to 1
+            np.testing.assert_array_almost_equal(ais.atoms._fidelity(rhoA, rhoA), 1)

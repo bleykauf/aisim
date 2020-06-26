@@ -412,5 +412,5 @@ def _fidelity(rhoA, rhoB):
     """
     assert rhoA.shape == rhoB.shape
     sqrt_rhoA = splin.sqrtm(rhoA)
-    sqrtF = np.trace(splin.sqrtm(sqrt_rhoA @ rhoB @ sqrt_rhoA))
-    return np.real(sqrtF)**2
+    eig_vals = np.linalg.eigvals(sqrt_rhoA @ rhoB @ sqrt_rhoA)
+    return np.real(np.sum(np.sqrt(eig_vals)))**2
