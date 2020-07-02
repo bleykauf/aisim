@@ -1,32 +1,39 @@
 """Classes and functions related to the detection system."""
 
 import numpy as np
+from . import convert
 
 
 class Detector():
     """
-    A spherical detection area.
+    A generic detection zone.
+
+    This is only a template without functionality. Deriving classes have to 
+    implement `_detected_idx`.
 
     Parameters
     ----------
-    r_det : float
-        radius of the detection area
     t_det : float
         time of the detection
+    **kwargs :
+        Additional arguments used by classes that inherit from this class. All
+        keyworded arguments are stored as attribues.
 
     Attributes
     ----------
-    r_det : float
-        radius of the detection area
     t_det : float
         time of the detection
+    ** kwargs :
+        all keyworded arguments that are passed upon creation
     """
 
-    def __init__(self, r_det, t_det):
-        self.r_det = r_det
+    def __init__(self, t_det, **kwargs):
         self.t_det = t_det
+        # save all keyworded arguments as attributes
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
-    def detected_idx(self, atoms):
+    def _detected_idx(self, atoms):
         """
         Return indices of the detected atoms.
 
@@ -44,12 +51,8 @@ class Detector():
         det_idx : nd array of bool
             boolean array for filtering an AtomicEnsemble; True if detected,
             otherwise False.
-
         """
-        det_pos = atoms.calc_position(self.t_det)
-        x, y, z = det_pos[:, 0], det_pos[:, 1], det_pos[:, 2]
-        rho = np.sqrt(x**2 + y**2 + z**2)
-        return np.where(rho <= self.r_det, True, False)
+        raise NotImplementedError()
 
     def detected_atoms(self, atoms):
         """
@@ -69,4 +72,59 @@ class Detector():
             atomic ensemble containing only phase space vectors that are
             eventually detected
         """
-        return atoms[self.detected_idx(atoms)]
+        return atoms[self._detected_idx(atoms)]
+
+
+class SphericalDetector(Detector):
+    """
+    A spherical detection zone.
+
+    All atoms within a sphere of the specified radius will be detected.
+
+    Parameters
+    ----------
+    t_det : float
+        time of the detection
+    r_det :
+        radius of the spherical detection zone
+
+    Attributes
+    ----------
+    t_det : float
+        time of the detection
+    ** kwargs :
+        all keyworded arguments that are passed upon creation
+    """
+
+    def _detected_idx(self, atoms):
+        det_pos = atoms.calc_position(self.t_det)
+        x, y, z = det_pos[:, 0], det_pos[:, 1], det_pos[:, 2]
+        rho = np.sqrt(x**2 + y**2 + z**2)
+        return np.where(rho <= self.r_det, True, False)
+
+
+class PolarDetector(Detector):
+    """
+    A spherical detection zone.
+
+    All atoms within a circle with the specified radius within the x-y plane
+    will be detected.
+
+    Parameters
+    ----------
+    t_det : float
+        time of the detection
+    r_det :
+        radius of the spherical detection zone
+
+    Attributes
+    ----------
+    t_det : float
+        time of the detection
+    ** kwargs :
+        all keyworded arguments that are passed upon creation
+    """
+
+    def _detected_idx(self, atoms):
+        rho = convert.cart2pol(atoms.calc_position(self.t_det))[:, 0]
+        return np.where(rho <= self.r_det, True, False)
