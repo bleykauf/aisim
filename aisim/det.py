@@ -8,7 +8,7 @@ class Detector():
     """
     A generic detection zone.
 
-    This is only a template without functionality. Deriving classes have to 
+    This is only a template without functionality. Deriving classes have to
     implement `_detected_idx`.
 
     Parameters
