@@ -201,8 +201,7 @@ class AtomicEnsemble():
 
     def fidelity(self, rho_target):
         """
-        Calculate the fidelity of the AtomicEnsemble's density matrix
-        and target density matrix [1].
+        Calculate fidelity of ensemble's density matrix and target matrix [1].
 
         Parameters
         ----------
@@ -212,8 +211,7 @@ class AtomicEnsemble():
         Returns
         -------
         fidelity : float
-            fidelity of AtomicEnsemble's compared to
-            target density matrix
+            fidelity of AtomicEnsemble's compared to target density matrix
 
         References
         ----------
@@ -391,14 +389,15 @@ def combine_weights(pos_weights, vel_weights):
     return np.array([p * v for p in pos_weights for v in vel_weights])
 
 
-def _fidelity(rhoA, rhoB):
+def _fidelity(rho_a, rho_b):
     """
-    Calculate the fidelity of two density matrices [1].
+    Calculate the fidelity of two density matrices [1, 2].
+
     Parameters
     ----------
-    rhoA : array
+    rho_a : array
         density matrix as m x m array
-    rhoB : array
+    rho_b : array
         density matrix as m x m array
 
     Returns
@@ -409,8 +408,13 @@ def _fidelity(rhoA, rhoB):
     References
     ----------
     [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
+    [2] http://qutip.org/docs/4.0.2/modules/qutip/metrics.html
     """
-    assert rhoA.shape == rhoB.shape
-    sqrt_rhoA = splin.sqrtm(rhoA)
-    eig_vals = np.linalg.eigvals(sqrt_rhoA @ rhoB @ sqrt_rhoA)
-    return np.real(np.sum(np.sqrt(eig_vals)))**2
+    assert rho_a.shape == rho_b.shape
+    sqrt_rho_a = splin.sqrtm(rho_a)  # matrix square root
+    # Implementation used in qutip"s fidelity calculation: calculating the
+    # eigenvalues and taking it's square root instead of matrix squar-rrot and
+    # taking the trace. It's faster.
+    eig_vals = np.linalg.eigvals(sqrt_rho_a @ rho_b @ sqrt_rho_a)
+    fidelity = np.real(np.sum(np.sqrt(eig_vals)))**2
+    return fidelity
