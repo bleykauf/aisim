@@ -18,6 +18,19 @@ def generate_random_atoms(n_atom, n_int):
     return random_atoms
 
 
+def test_slicing():
+    # Create "ensemble" with only one atom
+    single_atom = generate_random_atoms(n_atom=1, n_int=2)
+    assert len(single_atom) == 1
+    # test slicing of AtomicEnsemble
+    random_atoms = generate_random_atoms(n_atom=100, n_int=2)
+    sliced_atoms = random_atoms[0:5]
+    assert len(sliced_atoms) == 5
+    one_atom = random_atoms[0]
+    assert len(one_atom) == 1
+    random_atoms
+
+
 def test_atomic_ensemble_methods():
     # This tests the AtomicEnsemble class' methods for consistency. It creates
     # ensembles of atoms with random internal and external states.
