@@ -47,7 +47,7 @@ t3 = t2 + T
 awfs = []
 for r_det in r_dets:
     # creating detector with new detection radius
-    det = ais.Detector(r_det, t_det)
+    det = ais.PolarDetector(t_det, r_det=r_det)
 
     det_atoms = det.detected_atoms(atoms)
 
