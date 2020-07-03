@@ -1,6 +1,7 @@
 """Classes and functions related to the atomic cloud."""
 
 import numpy as np
+import scipy.linalg as splin
 from . import convert
 
 
@@ -198,6 +199,26 @@ class AtomicEnsemble():
         occupation = np.abs(np.matmul(projection_bras, self.state_kets))**2
         return occupation.flatten()
 
+    def fidelity(self, rho_target):
+        """
+        Calculate fidelity of ensemble's density matrix and target matrix [1].
+
+        Parameters
+        ----------
+        rho_target : array
+            target density matrix as m x m array
+
+        Returns
+        -------
+        fidelity : float
+            fidelity of AtomicEnsemble's compared to target density matrix
+
+        References
+        ----------
+        [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
+        """
+        return _fidelity(self.density_matrix, rho_target)
+
 
 def create_random_ensemble_from_gaussian_distribution(pos_params, vel_params,
                                                       n_samples, seed=None,
@@ -366,3 +387,34 @@ def combine_weights(pos_weights, vel_weights):
     """
     # FIXME: replace with faster version, for example based on meshgrid
     return np.array([p * v for p in pos_weights for v in vel_weights])
+
+
+def _fidelity(rho_a, rho_b):
+    """
+    Calculate the fidelity of two density matrices [1, 2].
+
+    Parameters
+    ----------
+    rho_a : array
+        density matrix as m x m array
+    rho_b : array
+        density matrix as m x m array
+
+    Returns
+    -------
+    fidelity : float
+        fidelity of both density matrices
+
+    References
+    ----------
+    [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
+    [2] http://qutip.org/docs/4.0.2/modules/qutip/metrics.html
+    """
+    assert rho_a.shape == rho_b.shape
+    sqrt_rho_a = splin.sqrtm(rho_a)  # matrix square root
+    # Implementation used in qutip"s fidelity calculation: calculating the
+    # eigenvalues and taking it's square root instead of matrix square root and
+    # taking the trace. It's faster.
+    eig_vals = np.linalg.eigvals(sqrt_rho_a @ rho_b @ sqrt_rho_a)
+    fidelity = np.real(np.sum(np.sqrt(eig_vals)))**2
+    return fidelity
