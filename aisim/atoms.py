@@ -413,7 +413,7 @@ def _fidelity(rho_a, rho_b):
     assert rho_a.shape == rho_b.shape
     sqrt_rho_a = splin.sqrtm(rho_a)  # matrix square root
     # Implementation used in qutip"s fidelity calculation: calculating the
-    # eigenvalues and taking it's square root instead of matrix squar-rrot and
+    # eigenvalues and taking it's square root instead of matrix square root and
     # taking the trace. It's faster.
     eig_vals = np.linalg.eigvals(sqrt_rho_a @ rho_b @ sqrt_rho_a)
     fidelity = np.real(np.sum(np.sqrt(eig_vals)))**2
