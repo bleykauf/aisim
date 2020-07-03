@@ -57,10 +57,18 @@ def test_atomic_ensemble_methods():
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000
-    n_ints = [2, 3, 5, 10, 20, 100]
+    n_ints = [1, 2, 3, 100]
     for n_int in n_ints:
         random_atoms = generate_random_atoms(n_atom, n_int)
         atomic_ensemble_test_function(random_atoms)
+
+        # test slicing/selecting
+        # selecting a single atom
+        one_atom = random_atoms[0]
+        assert len(one_atom) == 1
+        if len(random_atoms) > 5:
+            sliced_atoms = random_atoms[0:5]
+            assert len(sliced_atoms) == 5
 
     # Test AtomicEnsemble from
     # create_random_ensemble_from_gaussian_distribution method

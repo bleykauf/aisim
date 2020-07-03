@@ -77,10 +77,18 @@ class AtomicEnsemble():
             a new instance of the atomic ensemble only containing the selected
             atoms
         """
+        phase_space_vectors = self.phase_space_vectors[key][:]
+        state_kets = self.state_kets[key][:]
+        weights = self.weights[key]
+        if isinstance(key, int):
+            # ratain correct shape in case of only one atom is selected
+            phase_space_vectors = phase_space_vectors.reshape(1, 6)
+            state_kets = state_kets.reshape(1, len(state_kets))
+            weights = weights.reshape(1, 1)
         new_instance = AtomicEnsemble(
-            phase_space_vectors=self.phase_space_vectors[key][:],
-            state_kets=self.state_kets[key][:],
-            weights=self.weights[key])
+            phase_space_vectors=phase_space_vectors,
+            state_kets=state_kets,
+            weights=weights)
         return new_instance
 
     def __len__(self):
