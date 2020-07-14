@@ -3,6 +3,21 @@ import aisim as ais
 import numpy as np
 
 
+def generate_random_atoms(n_atom, n_int):
+    random_phase_space_vectors = np.random.rand(n_atom, 6)
+    random_kets = np.random.rand(n_atom, n_int)
+    # normalize random ket
+    norm = np.einsum('ij,ij->i', random_kets, random_kets)
+    norm_random_kets = np.einsum('ij,i->ij', random_kets, 1/norm**(1/2))
+    # apply random phase shifts
+    random_phases = 2*np.pi*np.random.rand(n_atom, n_int)
+    norm_random_kets = np.exp(1j*random_phases) * norm_random_kets
+    norm_random_kets = np.reshape(norm_random_kets, (n_atom, n_int, 1))
+    random_atoms = ais.AtomicEnsemble(
+        random_phase_space_vectors, norm_random_kets)
+    return random_atoms
+
+
 def test_atomic_ensemble_methods():
     # This tests the AtomicEnsemble class' methods for consistency. It creates
     # ensembles of atoms with random internal and external states.
@@ -36,23 +51,24 @@ def test_atomic_ensemble_methods():
         for m in m_levels:
             state_occupation += atoms.state_occupation(m)
         np.testing.assert_almost_equal(state_occupation, 1)
+        # Test properties of the fidelity function
+        # fidelity of density matrix with itself is 1
+        np.testing.assert_almost_equal(1, atoms.fidelity(atoms.density_matrix))
 
     # Test AtomicEnsemble from very general randomly generated states
     n_atom = 1000
-    n_ints = [2, 3, 5, 10, 20, 100]
+    n_ints = [1, 2, 3, 100]
     for n_int in n_ints:
-        random_phase_space_vectors = np.random.rand(n_atom, 6)
-        random_kets = np.random.rand(n_atom, n_int)
-        # normalize random ket
-        norm = np.einsum('ij,ij->i', random_kets, random_kets)
-        norm_random_kets = np.einsum('ij,i->ij', random_kets, 1/norm**(1/2))
-        # apply random phase shifts
-        random_phases = 2*np.pi*np.random.rand(n_atom, n_int)
-        norm_random_kets = np.exp(1j*random_phases) * norm_random_kets
-        norm_random_kets = np.reshape(norm_random_kets, (n_atom, n_int, 1))
-        random_atoms = ais.AtomicEnsemble(
-            random_phase_space_vectors, norm_random_kets)
+        random_atoms = generate_random_atoms(n_atom, n_int)
         atomic_ensemble_test_function(random_atoms)
+
+        # test slicing/selecting
+        # selecting a single atom
+        one_atom = random_atoms[0]
+        assert len(one_atom) == 1
+        if len(random_atoms) > 5:
+            sliced_atoms = random_atoms[0:5]
+            assert len(sliced_atoms) == 5
 
     # Test AtomicEnsemble from
     # create_random_ensemble_from_gaussian_distribution method
@@ -73,7 +89,7 @@ def test_atomic_ensemble_methods():
         'std_vz': ais.convert.vel_from_temp(0.2e-6),
     }
     atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_atom, state_kets=norm_random_kets)
+        pos_params, vel_params, n_atom, state_kets=random_atoms.state_kets)
     atomic_ensemble_test_function(atoms)
 
 
@@ -84,3 +100,21 @@ def test_make_grid():
     assert atomic_ensemble[:, 2].min() == -3.0
     assert atomic_ensemble[:, 2].max() == 3.0
     np.testing.assert_almost_equal(atomic_ensemble[:, 2].mean(), 0.0)
+
+
+def test_fidelity():
+    for n_atom in [1, 3, 1000]:
+        for n_int in [2, 3, 10, 50]:
+            # Generate random density matrices
+            rho_a = generate_random_atoms(n_atom, n_int).density_matrix
+            rho_b = generate_random_atoms(n_atom, n_int).density_matrix
+            # Test that return is float
+            assert isinstance(ais.atoms._fidelity(rho_a, rho_b), float)
+            # Test symmetry F(rhoA,rhoB) == F(rhoB,rhoA)
+            np.testing.assert_almost_equal(ais.atoms._fidelity(rho_a, rho_b),
+                                           ais.atoms._fidelity(rho_b, rho_a))
+            # Test if F(rhoA, rhoB) is equal or less than 1
+            assert np.all(ais.atoms._fidelity(rho_a, rho_b) <= 1)
+            # Test if F(rhoA, rhoA) is equal to 1
+            np.testing.assert_array_almost_equal(
+                ais.atoms._fidelity(rho_a, rho_a), 1)
