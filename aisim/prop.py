@@ -224,9 +224,21 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         return matrix.reshape((n, m * num, m * num))
 
     def _index_shift(self):
+        """
+        Switch state indices to ensure that the correct states interact.
+
+        Returns
+        -------
+        index_shift_matrix : 2*n_pulses × 2*n_pulses array
+        """
+        # Each pulse splits the initial state into two states (2 level system),
+        # so we end up with 2*n_pulses output states
         index_shift_matrix = np.eye(2*self.n_pulses)
         for i in range(0, len(index_shift_matrix)):
             if i % 2 == 0:
+                # shift the index of one of the two interacting states;
+                # applying this matrix n_pulses times results again in a unity
+                # matrx
                 index_shift_matrix[i, :] = np.roll(index_shift_matrix[i, :], 2)
         return index_shift_matrix
 
@@ -237,6 +249,11 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
 
         u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
+        # Create two index shift matrices. First, positions of the state
+        # vectors are switched such that the two interacting states are next
+        # to each other and are coupled by the blocks of _block_diag. After the
+        # application of the propagation matrix, these states are put back into
+        # their initial position.
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
         shift_back = np.linalg.matrix_power(self._index_shift(),
                                             self.n_pulses-self.n_pulse)
