@@ -76,50 +76,58 @@ def test_two_level_transition_propagator():
 
 
 def test_spatial_superposition_transition_propagator():
+
+    # define helper function
+    def spatial_superposition_transition_prop_tester(n_pulses, pi_half_time):
+
+        # create initial state ket [1,0,0,...,0] with length 2*n_pulses
+        n_pulses = 3
+        init_state = [1]
+        for i in range(1, 2*n_pulses):
+            init_state.append(0)
+
+        atoms = create_random_thermal_atoms(100, state_kets=init_state)
+        atoms0 = atoms
+        # create Raman beam
+        r_beam = 29.5e-3 / 2  # 1/e^2 beam radius in m
+        wave_vectors = ais.Wavevectors(k1=8.052945514e6, k2=-8.052802263e6)
+        center_rabi_freq = 2*np.pi / 4 / pi_half_time
+        intensity_profile = ais.IntensityProfile(r_beam, center_rabi_freq)
+
+        for n_pulse in range(0, n_pulses):
+            propagator = ais.SpatialSuperpositionTransitionPropagator(
+                pi_half_time, intensity_profile, n_pulses, n_pulse+1,
+                wave_vectors)
+            atoms = propagator.propagate(atoms)
+            # check if trace is one for atomic ensembles density matrix
+            np.testing.assert_array_almost_equal(
+                np.trace(atoms.density_matrix), 1)
+            # check if rho^2 = rho for pure states
+            np.testing.assert_array_almost_equal(
+                np.matmul(atoms.density_matrices, atoms.density_matrices),
+                atoms.density_matrices)
+
+        # check for time-reversibility (unitarity)
+        for n_pulse in range(0, n_pulses):
+            # change counting direction to descending, e.g. 3, 2, ...
+            n_pulse = n_pulses - n_pulse
+            propagator = ais.SpatialSuperpositionTransitionPropagator(
+                -pi_half_time, intensity_profile, n_pulses, n_pulse,
+                wave_vectors)
+            atoms = propagator.propagate(atoms)
+            # check if trace is one for atomic ensembles density matrix
+            np.testing.assert_array_almost_equal(
+                np.trace(atoms.density_matrix), 1)
+            # check if rho^2 = rho for pure states
+            np.testing.assert_array_almost_equal(
+                np.matmul(atoms.density_matrices, atoms.density_matrices),
+                atoms.density_matrices)
+
+        # check if final state is initial state
+        np.testing.assert_array_almost_equal(
+            atoms0.density_matrices, atoms.density_matrices)
+
+    # test for different number of pulses
+    pi_half_time = 13.5e-15  # time of a pi/2 pulse
     for n_pulses in [1, 3, 10]:
-        SpatialSuperpositionTransitionPropagator_tester(n_pulses)
-
-
-def SpatialSuperpositionTransitionPropagator_tester(n_pulses):
-    # create initial state ket [1,0,0,...,0] with length 2*n_pulses
-    n_pulses = 3
-    init_state = [1]
-    for i in range(1, 2*n_pulses):
-        init_state.append(0)
-
-    atoms = create_random_thermal_atoms(100, state_kets=init_state)
-    atoms0 = atoms
-    # create Raman beam
-    r_beam = 29.5e-3 / 2  # 1/e^2 beam radius in m
-    wave_vectors = ais.Wavevectors(k1=8.052945514e6, k2=-8.052802263e6)
-    center_Rabi_freq = 2*np.pi/4/13.5e-15
-    intensity_profile = ais.IntensityProfile(r_beam, center_Rabi_freq)
-
-    for n_pulse in range(0, n_pulses):
-        propagator = ais.SpatialSuperpositionTransitionPropagator(
-            13.5e-15, intensity_profile, n_pulses, n_pulse+1, wave_vectors)
-        atoms = propagator.propagate(atoms)
-        # check if trace is one for atomic ensembles density matrix
-        np.testing.assert_array_almost_equal(np.trace(atoms.density_matrix), 1)
-        # check if rho^2 = rho for pure states
-        np.testing.assert_array_almost_equal(
-            np.matmul(atoms.density_matrices, atoms.density_matrices),
-            atoms.density_matrices)
-
-    # check for time-reversibility (unitarity)
-    for n_pulse in range(0, n_pulses):
-        # change counting direction to descending, e.g. 3, 2, ...
-        n_pulse = n_pulses - n_pulse
-        propagator = ais.SpatialSuperpositionTransitionPropagator(
-            -13.5e-15, intensity_profile, n_pulses, n_pulse, wave_vectors)
-        atoms = propagator.propagate(atoms)
-        # check if trace is one for atomic ensembles density matrix
-        np.testing.assert_array_almost_equal(np.trace(atoms.density_matrix), 1)
-        # check if rho^2 = rho for pure states
-        np.testing.assert_array_almost_equal(
-            np.matmul(atoms.density_matrices, atoms.density_matrices),
-            atoms.density_matrices)
-
-    # check if final state is initial state
-    np.testing.assert_array_almost_equal(
-        atoms0.density_matrices, atoms.density_matrices)
+        spatial_superposition_transition_prop_tester(n_pulses, pi_half_time)
