@@ -22,7 +22,6 @@ class Propagator():
 
     def __init__(self, time_delta, **kwargs):
 
-        # FIXME: find a better name
         self.time_delta = time_delta
 
         # save all keyworded arguments as attributes
