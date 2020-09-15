@@ -42,11 +42,15 @@ class Propagator():
             atomic ensemble that should be is propagated
         """
         atoms = copy.deepcopy(atoms)
-        atoms.time += self.time_delta
-        atoms.position += atoms.velocity * self.time_delta
+        # propagate for half a time step
+        atoms.time += self.time_delta / 2
+        atoms.position += atoms.velocity * self.time_delta / 2
         # U*|Psi>
         atoms.state_kets = np.einsum(
             'ijk,ikl ->ijl', self._prop_matrix(atoms), atoms.state_kets)
+        # propagate for another half time step
+        atoms.time += self.time_delta / 2
+        atoms.position += atoms.velocity * self.time_delta / 2
         return atoms
 
 
