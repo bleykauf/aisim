@@ -43,6 +43,7 @@ notebooks](https://jupyter.org/):
     interferometry](https://github.com/bleykauf/aisim/blob/master/docs/examples/wavefront-aberrations.ipynb)
 -   [Rabi oscillations with a Gaussian beam and thermal
     atoms](https://github.com/bleykauf/aisim/blob/master/docs/examples/rabi-oscillations.ipynb)
+-   [Multiport atom interferometer](https://github.com/bleykauf/aisim/blob/master/docs/examples/multiport-ais.ipynb)
 
 Contributing
 ------------
