@@ -81,7 +81,6 @@ def test_spatial_superposition_transition_propagator():
     def spatial_superposition_transition_prop_tester(n_pulses, pi_half_time):
 
         # create initial state ket [1,0,0,...,0] with length 2*n_pulses
-        n_pulses = 3
         init_state = [1]
         for i in range(1, 2*n_pulses):
             init_state.append(0)
