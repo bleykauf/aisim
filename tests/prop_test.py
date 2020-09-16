@@ -128,6 +128,6 @@ def test_spatial_superposition_transition_propagator():
             atoms0.density_matrices, atoms.density_matrices)
 
     # test for different number of pulses
-    pi_half_time = 13.5e-15  # time of a pi/2 pulse
+    pi_half_time = 13.5e-6  # time of a pi/2 pulse
     for n_pulses in [1, 3, 10]:
         spatial_superposition_transition_prop_tester(n_pulses, pi_half_time)
