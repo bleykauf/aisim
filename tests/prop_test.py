@@ -76,31 +76,38 @@ def test_two_level_transition_propagator_unitarity():
 
 
 def test_spatial_superposition_transition_propagator_unitarity():
-    # create initial state ket [1,0,0,...,0] with length 2*n_pulses
 
-    n_pulses = 3
-    init_state = [1]
-    for i in range(1, 2*n_pulses):
-        init_state.append(0)
-        atoms = create_random_thermal_atoms(100, state_kets=init_state)
+    # define helper function
+    def prop_unitarity_tester(n_pulses, pi_half_time):
 
-    intensity_profile = ais.IntensityProfile(1, 1)
-    wf = ais.gen_wavefront(10)
-    wave_vectors = ais.Wavevectors()
+        # create initial state ket [1,0,0,...,0] with length 2*n_pulses
+        init_state = [1]
+        for i in range(1, 2*n_pulses):
+            init_state.append(0)
+            atoms = create_random_thermal_atoms(100, state_kets=init_state)
 
-    for n_pulse in range(n_pulses):
-        prop = ais.SpatialSuperpositionTransitionPropagator(
-            1, intensity_profile, n_pulses, n_pulse+1, wave_vectors, wf=wf)
-        matrices = prop._prop_matrix(atoms)
-        for matrix in matrices:
-            np.testing.assert_almost_equal(
-                np.matmul(matrix, np.conjugate(matrix.T)), np.eye(2*n_pulses))
+        intensity_profile = ais.IntensityProfile(1, 1)
+        wf = ais.gen_wavefront(10)
+        wave_vectors = ais.Wavevectors()
+
+        for n_pulse in range(n_pulses):
+            prop = ais.SpatialSuperpositionTransitionPropagator(
+                1, intensity_profile, n_pulses, n_pulse+1, wave_vectors, wf=wf)
+            matrices = prop._prop_matrix(atoms)
+            for matrix in matrices:
+                multiplied = np.matmul(matrix, np.conjugate(matrix.T))
+                np.testing.assert_almost_equal(multiplied, np.eye(2*n_pulses))
+    # test for different number of pulses and propagation times
+    for pi_half_time in [1e-15, 13.5e-6, 1]:  # time of a pi/2 pulse
+        for n_pulses in [1, 3, 10]:
+            prop_unitarity_tester(
+                n_pulses, pi_half_time)
 
 
 def test_spatial_superposition_transition_propagator_time_reversal():
 
     # define helper function
-    def spatial_superposition_transition_prop_tester(n_pulses, pi_half_time):
+    def prop_time_reversal_tester(n_pulses, pi_half_time):
 
         # create initial state ket [1,0,0,...,0] with length 2*n_pulses
         init_state = [1]
@@ -148,7 +155,8 @@ def test_spatial_superposition_transition_propagator_time_reversal():
         np.testing.assert_array_almost_equal(
             atoms0.density_matrices, atoms.density_matrices)
 
-    # test for different number of pulses
-    pi_half_time = 13.5e-6  # time of a pi/2 pulse
-    for n_pulses in [1, 3, 10]:
-        spatial_superposition_transition_prop_tester(n_pulses, pi_half_time)
+    # test for different number of pulses and propagation times
+    for pi_half_time in [1e-15, 13.5e-6, 1]:  # time of a pi/2 pulse
+        for n_pulses in [1, 3, 10]:
+            prop_time_reversal_tester(
+                n_pulses, pi_half_time)
