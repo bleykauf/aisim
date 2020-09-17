@@ -35,7 +35,7 @@ def test_propagator():
         prop._prop_matrix(atoms)
 
 
-def test_free_propagation():
+def test_free_propagator():
     free_prop1 = ais.FreePropagator(time_delta=1)
     free_prop2 = ais.FreePropagator(time_delta=-1)
 
@@ -52,7 +52,7 @@ def test_free_propagation():
     np.testing.assert_array_almost_equal(prop_atoms2.position, atoms.position)
 
 
-def test_two_level_transition_propagator():
+def test_two_level_transition_propagator_unitarity():
 
     atoms = create_random_thermal_atoms(100)
 
@@ -75,7 +75,29 @@ def test_two_level_transition_propagator():
                 np.matmul(matrix, np.conjugate(matrix.T)), np.eye(2))
 
 
-def test_spatial_superposition_transition_propagator():
+def test_spatial_superposition_transition_propagator_unitarity():
+    # create initial state ket [1,0,0,...,0] with length 2*n_pulses
+
+    n_pulses = 3
+    init_state = [1]
+    for i in range(1, 2*n_pulses):
+        init_state.append(0)
+        atoms = create_random_thermal_atoms(100, state_kets=init_state)
+
+    intensity_profile = ais.IntensityProfile(1, 1)
+    wf = ais.gen_wavefront(10)
+    wave_vectors = ais.Wavevectors()
+
+    for n_pulse in range(n_pulses):
+        prop = ais.SpatialSuperpositionTransitionPropagator(
+            1, intensity_profile, n_pulses, n_pulse+1, wave_vectors, wf=wf)
+        matrices = prop._prop_matrix(atoms)
+        for matrix in matrices:
+            np.testing.assert_almost_equal(
+                np.matmul(matrix, np.conjugate(matrix.T)), np.eye(2*n_pulses))
+
+
+def test_spatial_superposition_transition_propagator_time_reversal():
 
     # define helper function
     def spatial_superposition_transition_prop_tester(n_pulses, pi_half_time):
