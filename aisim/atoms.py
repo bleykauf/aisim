@@ -1,8 +1,8 @@
 """Classes and functions related to the atomic cloud."""
 
+from . import convert
 import numpy as np
 import scipy.linalg as splin
-from . import convert
 
 
 class AtomicEnsemble():
@@ -47,8 +47,7 @@ class AtomicEnsemble():
 
     """
 
-    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0,
-                 weights=None):
+    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0, weights=None):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
         self.state_kets = state_kets
