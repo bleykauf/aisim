@@ -1,2 +1,3 @@
 numpy
 nbsphinx
+pygments>=2.4
