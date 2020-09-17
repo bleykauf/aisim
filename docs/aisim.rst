@@ -52,11 +52,3 @@ aisim.prop module
    :undoc-members:
    :show-inheritance:
 
-aisim.sims module
------------------
-
-.. automodule:: aisim.sims
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
