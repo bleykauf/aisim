@@ -104,3 +104,4 @@ The notebooks containing the following exampels can also be found
 
 -  `Effect of wavefront aberrations in atom interferometry <examples/wavefront-aberrations.ipynb>`__
 -  `Rabi oscillations with a Gaussian beam and thermal atoms <examples/rabi-oscillations.ipynb>`__
+-  `Multiport atom interferometer <examples/multiport-ai.ipynb>`__
