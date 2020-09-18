@@ -59,8 +59,9 @@ Authors
 License
 -------
 
-AISim -- Simulations for light-pulse atom interferometry
-Copyright (C) 2020 B. Leykauf, S. Vowe
+AISim ‒ Simulations for light-pulse atom interferometry
+
+Copyright © 2020 B. Leykauf, S. Vowe
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
