@@ -17,9 +17,13 @@ simulate internal and external degrees of freedom of cold atoms.
 Installation
 ------------
 
-The latest tagged release can installed via pip:
+The latest tagged release can installed via pip with
 
     pip install aisim
+
+or via conda with
+
+    conda install -c conda-forge aisim 
 
 Alternatively, if you plan to make changes to the code, use
 
