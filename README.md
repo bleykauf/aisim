@@ -1,5 +1,5 @@
-[![PyPI version](https://badge.fury.io/py/aisim.svg)](https://badge.fury.io/py/aisim)
-[![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
+![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)
+![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)[![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/bleykauf/aisim/badge.svg?branch=master)](https://coveralls.io/github/bleykauf/aisim?branch=master)
 
@@ -17,9 +17,13 @@ simulate internal and external degrees of freedom of cold atoms.
 Installation
 ------------
 
-The latest tagged release can installed via pip:
+The latest tagged release can installed via pip with
 
     pip install aisim
+
+or via conda with
+
+    conda install -c conda-forge aisim 
 
 Alternatively, if you plan to make changes to the code, use
 
@@ -59,5 +63,12 @@ Authors
 License
 -------
 
-AISim is licensed under [GPL
-3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
+AISim ‒ Simulations for light-pulse atom interferometry
+
+Copyright © 2020 B. Leykauf, S. Vowe
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
