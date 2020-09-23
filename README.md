@@ -1,5 +1,6 @@
-![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)
-![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)[![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
+[![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
+[![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)](https://anaconda.org/conda-forge/aisim)
+[![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/bleykauf/aisim/badge.svg?branch=master)](https://coveralls.io/github/bleykauf/aisim?branch=master)
 
