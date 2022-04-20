@@ -1,7 +1,8 @@
 """Classes and functions related to the interferometry lasers."""
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from . import convert
 
 
@@ -12,15 +13,13 @@ class Wavevectors:
     Parameters
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams  in
-        rad/m, defaults to
-        2*pi/780e-9
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams  in rad/m,
+        defaults to 2*pi/780e-9
 
     Attributes
     ----------
     k1, k2 : float
-        1D wave vectors (wavenumber) in z-direction of the two Raman beams in
-        rad/m
+        1D wave vectors (wavenumber) in z-direction of the two Raman beams in rad/m
     """
 
     def __init__(self, k1=8055366, k2=-8055366):
@@ -144,8 +143,8 @@ class Wavefront:
         Parameters
         ----------
         ax : Axis , optional
-            If axis is provided, they will be used for the plot. if not
-            provided, a new plot will automatically be created.
+            If axis is provided, they will be used for the plot. if not provided, a new
+            plot will automatically be created.
 
         """
         azimuths = np.radians(np.linspace(0, 360, 180))
@@ -172,8 +171,8 @@ class Wavefront:
         Parameters
         ----------
         ax : Axis , optional
-            If axis is provided, they will be used for the plot. if not
-            provided, a new plot will automatically be created.
+            If axis is provided, they will be used for the plot. if not provided, a new
+            plot will automatically be created.
         """
         if ax is None:
             fig, ax = plt.subplots()
@@ -195,8 +194,8 @@ class Wavefront:
         Parameters
         ----------
         rho, theta : float or array of float
-            Polar coordinates of the position where the sum of Zernike
-            polynomials should be calculated.
+            Polar coordinates of the position where the sum of Zernike polynomials
+            should be calculated.
         coeff : array
             first 36 Zernike coefficients
         r_beam : float
@@ -288,8 +287,8 @@ def gen_wavefront(r_beam, std=0):
     r_beam : float
         beam radius
     std : float
-        standard deviation of each Zernike polynomial coefficient in multiples
-        of the wavelength.
+        standard deviation of each Zernike polynomial coefficient in multiples of the
+        wavelength.
 
     Returns
     -------

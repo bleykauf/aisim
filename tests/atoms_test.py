@@ -1,6 +1,6 @@
-import pytest  # noqa
 import aisim as ais
 import numpy as np
+import pytest  # noqa
 
 
 def generate_random_atoms(n_atom, n_int):
@@ -18,8 +18,8 @@ def generate_random_atoms(n_atom, n_int):
 
 
 def test_atomic_ensemble_methods():
-    # This tests the AtomicEnsemble class' methods for consistency. It creates
-    # ensembles of atoms with random internal and external states.
+    # This tests the AtomicEnsemble class' methods for consistency. It creates ensembles
+    # of atoms with random internal and external states.
     # Methods of AtomicEnsemble that are tested:
     #     state_kets, state_bras, density_matrices, density_matrix
     def atomic_ensemble_test_function(atoms):
@@ -39,8 +39,8 @@ def test_atomic_ensemble_methods():
         np.testing.assert_almost_equal(
             np.trace(atoms.density_matrices, axis1=1, axis2=2), 1
         )
-        # Test whether every single atoms density matrix satisfiesrho^2 = rho
-        # (condition for pure states)
+        # Test whether every single atoms density matrix satisfiesrho^2 = rho (condition
+        # for pure states)
         np.testing.assert_array_almost_equal(
             np.matmul(atoms.density_matrices, atoms.density_matrices),
             atoms.density_matrices,

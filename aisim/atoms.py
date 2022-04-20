@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy.linalg as splin
+
 from . import convert
 
 
@@ -9,10 +10,10 @@ class AtomicEnsemble:
     """
     Represents an atomic ensemble consisting of n atoms.
 
-    Each atom is is defined by its phase space vector (x0, y0, z0, vx, vy, vz)
-    at time t=0. From this phase space vector the position at later times can
-    be calculated. Optionally, weights can be added for each atom in the
-    ensemble. Slicing along the axis of the n atoms is supported.
+    Each atom is is defined by its phase space vector (x0, y0, z0, vx, vy, vz)  at time
+    t=0. From this phase space vector the position at later times can be calculated.
+    Optionally, weights can be added for each atom in the ensemble. Slicing along the
+    axis of the n atoms is supported.
 
     Parameters
     ----------
@@ -20,13 +21,12 @@ class AtomicEnsemble:
         n × 6 dimensional array representing the phase space vectors
         (x0, y0, z0, vx, vy, vz) of the atoms in an atomic ensemble
     state_kets : m × 1 or n × m x 1 array or list, optional
-        vector(s) representing the `m` internal degrees of freedom of the
-         atoms. If the list or array is one-dimensional, all atoms are
-         initialized in the same internal state. Alternatively, each atom can
-         be initialized with a different state vector by passing an array of
-         state vectors for every atom. E.g. to initialize all atoms in the
-         ground state of a two-level system, pass `[1, 0]` which is the
-         default.
+        vector(s) representing the `m` internal degrees of freedom of the atoms. If the
+        list or array is one-dimensional, all atoms are initialized in the same internal
+        state. Alternatively, each atom can be initialized with a different state vector
+        by passing an array of state vectors for every atom. E.g. to initialize all
+        atoms in the ground state of a two-level system, pass `[1, 0]` which is the
+        default.
     time : float, optional
         the initial time (default 0) when the phase space and state vectors are
         initialized
@@ -73,8 +73,7 @@ class AtomicEnsemble:
         Returns
         -------
         new_instance : AtomicEnsemble
-            a new instance of the atomic ensemble only containing the selected
-            atoms
+            a new instance of the atomic ensemble only containing the selected atoms
         """
         phase_space_vectors = self.phase_space_vectors[key][:]
         state_kets = self.state_kets[key][:]
@@ -182,9 +181,8 @@ class AtomicEnsemble:
         Parameters
         ----------
         state : int or list_like
-            Specifies which state population should be calculated. E.g. the
-            excited state of a two-level system can be calculated by passing
-            either 1 or [0, 1].
+            Specifies which state population should be calculated. E.g. the excited
+            state of a two-level system can be calculated by passing either 1 or [0, 1].
 
         Returns
         -------
@@ -237,16 +235,15 @@ def create_random_ensemble_from_gaussian_distribution(
     Parameters
     ----------
     pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and
-        velocity distributions of the atomic ensemble.
-        Entries for position space are 'mean_x','std_x' ,'mean_y', 'std_y',
-        'mean_z', 'std_z'. Entries for velocity space are 'mean_vx','std_vx',
-        'mean_vy', 'std_vy','mean_vz', 'std_vz'.
+        Dictionary containing the parameters determining the position and velocity
+        distributions of the atomic ensemble. Entries for position space are
+        'mean_x','std_x' ,'mean_y', 'std_y', 'mean_z', 'std_z'. Entries for velocity
+        space are 'mean_vx','std_vx', 'mean_vy', 'std_vy','mean_vz', 'std_vz'.
     n_samples : float
         number of random samples
     seed : int or 1-d array_like, optional
-        Set the seed of the random number generator to get predictable samples.
-        If set, this number is passed to `numpy.random.seed`.
+        Set the seed of the random number generator to get predictable samples. If set,
+        this number is passed to `numpy.random.seed`.
     **kwargs :
         Optional keyworded arguments passed to `AtomicEnsemble`
 
@@ -286,28 +283,25 @@ def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
     """
     Create an atomic ensemble from evenly spaced position and velocity grids.
 
-    The resulting position and velocity grids are evenly spaced on polar
-    coordinates.
+    The resulting position and velocity grids are evenly spaced on polar coordinates.
 
     Parameters
     ----------
     pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and
-        velocity distributions of the atomic ensemble. They each have to
-        contain the arguments described in the docstring of `make_grid`, i.e.
-        `std_rho`, `std_z` (required), `n_rho`, `n_theta`, `n_z`, `m_std_rho`,
-        `m_std_z`, `weight`, optional.
+        Dictionary containing the parameters determining the position and velocity
+        distributions of the atomic ensemble. They each have to contain the arguments
+        described in the docstring of `make_grid`, i.e. `std_rho`, `std_z` (required),
+        `n_rho`, `n_theta`, `n_z`, `m_std_rho`, `m_std_z`, `weight`, optional.
     **kwargs :
         Optional keyworded arguments passed to `AtomicEnsemble`
 
     Returns
     -------
     ensemble : AtomicEnsemble
-        Atomic ensemble contains all possible combinations of the position and
-        velocity grid as phase space vectors. They vectors are weighted
-        according to the combined (multiplied) weights of the respective
-        position and velocity distributions ccording to the `weight` arguments
-        in `pos_params` and `vel_params`
+        Atomic ensemble contains all possible combinations of the position and velocity
+        grid as phase space vectors. They vectors are weighted according to the combined
+        (multiplied) weights of the respective position and velocity distributions
+        according to the `weight` arguments in `pos_params` and `vel_params`
     """
     pos_grid, pos_weights = make_grid(**pos_params)
     vel_grid, vel_weights = make_grid(**vel_params)
@@ -321,25 +315,24 @@ def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=
     """
     Evenly spaced grid of positions (or velocities) and weights.
 
-    Each of these positions (or velocities) are evenly spaced in polar
-    coordinates and weighted according to a gaussian distribution.
+    Each of these positions (or velocities) are evenly spaced in polar coordinates and
+    weighted according to a gaussian distribution.
 
     Parameters
     ----------
     std_rho, std_sigma : float
         1/e radius of the position or velocity distribution.
     n_rho, n_theta, n_z : int
-        number of grid points per standard deviation along rho and z direction
-        and total number of
-        points along theta, respectively
+        number of grid points per standard deviation along rho and z direction and
+        total number of points along theta, respectively
     m_std_rho, m_std_z : int
         number of standard deviations for the rho and z distribution
 
     Returns
     -------
     grid : n × 3 array
-        Grid of n vectors in carthesian coordinates  (x, y, z). In polar
-        coordinates, the grid has this form:
+        Grid of n vectors in carthesian coordinates  (x, y, z). In polar coordinates,
+        the grid has this form:
         [[dRho, 0, -m_std_z*sigma_z/2]
         [dRho, dTheta, ...]
         [dRho   , 2*dTheta, ...]

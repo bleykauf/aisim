@@ -111,8 +111,8 @@ def phase_to_grav(phase, T, keff):
     """
     Convert a phase shift to gravitational acceleration.
 
-    Takes the phase shift measured in a Mach Zehnder atom interferometer and
-    converts it to the corresponding gravtional accleration.
+    Takes the phase shift measured in a Mach Zehnder atom interferometer and converts it
+    to the corresponding gravtional accleration.
 
     Parameters
     ----------
