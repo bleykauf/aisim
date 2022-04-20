@@ -4,7 +4,7 @@ import numpy as np
 from . import convert
 
 
-class Detector():
+class Detector:
     """
     A generic detection zone.
 

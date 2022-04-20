@@ -4,7 +4,7 @@ import numpy as np
 import copy
 
 
-class Propagator():
+class Propagator:
     """
     A generic propagator.
 
@@ -45,7 +45,8 @@ class Propagator():
         atoms.position += atoms.velocity * self.time_delta / 2
         # U*|Psi>
         atoms.state_kets = np.einsum(
-            'ijk,ikl ->ijl', self._prop_matrix(atoms), atoms.state_kets)
+            "ijk,ikl ->ijl", self._prop_matrix(atoms), atoms.state_kets
+        )
         # propagate for another half time step
         atoms.position += atoms.velocity * self.time_delta / 2
         # update internal time
@@ -97,11 +98,16 @@ class TwoLevelTransitionPropagator(Propagator):
     https://doi.org/10.1016/B978-012092460-8/50010-2
     """
 
-    def __init__(self, time_delta, intensity_profile, wave_vectors=None,
-                 wf=None, phase_scan=0):
-        super().__init__(time_delta, intensity_profile=intensity_profile,
-                         wave_vectors=wave_vectors, wf=wf,
-                         phase_scan=phase_scan)
+    def __init__(
+        self, time_delta, intensity_profile, wave_vectors=None, wf=None, phase_scan=0
+    ):
+        super().__init__(
+            time_delta,
+            intensity_profile=intensity_profile,
+            wave_vectors=wave_vectors,
+            wf=wf,
+            phase_scan=phase_scan,
+        )
 
     def _prop_matrix(self, atoms):
         # calculate the effective Rabi frequency at atoms' positions
@@ -128,26 +134,32 @@ class TwoLevelTransitionPropagator(Propagator):
 
         # calculate matrix elements
 
-        sin_theta = Omega_eff/Omega_R
-        cos_theta = -delta/Omega_R
+        sin_theta = Omega_eff / Omega_R
+        cos_theta = -delta / Omega_R
 
-        u_ee = np.cos(Omega_R * tau / 2) - 1j * \
-            cos_theta * np.sin(Omega_R * tau / 2)
-        u_ee *= np.exp(-1j * delta * tau/2)
+        u_ee = np.cos(Omega_R * tau / 2) - 1j * cos_theta * np.sin(Omega_R * tau / 2)
+        u_ee *= np.exp(-1j * delta * tau / 2)
 
-        u_eg = np.exp(-1j * (delta*t0 + phase)) * -1j * \
-            sin_theta * np.sin(Omega_R * tau / 2)
-        u_eg *= np.exp(-1j * delta * tau/2)
+        u_eg = (
+            np.exp(-1j * (delta * t0 + phase))
+            * -1j
+            * sin_theta
+            * np.sin(Omega_R * tau / 2)
+        )
+        u_eg *= np.exp(-1j * delta * tau / 2)
 
-        u_ge = np.exp(+1j * (delta*t0 + phase)) * -1j * \
-            sin_theta * np.sin(Omega_R * tau / 2)
-        u_ge *= np.exp(1j * delta * tau/2)
+        u_ge = (
+            np.exp(+1j * (delta * t0 + phase))
+            * -1j
+            * sin_theta
+            * np.sin(Omega_R * tau / 2)
+        )
+        u_ge *= np.exp(1j * delta * tau / 2)
 
-        u_gg = np.cos(Omega_R * tau / 2) + 1j * \
-            cos_theta * np.sin(Omega_R * tau / 2)
-        u_gg *= np.exp(1j * delta * tau/2)
+        u_gg = np.cos(Omega_R * tau / 2) + 1j * cos_theta * np.sin(Omega_R * tau / 2)
+        u_gg *= np.exp(1j * delta * tau / 2)
 
-        u = np.array([[u_ee, u_eg], [u_ge, u_gg]], dtype='complex')
+        u = np.array([[u_ee, u_eg], [u_ge, u_gg]], dtype="complex")
         u = np.transpose(u, (2, 0, 1))
         return u
 
@@ -186,14 +198,26 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
     https://doi.org/10.1016/B978-012092460-8/50010-2
     """
 
-    def __init__(self, time_delta, intensity_profile, n_pulses, n_pulse,
-                 wave_vectors=None, wf=None, phase_scan=0):
+    def __init__(
+        self,
+        time_delta,
+        intensity_profile,
+        n_pulses,
+        n_pulse,
+        wave_vectors=None,
+        wf=None,
+        phase_scan=0,
+    ):
 
         self.n_pulses = n_pulses
         self.n_pulse = n_pulse
-        super().__init__(time_delta, intensity_profile=intensity_profile,
-                         wave_vectors=wave_vectors, wf=wf,
-                         phase_scan=phase_scan)
+        super().__init__(
+            time_delta,
+            intensity_profile=intensity_profile,
+            wave_vectors=wave_vectors,
+            wf=wf,
+            phase_scan=phase_scan,
+        )
 
     def _block_diag(self, u, num):
         """
@@ -218,7 +242,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         matrix = np.zeros((n, num, m, num, m), dtype="complex")
         # Note that diag is a view of matrix, so matrix is changed.
         # n is index for atoms, m and k for the levels and i for num
-        diag = np.einsum('nimik->nimk', matrix)
+        diag = np.einsum("nimik->nimk", matrix)
         for i in range(0, n):
             # diag[i, :] has shape (num, n_int, n_int), u[i] has shape
             # (n_int, n_int), i.e. so u[i] is copied num times in each loop
@@ -236,7 +260,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         """
         # Each pulse splits the initial state into two states (2 level system),
         # so we end up with 2*n_pulses output states
-        index_shift_matrix = np.eye(2*self.n_pulses)
+        index_shift_matrix = np.eye(2 * self.n_pulses)
         for i in range(0, len(index_shift_matrix)):
             if i % 2 == 0:
                 # shift the index of one of the two interacting states;
@@ -247,8 +271,9 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
 
     def _prop_matrix(self, atoms):
 
-        assert atoms.state_kets.shape[1] == 2 * self.n_pulses,\
-            'Number of states must be twice the number of pulses.'
+        assert (
+            atoms.state_kets.shape[1] == 2 * self.n_pulses
+        ), "Number of states must be twice the number of pulses."
 
         u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
@@ -258,6 +283,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         # application of the propagation matrix, these states are put back into
         # their initial position.
         shift_forth = np.linalg.matrix_power(self._index_shift(), self.n_pulse)
-        shift_back = np.linalg.matrix_power(self._index_shift(),
-                                            self.n_pulses-self.n_pulse)
-        return np.einsum('ij,njk,kl->nil', shift_back, u, shift_forth)
+        shift_back = np.linalg.matrix_power(
+            self._index_shift(), self.n_pulses - self.n_pulse
+        )
+        return np.einsum("ij,njk,kl->nil", shift_back, u, shift_forth)
