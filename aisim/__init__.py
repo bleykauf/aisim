@@ -5,7 +5,3 @@ from .beam import *  # noqa
 from .convert import *  # noqa
 from .det import *  # noqa
 from .prop import *  # noqa
-from ._version import get_versions
-
-__version__ = get_versions()["version"]
-del get_versions
