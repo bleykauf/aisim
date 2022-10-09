@@ -2,14 +2,14 @@
 
 import numpy as np
 
-mass = {'Rb87':  1.443161e-25}
+mass = {"Rb87": 1.443161e-25}
 """Atomic mass in kg."""
 
 kb = 1.3806488e-23
 """Boltzmann constant in J/K."""
 
 
-def temp(sigma_v, species='Rb87'):
+def temp(sigma_v, species="Rb87"):
     """
     Calculate the temperature of an atomic cloud from its velocity spread.
 
@@ -31,11 +31,11 @@ def temp(sigma_v, species='Rb87'):
         If negative velocity spread is passed
     """
     if sigma_v < 0:
-        raise ValueError('sigma_v must be non-negative')
+        raise ValueError("sigma_v must be non-negative")
     return mass[species] * sigma_v**2 / kb
 
 
-def vel_from_temp(temp, species='Rb87'):
+def vel_from_temp(temp, species="Rb87"):
     """
     Calculate the velocity spread (1 sigma) from the temperature of the cloud.
 
@@ -57,7 +57,7 @@ def vel_from_temp(temp, species='Rb87'):
         If negative temperature is passed
     """
     if temp < 0:
-        raise ValueError('temp must be non-negative')
+        raise ValueError("temp must be non-negative")
     return np.sqrt(temp * kb / mass[species])
 
 
@@ -111,8 +111,8 @@ def phase_to_grav(phase, T, keff):
     """
     Convert a phase shift to gravitational acceleration.
 
-    Takes the phase shift measured in a Mach Zehnder atom interferometer and
-    converts it to the corresponding gravtional accleration.
+    Takes the phase shift measured in a Mach Zehnder atom interferometer and converts it
+    to the corresponding gravtional accleration.
 
     Parameters
     ----------
@@ -128,4 +128,4 @@ def phase_to_grav(phase, T, keff):
     float :
         gravitational acceleration in m/s²
     """
-    return phase/keff/(T**2)
+    return phase / keff / (T**2)
