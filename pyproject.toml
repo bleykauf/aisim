@@ -43,7 +43,7 @@ repository = "https://github.com/bleykauf/aisim/"
 
 [tool.flake8]
 max-line-length = 88
-extend-ignore = ["E203", "E203", "E402", "E731", "W503"]
+extend-ignore = ["E203", "E402", "E731", "W503"]
 docstring-convention = "numpy"
 
 [tool.isort]
