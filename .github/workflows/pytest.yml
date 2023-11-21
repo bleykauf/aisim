@@ -18,10 +18,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install . pytest pytest-cov
+          pip install . pytest
+
       - name: Run pytest
-        run: |
-          pytest --cov
+        run: pytest .
