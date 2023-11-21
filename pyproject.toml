@@ -17,7 +17,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
 ]
-dependencies = ["numpy>=1.18.5", "scipy<1.10.3", "matplotlib>=3.7.4"]
+dependencies = ["numpy>=1.18.5", "scipy<1.10", "matplotlib>=3.7.4"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
