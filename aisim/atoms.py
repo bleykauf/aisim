@@ -10,7 +10,7 @@ class AtomicEnsemble:
     """
     Represents an atomic ensemble consisting of n atoms.
 
-    Each atom is is defined by its phase space vector (x0, y0, z0, vx, vy, vz)  at time
+    Each atom is is defined by its phase space vector (x0, y0, z0, vx, vy, vz) at time
     t=0. From this phase space vector the position at later times can be calculated.
     Optionally, weights can be added for each atom in the ensemble. Slicing along the
     axis of the n atoms is supported.
@@ -419,9 +419,9 @@ def _fidelity(rho_a, rho_b):
     """
     assert rho_a.shape == rho_b.shape
     sqrt_rho_a = splin.sqrtm(rho_a)  # matrix square root
-    # Implementation used in qutip"s fidelity calculation: calculating the
-    # eigenvalues and taking it's square root instead of matrix square root and
-    # taking the trace. It's faster.
+    # Implementation used in qutip"s fidelity calculation: calculating the eigenvalues
+    # and taking it's square root instead of matrix square root and taking the trace.
+    # It's faster.
     eig_vals = np.linalg.eigvals(sqrt_rho_a @ rho_b @ sqrt_rho_a)
     fidelity = np.real(np.sum(np.sqrt(eig_vals))) ** 2
     return fidelity
