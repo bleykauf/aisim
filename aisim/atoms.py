@@ -236,8 +236,8 @@ def create_random_ensemble_from_gaussian_distribution(
     ----------
     pos_params, vel_params : dict
         Dictionary containing the parameters determining the position and velocity
-        distributions of the atomic ensemble. Entries for position space are
-        'mean_x','std_x' ,'mean_y', 'std_y', 'mean_z', 'std_z'. Entries for velocity
+        distributions of the atomic ensemble. Entries for position space are  'mean_x',
+        'std_x' ,'mean_y', 'std_y', 'mean_z', 'std_z'. Entries for velocity
         space are 'mean_vx','std_vx', 'mean_vy', 'std_vy','mean_vz', 'std_vz'.
     n_samples : float
         number of random samples
