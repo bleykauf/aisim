@@ -26,8 +26,8 @@ jobs:
           coverage run -m pytest .
           coverage report -m
 
-          - name: Coverage Badge
-          uses: tj-actions/coverage-badge-py@v2
+      - name: Coverage Badge
+        uses: tj-actions/coverage-badge-py@v2
   
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v16
