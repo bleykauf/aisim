@@ -37,6 +37,7 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinx_rtd_theme",
 ]
 
 master_doc = "index"
