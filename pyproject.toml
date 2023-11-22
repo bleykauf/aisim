@@ -28,6 +28,9 @@ dev = [
     "isort>=5.10.1",
     "flake8-pyproject>=1.2.3",
     "setuptools_scm>=6.2",
+    "sphinx",
+    "nbsphinx",
+    "pygments>=2.4",
 ]
 
 [tool.setuptools_scm]
