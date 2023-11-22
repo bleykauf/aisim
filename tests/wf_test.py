@@ -1,7 +1,7 @@
-import pytest  # noqa
 import numpy as np
-import aisim as ais
+import pytest  # noqa
 
+import aisim as ais
 
 data = np.loadtxt("docs/examples/data/wf_grav_data.csv", skiprows=1, delimiter=",")
 r_dets = data[:, 0]

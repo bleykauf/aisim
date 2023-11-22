@@ -21,7 +21,6 @@ class Propagator:
     """
 
     def __init__(self, time_delta, **kwargs):
-
         self.time_delta = time_delta
 
         # save all keyworded arguments as attributes
@@ -208,7 +207,6 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         wf=None,
         phase_scan=0,
     ):
-
         self.n_pulses = n_pulses
         self.n_pulse = n_pulse
         super().__init__(
@@ -268,7 +266,6 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         return index_shift_matrix
 
     def _prop_matrix(self, atoms):
-
         assert (
             atoms.state_kets.shape[1] == 2 * self.n_pulses
         ), "Number of states must be twice the number of pulses."

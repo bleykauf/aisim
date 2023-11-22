@@ -112,7 +112,6 @@ class Wavefront:
     """
 
     def __init__(self, r_beam, coeff):
-
         self.r_beam = r_beam
         self.coeff = coeff
 

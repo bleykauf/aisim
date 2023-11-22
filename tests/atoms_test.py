@@ -1,6 +1,7 @@
-import aisim as ais
 import numpy as np
 import pytest  # noqa
+
+import aisim as ais
 
 
 def generate_random_atoms(n_atom, n_int):

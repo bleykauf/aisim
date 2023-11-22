@@ -1,5 +1,6 @@
-import pytest  # noqa
 import numpy as np
+import pytest  # noqa
+
 import aisim as ais
 
 
@@ -28,7 +29,6 @@ def create_random_thermal_atoms(n_atoms, state_kets=[1, 0]):
 
 
 def test_propagator():
-
     atoms = create_random_thermal_atoms(100)
 
     prop = ais.Propagator(1)
@@ -53,7 +53,6 @@ def test_free_propagator():
 
 
 def test_two_level_transition_propagator_unitarity():
-
     atoms = create_random_thermal_atoms(100)
 
     intensity_profile = ais.IntensityProfile(1, 1)
@@ -82,10 +81,8 @@ def test_two_level_transition_propagator_unitarity():
 
 
 def test_spatial_superposition_transition_propagator_unitarity():
-
     # define helper function
     def prop_unitarity_tester(n_pulses, pi_half_time):
-
         # create initial state ket [1,0,0,...,0] with length 2*n_pulses
         init_state = [1]
         for i in range(1, 2 * n_pulses):
@@ -112,10 +109,8 @@ def test_spatial_superposition_transition_propagator_unitarity():
 
 
 def test_spatial_superposition_transition_propagator_time_reversal():
-
     # define helper function
     def prop_time_reversal_tester(n_pulses, pi_half_time):
-
         # create initial state ket [1,0,0,...,0] with length 2*n_pulses
         init_state = [1]
         for i in range(1, 2 * n_pulses):

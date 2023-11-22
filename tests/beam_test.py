@@ -1,6 +1,7 @@
-import pytest  # noqa
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest  # noqa
+
 import aisim as ais
 
 
