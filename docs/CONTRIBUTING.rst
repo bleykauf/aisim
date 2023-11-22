@@ -7,13 +7,7 @@ We welcome everybody to help by reporting bugs or making suggestions via our
 
 Code style
 ----------
-We use `PEP8 <https://www.python.org/dev/peps/pep-0008>`__ as the code style convention. Please 
-check your contributions with `flask8 <https://flake8.pycqa.org>`__ and the 
-`flake8-doscstring <https://pypi.org/project/flake8-docstrings/>`__ extension before submitting.
-Configuration of :code:`flake8` is stored in the :code:`setup.cfg`. 
-
-`Autopep8 <https://pypi.org/project/autopep8/>`__ is helpful and uses the same configuration as 
-:code:`flake8`.
+We use the `black <https://black.readthedocs.io/en/stable/index.html>`__code style.
 
 Testing
 -------
