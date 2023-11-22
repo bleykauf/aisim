@@ -1,8 +1,9 @@
 [![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
 [![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)](https://anaconda.org/conda-forge/aisim)
-[![Build Status](https://travis-ci.com/bleykauf/aisim.svg?branch=master)](https://travis-ci.com/bleykauf/aisim)
+![Test Status](https://github.com/bleykauf/aisim/actions/workflows/pytest.yml/badge.svg)
+![Test Coverage](./docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/bleykauf/aisim/badge.svg?branch=master)](https://coveralls.io/github/bleykauf/aisim?branch=master)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================

@@ -1,2 +1,45 @@
 [build-system]
-requires = ["setuptools >= 30.3.0", "wheel"]
+requires = ["setuptools >= 30.3.0", "wheel", "setuptools_scm[toml]>=6.2"]
+
+[project]
+name = "aisim"
+description = "Simulations for light-pulse atom interferometry"
+authors = [
+    { name = "Bastian Leykauf" },
+    { email = "leykauf@physik.hu-berlin.de" },
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+]
+dependencies = ["numpy>=1.18.5", "scipy<1.10", "matplotlib>=3.7.4"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "black>=22.8.0",
+    "pre-commit>=2.20.0",
+    "flake8>=5.0.4",
+    "isort>=5.10.1",
+    "flake8-pyproject>=1.2.3",
+    "setuptools_scm>=6.2",
+]
+
+[tool.setuptools_scm]
+
+[project.urls]
+homepage = "https://github.com/bleykauf/aisim/"
+repository = "https://github.com/bleykauf/aisim/"
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = "E203"
+docstring-convention = "numpy"
+
+[tool.isort]
+profile = "black"

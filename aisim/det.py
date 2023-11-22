@@ -1,23 +1,24 @@
 """Classes and functions related to the detection system."""
 
 import numpy as np
+
 from . import convert
 
 
-class Detector():
+class Detector:
     """
     A generic detection zone.
 
-    This is only a template without functionality. Deriving classes have to
-    implement `_detected_idx`.
+    This is only a template without functionality. Deriving classes have to implement
+    `_detected_idx`.
 
     Parameters
     ----------
     t_det : float
         time of the detection
     **kwargs :
-        Additional arguments used by classes that inherit from this class. All
-        keyworded arguments are stored as attribues.
+        Additional arguments used by classes that inherit from this class. All keyworded
+        arguments are stored as attribues.
 
     Attributes
     ----------
@@ -37,9 +38,8 @@ class Detector():
         """
         Return indices of the detected atoms.
 
-        Determines wheter a position is within the detection zone and returns
-        the indices of the phase space vectors of an atomic ensemble that are
-        detected.
+        Determines wheter a position is within the detection zone and returns the
+        indices of the phase space vectors of an atomic ensemble that are detected.
 
         Parameters
         ----------
@@ -49,8 +49,8 @@ class Detector():
         Returns
         -------
         det_idx : nd array of bool
-            boolean array for filtering an AtomicEnsemble; True if detected,
-            otherwise False.
+            boolean array for filtering an AtomicEnsemble; True if detected, otherwise
+            False.
         """
         raise NotImplementedError()
 
@@ -58,8 +58,8 @@ class Detector():
         """
         Determine wheter a position is within the detection zone.
 
-        Returns a new AtomicEnsemble object containing only the detected phase
-        space vectors.
+        Returns a new AtomicEnsemble object containing only the detected phase space
+        vectors.
 
         Parameters
         ----------
@@ -69,8 +69,8 @@ class Detector():
         Returns
         -------
         detected_atoms : AtomicEnsemble
-            atomic ensemble containing only phase space vectors that are
-            eventually detected
+            atomic ensemble containing only phase space vectors that are eventually
+            detected
         """
         return atoms[self._detected_idx(atoms)]
 
@@ -107,8 +107,8 @@ class PolarDetector(Detector):
     """
     A spherical detection zone.
 
-    All atoms within a circle with the specified radius within the x-y plane
-    will be detected.
+    All atoms within a circle with the specified radius within the x-y plane will be
+    detected.
 
     Parameters
     ----------
