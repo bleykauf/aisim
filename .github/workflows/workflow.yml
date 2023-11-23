@@ -97,7 +97,7 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    if: if: github.event_name == 'release'
+    if: github.event_name == 'release'
     needs:
     - build
     runs-on: ubuntu-latest
