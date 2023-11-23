@@ -48,7 +48,7 @@ jobs:
         run: |
           coverage run -m pytest .
           coverage report -m
-      - name: Coverage Badge
+      - name: Create coverage badge
         uses: tj-actions/coverage-badge-py@v2
         with:
           output: docs/coverage.svg
