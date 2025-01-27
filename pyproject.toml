@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 30.3.0", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools >= 75.8.0", "wheel", "setuptools_scm[toml]>=8.1.0"]
 
 [project]
 name = "aisim"
@@ -17,17 +17,18 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
 ]
-dependencies = ["numpy>=1.18.5,<2.0", "scipy>=1.13.1,<2.0", "matplotlib>=3.7.4"]
+dependencies = ["numpy>=1.26.4,<2.0", "scipy>=1.13.1,<2.0", "matplotlib>=3.10.0,<4.0.0"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
     "black>=24.10.0",
-    "pre-commit>=2.20.0",
-    "flake8>=5.0.4",
-    "isort>=5.10.1",
+    "flake8>=7.1.1",
     "flake8-pyproject>=1.2.3",
-    "setuptools_scm>=6.2",
+    "isort>=5.13.2",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "setuptools_scm>=8.1.0",
 ]
 docs = ["sphinx", "nbsphinx", "pygments>=2.4", "sphinx_rtd_theme"]
 
