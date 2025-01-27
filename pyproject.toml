@@ -10,19 +10,19 @@ authors = [
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
 ]
-dependencies = ["numpy>=1.18.5", "scipy<1.10", "matplotlib>=3.7.4"]
+dependencies = ["numpy>=1.18.5,<2.0", "scipy>=1.15,<2.0", "matplotlib>=3.7.4"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-    "black>=22.8.0",
+    "black>=24.10.0",
     "pre-commit>=2.20.0",
     "flake8>=5.0.4",
     "isort>=5.10.1",
