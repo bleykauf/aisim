@@ -63,7 +63,7 @@ for r_det in r_dets:
 
     awfs.append(weighted_awf)
 
-grav = ais.phase_to_grav(np.angle(awfs), T=260e-3, keff=1.610574779769e6)
+grav = ais.phase_error_to_grav(np.angle(awfs), T=260e-3, keff=1.610574779769e7)
 
 # test that simulation and data fit reasonably
 assert np.sqrt(np.sum((grav - grav_data) ** 2)) < 1e-8

@@ -107,12 +107,12 @@ def pol2cart(pol):
     return np.array([x, y, z]).T
 
 
-def phase_to_grav(phase, T, keff):
+def phase_error_to_grav(phase, T, keff):
     """
-    Convert a phase shift to gravitational acceleration.
+    Convert a phase error to gravitational acceleration.
 
     Takes the phase shift measured in a Mach Zehnder atom interferometer and converts it
-    to the corresponding gravtional accleration.
+    to the corresponding relative gravitional accleration.
 
     Parameters
     ----------
@@ -126,6 +126,6 @@ def phase_to_grav(phase, T, keff):
     Returns
     -------
     float :
-        gravitational acceleration in m/s²
+        gravitational acceleration in multiples of g
     """
     return phase / keff / (T**2)
