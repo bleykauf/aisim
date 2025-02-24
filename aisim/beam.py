@@ -206,9 +206,8 @@ class Wavefront:
             value(s) of the wavefront at the probed position
         """
         rho = rho / r_beam
-        # Raise error if Zernike polynom is oustide its defined domain
-        if (rho > 1).any():
-            raise ValueError("rho must be smaller than r_beam")
+        # Make sure rho outside of the beam are NaN
+        rho[rho > 1] = np.nan
         # precalculating values
         # powers of rho
         rho2 = rho * rho

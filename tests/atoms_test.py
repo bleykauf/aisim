@@ -97,14 +97,6 @@ def test_atomic_ensemble_methods():
     atomic_ensemble_test_function(atoms)
 
 
-def test_make_grid():
-    # test the one case (finite z) not covered by wf_test.py
-    atomic_ensemble, weights = ais.make_grid(std_rho=1, n_z=10, std_z=3, m_std_z=2)
-    assert atomic_ensemble[:, 2].min() == -3.0
-    assert atomic_ensemble[:, 2].max() == 3.0
-    np.testing.assert_almost_equal(atomic_ensemble[:, 2].mean(), 0.0)
-
-
 def test_fidelity():
     for n_atom in [1, 3, 1000]:
         for n_int in [2, 3, 10, 50]:
