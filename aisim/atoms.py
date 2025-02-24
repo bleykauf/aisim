@@ -3,8 +3,6 @@
 import numpy as np
 import scipy.linalg as splin
 
-from . import convert
-
 
 class AtomicEnsemble:
     """
@@ -12,8 +10,6 @@ class AtomicEnsemble:
 
     Each atom is is defined by its phase space vector (x0, y0, z0, vx, vy, vz) at time
     t=0. From this phase space vector the position at later times can be calculated.
-    Optionally, weights can be added for each atom in the ensemble. Slicing along the
-    axis of the n atoms is supported.
 
     Parameters
     ----------
@@ -30,8 +26,6 @@ class AtomicEnsemble:
     time : float, optional
         the initial time (default 0) when the phase space and state vectors are
         initialized
-    weights : 1darray , optional
-        Optional weights for each of the n atoms in the ensemble
 
     Attributes
     ----------
@@ -47,7 +41,7 @@ class AtomicEnsemble:
 
     """
 
-    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0, weights=None):
+    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
         self.state_kets = state_kets
@@ -56,37 +50,28 @@ class AtomicEnsemble:
         self.initial_position = self.phase_space_vectors[:, 0:3]
         self.initial_velocity = self.phase_space_vectors[:, 3:6]
 
-        if weights is None:
-            weights = np.ones(len(self))  # unity weight for each atom
-        else:
-            assert len(weights) == self.phase_space_vectors.shape[0]
-        self.weights = weights
-
     def __getitem__(self, key):
         """Select  certain atoms "from the ensemble.
 
-        Parameters
+            Parameters
         ----------
-        key : int or slice or bool map
-            for example 2, 1:15 or a boolean map
+            key : int or slice or bool map
+                for example 2, 1:15 or a boolean map
 
-        Returns
-        -------
-        new_instance : AtomicEnsemble
-            a new instance of the atomic ensemble only containing the selected atoms
+            Returns
+            -------
+            new_instance : AtomicEnsemble
+                a new instance of the atomic ensemble only containing the selected atoms
         """
         phase_space_vectors = self.phase_space_vectors[key][:]
         state_kets = self.state_kets[key][:]
-        weights = self.weights[key]
         if isinstance(key, int):
-            # ratain correct shape in case of only one atom is selected
+            # retain correct shape in case of only one atom is selected
             phase_space_vectors = phase_space_vectors.reshape(1, 6)
             state_kets = state_kets.reshape(1, len(state_kets))
-            weights = weights.reshape(1, 1)
         new_instance = AtomicEnsemble(
             phase_space_vectors=phase_space_vectors,
             state_kets=state_kets,
-            weights=weights,
         )
         return new_instance
 
@@ -277,123 +262,6 @@ def create_random_ensemble_from_gaussian_distribution(
     )
     ensemble = AtomicEnsemble(phase_space_vectors, **kwargs)
     return ensemble
-
-
-def create_ensemble_from_grids(pos_params, vel_params, **kwargs):
-    """
-    Create an atomic ensemble from evenly spaced position and velocity grids.
-
-    The resulting position and velocity grids are evenly spaced on polar coordinates.
-
-    Parameters
-    ----------
-    pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and velocity
-        distributions of the atomic ensemble. They each have to contain the arguments
-        described in the docstring of `make_grid`, i.e. `std_rho`, `std_z` (required),
-        `n_rho`, `n_theta`, `n_z`, `m_std_rho`, `m_std_z`, `weight`, optional.
-    **kwargs :
-        Optional keyworded arguments passed to `AtomicEnsemble`
-
-    Returns
-    -------
-    ensemble : AtomicEnsemble
-        Atomic ensemble contains all possible combinations of the position and velocity
-        grid as phase space vectors. They vectors are weighted according to the combined
-        (multiplied) weights of the respective position and velocity distributions
-        according to the `weight` arguments in `pos_params` and `vel_params`
-    """
-    pos_grid, pos_weights = make_grid(**pos_params)
-    vel_grid, vel_weights = make_grid(**vel_params)
-    grid = combine_grids(pos_grid, vel_grid)
-    weights = combine_weights(pos_weights, vel_weights)
-    ensemble = AtomicEnsemble(grid, weights=weights, **kwargs)
-    return ensemble
-
-
-def make_grid(std_rho, std_z, n_rho=20, n_theta=36, n_z=1, m_std_rho=3, m_std_z=0):
-    """
-    Evenly spaced grid of positions (or velocities) and weights.
-
-    Each of these positions (or velocities) are evenly spaced in polar coordinates and
-    weighted according to a gaussian distribution.
-
-    Parameters
-    ----------
-    std_rho, std_sigma : float
-        1/e radius of the position or velocity distribution.
-    n_rho, n_theta, n_z : int
-        number of grid points per standard deviation along rho and z direction and
-        total number of points along theta, respectively
-    m_std_rho, m_std_z : int
-        number of standard deviations for the rho and z distribution
-
-    Returns
-    -------
-    grid : n × 3 array
-        Grid of n vectors in carthesian coordinates  (x, y, z). In polar coordinates,
-        the grid has this form:
-        [[dRho, 0, -m_std_z*sigma_z/2]
-        [dRho, dTheta, ...]
-        [dRho   , 2*dTheta, ...]
-        [...    , ..., 0]
-        [dRho   , <2*pi, ...]
-        [2*dRho , 0, ...]
-        [2*dRho , dTheta, ...]
-        [...    , ..., ...
-        [m_std_rho*sigma_rho , <2*pi, +m_std_z*sigma_z/2]]
-    weights : 1 × n array
-        weights for each vector in the grid
-    """
-    rhos = np.linspace(0, m_std_rho * std_rho, n_rho)
-    thetas = np.linspace(0, 2 * np.pi, n_theta)
-    zs = np.linspace(-m_std_z * std_z / 2, m_std_z * std_z / 2, max(n_z * m_std_z, 1))
-    grid = np.array(np.meshgrid(rhos, thetas, zs)).T.reshape(-1, 3)
-    # get weights before converting to carthesian coordinates
-    weights = np.exp(-grid[:, 0] ** 2 / (2 * std_rho**2))
-    if std_z != 0:
-        # check if distribution is 2d to avoid divide by 0
-        weights = weights * np.exp(-grid[:, 2] ** 2 / (2 * std_z**2))
-    grid = convert.pol2cart(grid)
-    return grid, weights
-
-
-def combine_grids(pos, vel):
-    """
-    Combine a position and velocity grid into an array of phase space vectors.
-
-    The resulting array contains (x, y, z, vx, vy, vz).
-
-    Parameters
-    ----------
-    pos, vel : n, m × 3 array
-        position and velocity grids as generated by `make_grid`
-
-    Returns
-    -------
-    phase_space_vectors : n * m × 1 array
-    """
-    # FIXME: replace with faster version, for example based on meshgrid
-    phase_space_vectors = np.array(
-        [np.array((p, v)).flatten() for p in pos for v in vel]
-    )
-    return phase_space_vectors
-
-
-def combine_weights(pos_weights, vel_weights):
-    """
-    Combine the weights of a position and velocity grid.
-
-    Complements `_combine_grids`.
-
-    Parameters
-    ----------
-    pos_weights, vel_weights : n × 1 array
-        weights of a position and velocity grids.
-
-    """
-    # FIXME: replace with faster version, for example based on meshgrid
-    return np.array([p * v for p in pos_weights for v in vel_weights])
 
 
 def _fidelity(rho_a, rho_b):

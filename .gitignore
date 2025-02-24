@@ -116,3 +116,6 @@ dmypy.json
 
 # OS specific files
 .DS_Store
+
+# Visual Studio Code
+.vscode/

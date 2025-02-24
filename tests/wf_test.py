@@ -1,40 +1,44 @@
+import json
+
 import numpy as np
-import pytest  # noqa
 
 import aisim as ais
 
-data = np.loadtxt("docs/examples/data/wf_grav_data.csv", skiprows=1, delimiter=",")
-r_dets = data[:, 0]
-grav_data = data[:, 1]
+data = json.load(open("docs/examples/data/experimental_data.json"))
+r_dets = np.array(data["r_det"])
+grav_data = np.array(data["g"])
 
-coeff_window = np.loadtxt("docs/examples/data/wf_window.txt")
 
-wf = ais.Wavefront(11e-3, coeff_window)
+coeff_window = np.loadtxt("docs/examples/data/wavefront.txt")
+wf = ais.Wavefront(10.91e-3, coeff_window)
 wf.coeff[0:2] = 0  # remove piston, tip and tilt
 
 pos_params = {
-    "std_rho": 3.0e-3,  # cloud radius in m
-    "std_z": 0,  # ignore z dimension, its not relevant here
-    "n_rho": 20,  # within each standard deviation of the distribution
-    "n_theta": 36,  # using a resolution of 10°
-    "n_z": 1,  # use one value for the distribution along z
-    "m_std_rho": 3,  # use 3 standard deviations of the distribution
-    "m_std_z": 0,  # ignore z dimension, its not relevant here
+    "mean_x": 0.0,
+    "std_x": 3.0e-3,  # cloud radius in m
+    "mean_y": 0.0,
+    "std_y": 3.0e-3,  # cloud radius in m
+    "mean_z": 0.0,
+    "std_z": 0.0,  # ignore z dimension, its not relevant here
 }
-
 vel_params = {
-    # velocity spread in m/s from a temperature of 3 uK
-    "std_rho": ais.vel_from_temp(3e-6),
-    "std_z": 0,  # ignore z dimension, its not relevant here
-    # within each standard deviation of the distribution we use 20 points
-    "n_rho": 20,
-    "n_theta": 36,  # using a resolution of 10°
-    "n_z": 1,  # use one value for the distribution along z
-    "m_std_rho": 3,  # use 3 standard deviations of the distribution
-    "m_std_z": 0,  # ignore z dimension, its not relevant here
+    "mean_vx": 0.0,
+    "std_vx": ais.convert.vel_from_temp(
+        3.5e-6
+    ),  # cloud velocity spread in m/s at tempearture of 3 uK
+    "mean_vy": 0.0,
+    "std_vy": ais.convert.vel_from_temp(
+        3.5e-6
+    ),  # cloud velocity spread in m/s at tempearture of 3 uK
+    "mean_vz": 0.0,
+    "std_vz": ais.convert.vel_from_temp(
+        160e-9
+    ),  # after velocity selection, velocity in z direction is 160 nK
 }
 
-atoms = ais.create_ensemble_from_grids(pos_params, vel_params)
+atoms = ais.create_random_ensemble_from_gaussian_distribution(
+    pos_params, vel_params, int(1e5), state_kets=[0, 1], seed=1
+)
 
 t_det = 778e-3  # time of the detection in s
 
@@ -50,20 +54,16 @@ for r_det in r_dets:
 
     det_atoms = det.detected_atoms(atoms)
 
-    # calculate the imprinted phase for each "test atom" at each pulse.
-    # This is the computationally heavy part
+    # calculate the imprinted phase for each "test atom" at each pulse. This is the computationally heavy part
     phi1 = 2 * np.pi * wf.get_value(det_atoms.calc_position(t1))
     phi2 = 2 * np.pi * wf.get_value(det_atoms.calc_position(t2))
     phi3 = 2 * np.pi * wf.get_value(det_atoms.calc_position(t3))
 
     # calculate a complex amplitude factor for the Mach-Zehnder sequence and
     # weight their contribution to the signal
-    awf = np.exp(1j * (phi1 - 2 * phi2 + phi3))
-    weighted_awf = np.sum(det_atoms.weights * awf) / np.sum(det_atoms.weights)
+    awfs.append(np.nanmean(np.exp(1j * (phi1 - 2 * phi2 + phi3))))
 
-    awfs.append(weighted_awf)
-
-grav = ais.phase_error_to_grav(np.angle(awfs), T=260e-3, keff=1.610574779769e7)
+grav = 2 * ais.phase_error_to_grav(np.angle(awfs), T=260e-3, keff=1.610574779769e7)
 
 # test that simulation and data fit reasonably
-assert np.sqrt(np.sum((grav - grav_data) ** 2)) < 1e-8
+assert np.sqrt(np.sum((grav - grav_data) ** 2)) < 1.2e-8

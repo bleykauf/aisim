@@ -10,15 +10,17 @@ def test_wavefront():
     wf = ais.gen_wavefront(1)
     wf.plot()
     wf.plot_coeff()
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     wf.plot(ax=ax)
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
     wf.plot_coeff(ax=ax)
 
-    with pytest.raises(ValueError):
-        rho = np.array([1.0, 1.1])
-        theta = np.array([0, 0])
-        ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_beam=1)
+    rho = np.array([1.0, 1.1])
+    theta = np.array([0, 0])
+
+    res = ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_beam=1)
+    assert not np.isnan(res[0])
+    assert np.isnan(res[1])
 
 
 def test_wavevectors():
