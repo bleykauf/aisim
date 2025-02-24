@@ -96,6 +96,7 @@ def test_atomic_ensemble_methods():
     )
     atomic_ensemble_test_function(atoms)
 
+
 def test_fidelity():
     for n_atom in [1, 3, 1000]:
         for n_int in [2, 3, 10, 50]:
