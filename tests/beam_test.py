@@ -7,7 +7,7 @@ import aisim as ais
 
 def test_wavefront():
     # test the methods of Wavefront that are not covered by wf_test.py
-    wf = ais.gen_wavefront(1)
+    wf = ais.gen_wavefront(2, r_beam=1)
     wf.plot()
     wf.plot_coeff()
     _, ax = plt.subplots()
@@ -21,6 +21,12 @@ def test_wavefront():
     res = ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_wf=1)
     assert not np.isnan(res[0])
     assert np.isnan(res[1])
+
+    pos = np.array([[0, 0, 0], [1.1, 0, 0], [0, 2.1, 0]])
+    res2 = wf.get_value(pos)
+    assert not np.isnan(res2[0])
+    assert np.isnan(res2[1])
+    assert np.isnan(res2[2])
 
 
 def test_wavevectors():
