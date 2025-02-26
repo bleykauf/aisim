@@ -290,17 +290,20 @@ class Wavefront:
         return zern_vals
 
 
-def gen_wavefront(r_beam, std=0):
+def gen_wavefront(r_wf, std=0, r_beam=None):
     """
     Create an artificial wavefront.
 
     Parameters
     ----------
-    r_beam : float
-        beam radius
+    r_wf : float
+        radius of the wavefront data in m
     std : float
         standard deviation of each Zernike polynomial coefficient in multiples of the
         wavelength.
+    r_beam : float, optional
+        Beam radius in m. Can be set if the beam is smaller than the wavefront data.
+        Values outside of the beam will be set to NaN.
 
     Returns
     -------
@@ -308,4 +311,4 @@ def gen_wavefront(r_beam, std=0):
         artificial wavefront
     """
     coeff = np.random.normal(0, std, size=36)
-    return Wavefront(r_beam, coeff)
+    return Wavefront(r_wf, coeff, r_beam)
