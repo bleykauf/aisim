@@ -29,3 +29,9 @@ def test_pol2cart_and_cart2pol():
     cart = np.array([[0, 0, 0], [1, 2, 3], [-1, -2, -3], [-10, 10, -10]])
     pol = ais.cart2pol(cart)
     np.testing.assert_array_almost_equal(cart, ais.pol2cart(pol))
+
+
+def test_arrival_time():
+    t12 = ais.convert.arrival_time(-1, 0, 0, 0, 1)
+    assert t12[0] == -np.sqrt(2)
+    assert t12[1] == np.sqrt(2)
