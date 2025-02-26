@@ -18,7 +18,7 @@ def test_wavefront():
     rho = np.array([1.0, 1.1])
     theta = np.array([0, 0])
 
-    res = ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_beam=1)
+    res = ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_wf=1)
     assert not np.isnan(res[0])
     assert np.isnan(res[1])
 
@@ -52,13 +52,20 @@ def test_wavevectors():
 
 
 def test_intensity_profile():
-    r_beam = 1
+    r_profile = 1
     pos1 = np.array([[0, 0, 0]])
     pos2 = np.array([[0, 1, 0]])
-    intensity_profile = ais.IntensityProfile(r_beam, 1)
+    intensity_profile = ais.IntensityProfile(r_profile, 1)
 
     rabi1 = intensity_profile.get_rabi_freq(pos1)
     rabi2 = intensity_profile.get_rabi_freq(pos2)
     ratio = rabi2 / rabi1
     # test that Rabi frequency has dropped to 1/e**2 of center value
     np.testing.assert_almost_equal(ratio[0], 1 / np.e**2)
+
+    # test that Rabi frequency is zero outside of the beam
+    intensity_profile2 = ais.IntensityProfile(r_profile, 1, r_beam=0.5)
+    rabi3 = intensity_profile2.get_rabi_freq(pos1)
+    assert rabi3[0] == 1
+    rabi4 = intensity_profile2.get_rabi_freq(pos2)
+    assert rabi4[0] == 0

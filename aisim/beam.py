@@ -48,26 +48,33 @@ class Wavevectors:
 
 class IntensityProfile:
     """
-    Class that defines a intensity profile.
+    Class that defines a Gaussian intensity profile in terms of the Rabi frequency.
 
     Parameters
     ----------
-    r_beam : float
-        beam radius in m
+    r_profile : float
+        1/e² radius of the Gaussian intensity profile in m
     center_rabi_freq : float
-        Rabi frequency at center of intensity profile
+        Rabi frequency at center of intensity profile in rad/s
+    r_beam : float (optional)
+        Beam radius in m. Can be set if the intensity profile is limited by an aperture.
+        Rabi frequency will be set to 0 outside of the beam.
 
     Attributes
     ----------
-    r_beam : float
-        beam radius in m
+    r_profile : float
+        1/e² radius of the Gaussian intensity profile in m
     center_rabi_freq : float
-        Rabi frequency at center of intensity profile
+        Rabi frequency at center of intensity profile in rad/s
+    r_beam : float or None
+        Beam radius in m. If set, Rabi frequency will be set to 0 outside of the beam.
+
     """
 
-    def __init__(self, r_beam, center_rabi_freq):
-        self.r_beam = r_beam
+    def __init__(self, r_profile, center_rabi_freq, r_beam=None):
+        self.r_profile = r_profile
         self.center_rabi_freq = center_rabi_freq
+        self.r_beam = r_beam
 
     def get_rabi_freq(self, pos):
         """
@@ -80,15 +87,14 @@ class IntensityProfile:
 
         Returns
         -------
-        rabi_freqs : array
-            the Rabi frequencies for the n positions
+        rabi_freqs : array of float
+            the Rabi frequencies for the n positions. If ``r_beam`` is set, the Rabi
+            frequency will be set to 0 outside of the beam.
         """
-        rabi_freqs = np.zeros(pos.shape[0])
-        # FIXME: vectorize this
-        for i in range(0, pos.shape[0]):
-            rabi_freqs[i] = self.center_rabi_freq * np.exp(
-                -2 * (pos[i][0] ** 2 + pos[i][1] ** 2) / self.r_beam**2
-            )
+        r_sq = pos[:, 0] ** 2 + pos[:, 1] ** 2
+        rabi_freqs = self.center_rabi_freq * np.exp(-2 * r_sq / (self.r_profile**2))
+        if self.r_beam is not None:
+            rabi_freqs[r_sq > self.r_beam] = 0.0
         return rabi_freqs
 
 
@@ -98,22 +104,28 @@ class Wavefront:
 
     Parameters
     ----------
-    r_beam : float
-        beam radius in m
-    coeff : list
+    r_wf : float
+        radius of the wavefront data in m
+    coeff : list of float
         list of 36 Zernike coefficients in multiples of the wavelength
+    r_beam : float (optional)
+        Beam radius in m. Can be set if the beam is smaller than the wavefront data.
+        Values outside of the beam will be set to NaN.
 
     Attributes
     ----------
-    r_beam : float
-        beam radius in m
-    coeff : list
+    r_wf : float
+        radius of the wavefront data in m
+    coeff : list of float
         list of 36 Zernike coefficients in multiples of the wavelength
+    r_beam : float or None
+        Beam radius in m. If set, values outside of the beam will be set to NaN.
     """
 
-    def __init__(self, r_beam, coeff):
-        self.r_beam = r_beam
+    def __init__(self, r_wf, coeff, r_beam=None):
+        self.r_wf = r_wf
         self.coeff = coeff
+        self.r_beam = r_beam
 
     def get_value(self, pos):
         """
@@ -132,12 +144,14 @@ class Wavefront:
         pos = convert.cart2pol(pos)
         rho = pos[:, 0]
         theta = pos[:, 1]
-        values = self.zern_iso(rho, theta, coeff=self.coeff, r_beam=self.r_beam)
+        values = self.zern_iso(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
+        if self.r_beam is not None:
+            values[rho > self.r_beam] = np.nan
         return values
 
     def plot(self, ax=None):
         """
-        Plot the wavefront.
+        Plot the wavefront data.
 
         Parameters
         ----------
@@ -147,9 +161,9 @@ class Wavefront:
 
         """
         azimuths = np.radians(np.linspace(0, 360, 180))
-        zeniths = np.linspace(0, self.r_beam, 50)
+        zeniths = np.linspace(0, self.r_wf, 50)
         rho, theta = np.meshgrid(zeniths, azimuths)
-        values = self.zern_iso(rho, theta, coeff=self.coeff, r_beam=self.r_beam)
+        values = self.zern_iso(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
 
         if ax is None:
             fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
@@ -183,8 +197,8 @@ class Wavefront:
         ax.set_ylabel(r"Zernike coefficient $Z_i$ / $\lambda$")
         return fig, ax
 
-    @classmethod
-    def zern_iso(cls, rho, theta, coeff, r_beam):
+    @staticmethod
+    def zern_iso(rho, theta, coeff, r_wf):
         """
         Calculate the sum of the first 36 Zernike polynomials.
 
@@ -205,7 +219,7 @@ class Wavefront:
         values : float or array of float
             value(s) of the wavefront at the probed position
         """
-        rho = rho / r_beam
+        rho = rho / r_wf
         # Make sure rho outside of the beam are NaN
         rho[rho > 1] = np.nan
         # precalculating values
