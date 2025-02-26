@@ -129,3 +129,31 @@ def phase_error_to_grav(phase, T, keff):
         gravitational acceleration in  in m/s^2
     """
     return phase / keff / (T**2)
+
+
+def arrival_time(z, t0=0.0, z0=0.0, v0=0.0, g=9.80665):
+    """
+    Calculate time when the atomic ensemble reaches a certaini position.
+
+    Parameters
+    ----------
+    z : float
+        position in m
+    t0 : float
+        time reference in s (at which z0 and v0 are known)
+    z0, v0 : float
+        initial position and velocity (in m and m/s, respectively), i.e. position and
+        velocity at t_ref
+    g : float
+        gravitational acceleration in m/s**2
+
+    Returns
+    -------
+    t : list of float
+        The two times when atoms reach the position z in seconds.
+    """
+    t12 = [
+        (v0 - np.sqrt(v0**2 + 2 * g * (z0 - z))) / g + t0,
+        (v0 + np.sqrt(v0**2 + 2 * g * (z0 - z))) / g + t0,
+    ]
+    return t12
