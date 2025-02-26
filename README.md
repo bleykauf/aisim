@@ -1,5 +1,4 @@
 [![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
-[![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)](https://anaconda.org/conda-forge/aisim)
 ![Test Status](https://github.com/bleykauf/aisim/actions/workflows/workflow.yml/badge.svg)
 ![Test Coverage](https://raw.githubusercontent.com/bleykauf/aisim/master/docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
@@ -23,9 +22,6 @@ The latest tagged release can installed via pip with
 
     pip install aisim
 
-or via conda with
-
-    conda install -c conda-forge aisim 
 
 Alternatively, if you plan to make changes to the code, use
 
