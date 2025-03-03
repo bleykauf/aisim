@@ -202,9 +202,10 @@ class Wavefront:
         else:
             fig = ax.figure
 
-        ax.bar(np.arange(len(self.coeff)), self.coeff)
-        ax.set_xlabel("Zernike polynomial $i$")
-        ax.set_ylabel(r"Zernike coefficient $Z_i$ / $\lambda$")
+        j_shift = 1
+        ax.bar(np.arange(len(self.coeff)) + j_shift, self.coeff)
+        ax.set_xlabel("Zernike polynomial $j$")
+        ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
         return fig, ax
 
 
