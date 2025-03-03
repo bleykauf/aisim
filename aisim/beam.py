@@ -147,8 +147,10 @@ class Wavefront:
         """
         pos = convert.cart2pol(pos)
         rho = pos[:, 0]
+        rho = rho / self.r_wf
+        rho[rho > 1] = np.nan
         theta = pos[:, 1]
-        values = zern_iso_naive(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
+        values = zern_iso_naive(rho, theta, self.coeff)
         if self.r_beam is not None:
             values[rho > self.r_beam] = np.nan
         return values

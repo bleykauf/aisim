@@ -111,7 +111,7 @@ class ZernikePolynomial:
         return np.sum(self.zern_terms(rho, theta), axis=0)
 
 
-def zern_iso_naive(rho, theta, coeff, r_wf):
+def zern_iso_naive(rho, theta, coeff):
     """
     Calculate the sum of the first 36 Zernike polynomials.
 
@@ -132,9 +132,6 @@ def zern_iso_naive(rho, theta, coeff, r_wf):
     values : float or array of float
         value(s) of the wavefront at the probed position
     """
-    rho = rho / r_wf
-    # Make sure rho outside of the beam are NaN
-    rho[rho > 1] = np.nan
     # precalculating values
     # powers of rho
     rho2 = rho * rho
