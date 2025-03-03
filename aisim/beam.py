@@ -167,13 +167,19 @@ class Wavefront:
         azimuths = np.radians(np.linspace(0, 360, 180))
         zeniths = np.linspace(0, self.r_wf, 50)
         rho, theta = np.meshgrid(zeniths, azimuths)
-        values = zern_iso_naive(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
+        n_dim, m_dim = rho.shape
+        z = np.zeros_like(rho)
+        pos = np.array([rho.flatten(), theta.flatten(), z.flatten()]).T
+        values = self.get_value(convert.pol2cart(pos))
 
         if ax is None:
             fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
         else:
             fig = ax.figure
 
+        theta = theta.reshape(n_dim, m_dim)
+        rho = rho.reshape(n_dim, m_dim)
+        values = values.reshape(n_dim, m_dim)
         contour = ax.contourf(theta, rho, values)
         cbar = plt.colorbar(contour)
         cbar.set_label(r"Aberration / $\lambda$", rotation=90)
