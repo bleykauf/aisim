@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest  # noqa
 
 import aisim as ais
 
@@ -18,7 +17,7 @@ def test_wavefront():
     rho = np.array([1.0, 1.1])
     theta = np.array([0, 0])
 
-    res = ais.Wavefront.zern_iso(rho, theta, coeff=wf.coeff, r_wf=1)
+    res = ais.zern.zern_iso_naive(rho, theta, coeff=wf.coeff, r_wf=1)
     assert not np.isnan(res[0])
     assert np.isnan(res[1])
 

@@ -12,6 +12,7 @@ from .prop import (
     SpatialSuperpositionTransitionPropagator,
     TwoLevelTransitionPropagator,
 )
+from .zern import ZernikeConvention, ZernikePolynomial, j_to_nm
 
 __version__ = version("aisim")
 
@@ -34,4 +35,7 @@ __all__ = [
     "Propagator",
     "SpatialSuperpositionTransitionPropagator",
     "TwoLevelTransitionPropagator",
+    "ZernikeConvention",
+    "ZernikePolynomial",
+    "j_to_nm",
 ]
