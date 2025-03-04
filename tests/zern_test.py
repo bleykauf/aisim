@@ -88,3 +88,12 @@ def test_j_to_n_m():
 
     with pytest.raises(ValueError):
         j_to_n_m(-1, "unknown")
+
+    with pytest.raises(ValueError):
+        j_to_n_m(10000, ZernikeOrder.WYANT)
+
+    with pytest.raises(ValueError):
+        j_to_n_m(0, ZernikeOrder.FRINGE)
+
+    with pytest.raises(ValueError):
+        j_to_n_m(-1, ZernikeOrder.ANSI)

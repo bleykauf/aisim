@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from . import convert
-from .zern import ZernikeNorm, ZernikeOrder, ZernikePolynomial, zern_explicit
+from .zern import ZernikeNorm, ZernikeOrder, ZernikePolynomial
 
 
 class Wavevectors:
@@ -157,12 +157,8 @@ class Wavefront:
         rho = rho / self.r_wf
         rho[rho > 1] = np.nan
         theta = pos[:, 1]
-
-        if self.zern_order == ZernikeOrder.SHS:
-            values = zern_explicit(rho, theta, self.coeff)
-        else:
-            zern = ZernikePolynomial(self.coeff, self.zern_order, self.zern_norm)
-            values = zern.zern_sum(rho, theta)
+        zern = ZernikePolynomial(self.coeff, self.zern_order, self.zern_norm)
+        values = zern.zern_sum(rho, theta)
         if self.r_beam is not None:
             values[rho > self.r_beam / self.r_wf] = np.nan
         return values
@@ -231,7 +227,7 @@ def gen_wavefront(
     r_wf: float,
     std: float = 0.0,
     r_beam: float | None = None,
-    zern_order: ZernikeOrder = ZernikeOrder.SHS,
+    zern_order: ZernikeOrder = ZernikeOrder.NOLL,
     zern_norm: ZernikeNorm | None = None,
 ) -> Wavefront:
     """
