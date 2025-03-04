@@ -6,32 +6,63 @@ import numpy.typing as npt
 from scipy.special import eval_jacobi
 
 
-class ZernikeConvention(StrEnum):
-    """Enumeration of Zernike conventions for ordering and normalization."""
+# FIXME: This is not a very elegant solution. IT would be better to find an explicit
+# formula for the conversion from Wyant/Fringe single index j to n, m rather than
+# populating a lookup table.
+def _n_m_to_j_wyant(n, m):
+    return int((1 + (n + np.abs(m)) / (2)) ** 2 - 2 * np.abs(m) + (1 - np.sign(m)) / 2)
+
+
+_wyant_j_to_n_m_lookup_table = {}
+
+for n in range(100):
+    for m in reversed(range(-n, n + 1)):
+        if (n - abs(m)) % 2 == 0:
+            j = int(_n_m_to_j_wyant(n, m))
+            _wyant_j_to_n_m_lookup_table[j - 1] = (n, m)
+j_to_n_m_lookup_table = dict(sorted(_wyant_j_to_n_m_lookup_table.items()))
+
+
+class ZernikeOrder(StrEnum):
+    """Enumeration of conventions for ordering Zernike polynomials with a single index."""
 
     ANSI = "ANSI"
-    """Convention according to Z80.28-2017, i.e ANSI's indexing and normalization
-    sqrt(2n+2) for m=0 and sqrt(n+1) for m!=0.
-    """
-    ISO = "ISO"
-    """
-    Convention according to ISO 24157, i.e. Noll's indexing and normalization sqrt(n+1).
-    """
-    ISO_NAIVE = "NAIVE"
-    """
-    Naive implementation of ISO 24157, i.e. Noll's indexing and normalization sqrt(n+1).
-    """
+    """Ordering according to ANSI Z80.28-2017."""
+    NOLL = "NOLL"
+    """Noll's ordering."""
+    FRINGE = "FRINGE"
+    """Fringe ordering."""
+    WYANT = "WYANT"
+    """Wyant's ordering."""
+    SHS = "SHS"
+    """Should be equal to Wyant's ordering."""
 
 
-def j_to_nm(j: int, convention: ZernikeConvention) -> tuple[int, int]:
+class ZernikeNorm(StrEnum):
+    """Enumeration of Zernike conventions for normalization.
+
+    References
+    ----------
+    https://opg.optica.org/abstract.cfm?URI=VSIA-2000-SuC1
+    https://opg.optica.org/view_article.cfm?pdfKey=18218be4-47da-44fc-a4a09e5ef667c048_56041
+    """
+
+    OSA = "OSA"
+    """OSA normalization, sqrt(2n+2) for m=0 and sqrt(n+1) for m!=0."""
+
+    NOLL = "NOLL"
+    """Noll's normalization sqrt(n+1)."""
+
+
+def j_to_n_m(j: int, order: ZernikeOrder) -> tuple[int, int]:
     """Map the single index j to the pair of indices (n, m).
 
     References
     ----------
     https://github.com/ehpor/hcipy/blob/master/hcipy/mode_basis/zernike.py
     """
-    match convention:
-        case ZernikeConvention.ISO:
+    match order:
+        case ZernikeOrder.NOLL:
             if j < 1:
                 raise ValueError(f"Noll's index {j=} must be greater than 0.")
             n = int(np.sqrt(2 * j - 1) + 0.5) - 1
@@ -40,13 +71,26 @@ def j_to_nm(j: int, convention: ZernikeConvention) -> tuple[int, int]:
             else:
                 m = 2 * int((2 * j + 1 - n * (n + 1)) // 4)
             m = m * (-1) ** (j % 2)
-        case ZernikeConvention.ANSI:
+        case ZernikeOrder.ANSI:
             if j < 0:
                 raise ValueError(f"ANSI index {j=} can not be negative.")
             n = int((np.sqrt(8 * j + 1) - 1) / 2)
             m = 2 * j - n * (n + 2)
+        case ZernikeOrder.WYANT | ZernikeOrder.FRINGE:
+            if order == ZernikeOrder.WYANT:
+                if j < 0:
+                    raise ValueError(f"Wyant index {j=} can not be negative.")
+                if j >= len(_wyant_j_to_n_m_lookup_table):
+                    raise ValueError(f"Wyant index {j=} is out of range.")
+            else:
+                if j < 1:
+                    raise ValueError(f"Fringe index {j=} must be greater than 0.")
+                if j > len(_wyant_j_to_n_m_lookup_table):
+                    raise ValueError(f"Fringe index {j=} is out of range.")
+                j = j - 1
+            n, m = _wyant_j_to_n_m_lookup_table[j]
         case _:
-            raise ValueError(f"Unknown convention {convention=}.")
+            raise ValueError(f"Unknown ordering scheme {order=}.")
     return n, m
 
 
@@ -66,21 +110,23 @@ def radial(rho: np.ndarray, n: int, m: int) -> np.ndarray:
 
 
 def zernike_term(
-    rho: np.ndarray, theta: np.ndarray, n: int, m: int, convention: ZernikeConvention
+    rho: np.ndarray, theta: np.ndarray, n: int, m: int, norm: ZernikeNorm | None = None
 ) -> np.ndarray:
     """Compute the Zernike polynomial of degree n and azimuth m."""
-    match convention:
-        case ZernikeConvention.ISO:
+    match norm:
+        case None:
+            norm = 1
+        case ZernikeNorm.NOLL:
             norm = np.sqrt(n + 1)
-        case ZernikeConvention.ANSI:
+        case ZernikeNorm.OSA:
             norm = np.sqrt((2 * n + 2) / (1 + int(m == 0)))
         case _:
-            raise ValueError(f"Unknown convention {convention=}.")
+            raise ValueError(f"Unknown normalization scheme {norm=}.")
     r = radial(rho, n, m)
     if m == 0:
         return r * norm
     elif m < 0:
-        return r * np.sin(m * theta) * norm
+        return r * np.sin(np.abs(m) * theta) * norm
     else:
         return r * np.cos(m * theta) * norm
 
@@ -89,18 +135,18 @@ class ZernikePolynomial:
     def __init__(
         self,
         coeffs: npt.ArrayLike,
-        convention: ZernikeConvention = ZernikeConvention.ISO,
+        order: ZernikeOrder = ZernikeOrder.NOLL,
+        norm: ZernikeNorm | None = None,
     ) -> None:
-        self.convention = convention
         self.coeffs = np.asarray(coeffs)
+        self.order = order
+        self.norm = norm
         self.zernike_funcs = []
         for j in range(len(self.coeffs)):
-            if self.convention == ZernikeConvention.ISO:
-                j += 1  # Noll's index starts from 1
-            n, m = j_to_nm(j, convention)
-            self.zernike_funcs.append(
-                partial(zernike_term, n=n, m=m, convention=convention)
-            )
+            if self.order == ZernikeOrder.NOLL or self.order == ZernikeOrder.FRINGE:
+                j += 1  # Indices start at 1
+            n, m = j_to_n_m(j, order)
+            self.zernike_funcs.append(partial(zernike_term, n=n, m=m, norm=self.norm))
 
     def zern_terms(self, rho, theta):
         return np.array(
@@ -111,11 +157,9 @@ class ZernikePolynomial:
         return np.sum(self.zern_terms(rho, theta), axis=0)
 
 
-def zern_iso_naive(rho, theta, coeff):
+def zern_explicit(rho, theta, coeff):
     """
     Calculate the sum of the first 36 Zernike polynomials.
-
-    Based on ISO24157:2008.
 
     Parameters
     ----------
@@ -186,8 +230,8 @@ def zern_iso_naive(rho, theta, coeff):
         + coeff[28] * (6 * rho6 - 5 * rho4) * sin4th
         + coeff[29] * (21 * rho7 - 30 * rho5 + 10 * rho3) * cos3th
         + coeff[30] * (21 * rho7 - 30 * rho5 + 10 * rho3) * sin3th
-        + coeff[31] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * costh
-        + coeff[32] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * sinth
+        + coeff[31] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * cos2th
+        + coeff[32] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * sin2th
         + coeff[33]
         * (126 * rho9 - 280 * rho7 + 210 * rho5 - 60 * rho3 + 5 * rho)
         * costh

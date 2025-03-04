@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from . import convert
-from .zern import zern_iso_naive
+from .zern import ZernikeNorm, ZernikeOrder, ZernikePolynomial, zern_explicit
 
 
 class Wavevectors:
@@ -125,11 +125,18 @@ class Wavefront:
     """
 
     def __init__(
-        self, r_wf: float, coeff: ArrayLike, r_beam: float | None = None
+        self,
+        r_wf: float,
+        coeff: ArrayLike,
+        r_beam: float | None = None,
+        zern_order: ZernikeOrder = ZernikeOrder.WYANT,
+        zern_norm: ZernikeNorm | None = None,
     ) -> None:
         self.r_wf = r_wf
         self.coeff = np.array(coeff)
         self.r_beam = r_beam
+        self.zern_order = zern_order
+        self.zern_norm = zern_norm
 
     def get_value(self, pos: np.ndarray) -> np.ndarray:
         """
@@ -150,9 +157,14 @@ class Wavefront:
         rho = rho / self.r_wf
         rho[rho > 1] = np.nan
         theta = pos[:, 1]
-        values = zern_iso_naive(rho, theta, self.coeff)
+
+        if self.zern_order == ZernikeOrder.SHS:
+            values = zern_explicit(rho, theta, self.coeff)
+        else:
+            zern = ZernikePolynomial(self.coeff, self.zern_order, self.zern_norm)
+            values = zern.zern_sum(rho, theta)
         if self.r_beam is not None:
-            values[rho > self.r_beam] = np.nan
+            values[rho > self.r_beam / self.r_wf] = np.nan
         return values
 
     def plot(self, ax: plt.Axes | None = None) -> tuple[plt.Figure, plt.Axes]:
@@ -169,8 +181,9 @@ class Wavefront:
         azimuths = np.radians(np.linspace(0, 360, 180))
         zeniths = np.linspace(0, self.r_wf, 50)
         rho, theta = np.meshgrid(zeniths, azimuths)
-        n_dim, m_dim = rho.shape
         z = np.zeros_like(rho)
+
+        n_dim, m_dim = rho.shape
         pos = np.array([rho.flatten(), theta.flatten(), z.flatten()]).T
         values = self.get_value(convert.pol2cart(pos))
 
@@ -204,7 +217,10 @@ class Wavefront:
         else:
             fig = ax.figure
 
-        j_shift = 1
+        if self.zern_order == ZernikeOrder.ANSI:
+            j_shift = 0
+        else:
+            j_shift = 1
         ax.bar(np.arange(len(self.coeff)) + j_shift, self.coeff)
         ax.set_xlabel("Zernike polynomial $j$")
         ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
@@ -212,7 +228,11 @@ class Wavefront:
 
 
 def gen_wavefront(
-    r_wf: float, std: float = 0.0, r_beam: float | None = None
+    r_wf: float,
+    std: float = 0.0,
+    r_beam: float | None = None,
+    zern_order: ZernikeOrder = ZernikeOrder.SHS,
+    zern_norm: ZernikeNorm | None = None,
 ) -> Wavefront:
     """
     Create an artificial wavefront.
@@ -234,4 +254,4 @@ def gen_wavefront(
         artificial wavefront
     """
     coeff = np.random.normal(0, std, size=36)
-    return Wavefront(r_wf, coeff, r_beam)
+    return Wavefront(r_wf, coeff, r_beam, zern_order, zern_norm)

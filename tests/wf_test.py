@@ -11,7 +11,9 @@ def test_wf():
     grav_data = np.array(data["g"])
 
     coeff_window = np.loadtxt("docs/examples/data/wavefront.txt")
-    wf = ais.Wavefront(10.91e-3, coeff_window)
+    wf = ais.Wavefront(
+        10.91e-3, coeff_window, zern_norm=None, zern_order=ais.ZernikeOrder.WYANT
+    )
     wf.coeff[0:2] = 0  # remove piston, tip and tilt
 
     pos_params = {
