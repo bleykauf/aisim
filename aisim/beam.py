@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from . import convert
-from .zern import ZernikeNorm, ZernikeOrder, ZernikePolynomial
+from .zern import FIRST_INDEX_J, ZernikeNorm, ZernikeOrder, ZernikePolynomial
 
 
 class Wavevectors:
@@ -213,11 +213,7 @@ class Wavefront:
         else:
             fig = ax.figure
 
-        if self.zern_order == ZernikeOrder.ANSI:
-            j_shift = 0
-        else:
-            j_shift = 1
-        ax.bar(np.arange(len(self.coeff)) + j_shift, self.coeff)
+        ax.bar(np.arange(len(self.coeff)) + FIRST_INDEX_J[self.zern_order], self.coeff)
         ax.set_xlabel("Zernike polynomial $j$")
         ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
         return fig, ax
