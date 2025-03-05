@@ -19,10 +19,7 @@ Our tests are based on :code:`pytest`. To run the tests locally with your curren
 
 from the root directory.
 
-We use tox run via `Travis CI <https://travis-ci.com/github/bleykauf/aisim>`__  for testing for 
-various python versions. New commits will automatically be tested and the results reported within
-github. If all tests are succesful, coverage will be checked via 
-`coveralls <https://coveralls.io/github/bleykauf/aisim>`__ for the latest python version.
+We use Gtihub Actions to run the tests on every push to the repository.
 
 
 Documentation
