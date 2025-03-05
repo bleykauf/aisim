@@ -20,52 +20,114 @@ for n in range(100):
         if (n - abs(m)) % 2 == 0:
             j = int(_n_m_to_j_wyant(n, m))
             _wyant_j_to_n_m_lookup_table[j - 1] = (n, m)
-j_to_n_m_lookup_table = dict(sorted(_wyant_j_to_n_m_lookup_table.items()))
+_wyant_j_to_n_m_lookup_table = dict(sorted(_wyant_j_to_n_m_lookup_table.items()))
 
 
 class ZernikeOrder(StrEnum):
-    """Enumeration of conventions for ordering Zernike polynomials with a single index."""
+    """Enumeration of conventions for ordering Zernike polynomials with a single index.
+
+    There are different ways to order the Zernike polynomials with a single index. The
+    most common conventions are the OSA or ANSI convention [1, 2], the Noll
+    convention [3], the Fringe/University of Arizona/Air Force convention [4],
+    and the Wyant convention [5].
+
+    Note that some conventions start the index at 0, while others start at 1. In this
+    package, however, we always use 0-based indexing since Python uses 0-based indexing
+    for lists and arrays. That means that when using,e.g., the Noll convention, the
+    the first entry is the piston term, the second entry is the tip term, and so on.
+
+    References
+    ----------
+    [1] Noll, R. J. (1976).
+        Zernike polynomials and atmospheric turbulence*.
+        J. Opt. Soc. Am., 66, 207–211.
+        https://opg.optica.org/josa/fulltext.cfm?uri=josa-66-3-207&id=56041
+    [2] Thibos, L. N., Applegate, R. A., Schwiegerling, J. T., & Webb, R. (2000).
+        Standards for Reporting the Optical Aberrations of Eyes.
+        Optics InfoBase Conference Papers.
+    [3] ANSI Z80.28-2017.
+        American National Standard for Ophthalmics - Methods for Reporting Optical
+        Aberrations Of Eyes.
+    [4] Yen, A. (2021).
+        Straightforward path to Zernike polynomials.
+        Journal of Micro/Nanopatterning, Materials and Metrology, 20(2).
+        https://doi.org/10.1117/1.JMM.20.2.020501
+    [5] Wikipedia contributors. (2025).
+        Zernike polynomials.
+        In Wikipedia, The Free Encyclopedia.
+        https://en.wikipedia.org/wiki/Zernike_polynomials
+    """
 
     ANSI = "ANSI"
-    """Ordering according to ANSI Z80.28-2017."""
+    """Ordering according to OSA and ANSI Z80.28-2017."""
     NOLL = "NOLL"
-    """Noll's ordering."""
+    """Noll ordering."""
     FRINGE = "FRINGE"
-    """Fringe ordering."""
+    """Fringe/University of Arizona/Air Force  ordering."""
     WYANT = "WYANT"
     """Wyant's ordering."""
 
 
-FIRST_INDEX_J = {
+FIRST_INDEX_J: dict[ZernikeOrder, int] = {
     ZernikeOrder.ANSI: 0,
     ZernikeOrder.NOLL: 1,
     ZernikeOrder.FRINGE: 1,
     ZernikeOrder.WYANT: 0,
 }
-"""First index j of the Zernike polynomials for each ordering scheme."""
+"""First index j of the Zernike polynomials for each ordering scheme (1 or 0).
+
+Note that this package uses 0-based indexing for the Zernike polynomials independent of
+the ordering scheme. See
+"""
 
 
 class ZernikeNorm(StrEnum):
     """Enumeration of Zernike conventions for normalization.
 
+    There are two common conventions for normalizing Zernike polynomials. The Noll
+    convention [1] normalizes the polynomials with a factor sqrt(n+1), while the OSA
+    convention [2, 3] normalizes the polynomials to have unity variance.
+
     References
     ----------
-    https://opg.optica.org/abstract.cfm?URI=VSIA-2000-SuC1
-    https://opg.optica.org/view_article.cfm?pdfKey=18218be4-47da-44fc-a4a09e5ef667c048_56041
+    [1] Noll, R. J. (1976).
+        Zernike polynomials and atmospheric turbulence*.
+        J. Opt. Soc. Am., 66, 207-211.
+        https://opg.optica.org/josa/fulltext.cfm?uri=josa-66-3-207&id=56041
+    [2] Thibos, L. N., Applegate, R. A., Schwiegerling, J. T., & Webb, R. (2000).
+        Standards for Reporting the Optical Aberrations of Eyes.
+        Optics InfoBase Conference Papers.
+        https://doi.org/10.3928/1081-597x-20020901-30
+    [3] Lakshminarayanan, V., & Fleck, A. (2011).
+        Zernike polynomials: A guide.
+        Journal of Modern Optics (Vol. 58, Issue 7).
+        https://doi.org/10.1080/09500340.2011.554896
     """
 
-    OSA = "OSA"
-    """OSA normalization, sqrt(2n+2) for m=0 and sqrt(n+1) for m!=0."""
-
     NOLL = "NOLL"
-    """Noll's normalization sqrt(n+1)."""
+    """Noll normalization [1], sqrt(n+1)."""
+    OSA = "OSA"
+    """OSA normalization [2], sqrt(2n+2) for m=0 and sqrt(n+1) for m!=0."""
 
 
 def j_to_n_m(j: int, order: ZernikeOrder) -> tuple[int, int]:
     """Map the single index j to the pair of indices (n, m).
 
-    References
+    Parameters
     ----------
+    j : int
+        Single index of the Zernike polynomial.
+    order : ZernikeOrder
+        Ordering scheme for the Zernike polynomials.
+
+    Returns
+    -------
+    tuple of int
+        Degree and azimuth of the Zernike polynomial.
+
+    Notes
+    -----
+    Some of the implementations were taken from the hcipy library:
     https://github.com/ehpor/hcipy/blob/master/hcipy/mode_basis/zernike.py
     """
     if order not in FIRST_INDEX_J:
@@ -94,7 +156,20 @@ def j_to_n_m(j: int, order: ZernikeOrder) -> tuple[int, int]:
 
 
 def radial(rho: np.ndarray, n: int, m: int) -> np.ndarray:
-    """Compute the radial part of the Zernike polynomial."""
+    """Compute the radial part of the Zernike polynomial.
+
+    Parameters
+    ----------
+    rho : np.ndarray
+        Normalized adial coordinate.
+    n, m : int
+        Degree and azimuth of the Zernike polynomial.
+
+    Returns
+    -------
+    np.ndarray
+        Value of the Zernike polynomial at the given coordinates.
+    """
     m = np.abs(m)
     r = (
         (-1) ** ((n - m) // 2)
@@ -108,7 +183,23 @@ def radial(rho: np.ndarray, n: int, m: int) -> np.ndarray:
 def zernike_term(
     rho: np.ndarray, theta: np.ndarray, n: int, m: int, norm: ZernikeNorm | None = None
 ) -> np.ndarray:
-    """Compute the Zernike polynomial of degree n and azimuth m."""
+    """Compute the Zernike polynomial of degree n and azimuth m.
+
+    rho : np.ndarray
+        Normalized radial coordinate.
+    theta : np.ndarray
+        Azimuthal coordinate.
+    n, m : int
+        Degree and azimuth of the Zernike polynomial.
+    norm : ZernikeNorm, optional
+        Normalization scheme for the Zernike polynomial. Default is None, which means
+        no normalization.
+
+    Returns
+    -------
+    np.ndarray
+        Value of the Zernike polynomial at the given coordinates.
+    """
     match norm:
         case None:
             norm = 1
@@ -128,6 +219,36 @@ def zernike_term(
 
 
 class ZernikePolynomial:
+    """Class for evaluating Zernike polynomials.
+
+    Parameters
+    ----------
+    coeffs : ndarray
+        Coefficients of the Zernike polynomial. The coefficients are ordered  and
+        normalized according to the given `order` and `norm` scheme. Note that the
+        first coefficient (at index 0) corresponds to the piston term, the second
+        coefficient to the tip term, and so on, independent of the ordering scheme.
+    order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. Default is ZernikeOrder.NOLL. See
+        `ZernikeOrder` for possible values.
+    norm : ZernikeNorm, str or None (optional)
+        Normalization scheme for the Zernike polynomials. Default is None, which means
+        no normalization. See `ZernikeNorm` for possible values.
+
+    Attributes
+    ----------
+    coeffs : ndarray
+        Coefficients of the Zernike polynomial.
+    order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
+        values.
+    norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
+        values.
+    zernike_funcs : list of callable
+        List of Zernike polynomial functions for each coefficient.
+    """
+
     def __init__(
         self,
         coeffs: npt.ArrayLike,
@@ -144,10 +265,42 @@ class ZernikePolynomial:
             n, m = j_to_n_m(j, order)
             self.zernike_funcs.append(partial(zernike_term, n=n, m=m, norm=self.norm))
 
-    def zern_terms(self, rho, theta):
+    def zern_terms(self, rho: np.ndarray, theta: np.ndarray) -> np.ndarray:
+        """Evaluate the Zernike polynomial terms at the given coordinates.
+
+        Parameters
+        ----------
+        rho :  ndarray
+            1 dimensional array of normalized radial coordinates.
+        theta : ndarray
+            1 dimensional array of azimuthal coordinates. Must have the same length as
+            `rho`.
+
+        Returns
+        -------
+        ndarray
+            (n x m) dimensional array of the sum of the m Zernike polynomial terms at
+            the n coordinates.
+        """
         return np.array(
             [c * f(rho, theta) for c, f in zip(self.coeffs, self.zernike_funcs)]
         )
 
-    def zern_sum(self, rho, theta):
+    def zern_sum(self, rho: np.ndarray, theta: np.ndarray) -> np.ndarray:
+        """Calculate the sum of the Zernike polynomials at the given coordinates.
+
+        Parameters
+        ----------
+        rho :  ndarray
+            1 dimensional array of normalized radial coordinates.
+        theta : ndarray
+            1 dimensional array of azimuthal coordinates. Must have the same length as
+            `rho`.
+
+        Returns
+        -------
+        ndarray
+            n dimensional array of the sum of the Zernike polynomial terms at the n
+            coordinates.
+        """
         return np.sum(self.zern_terms(rho, theta), axis=0)

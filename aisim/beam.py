@@ -39,7 +39,7 @@ class Wavevectors:
 
         Returns
         -------
-        dopler_shift : 1d array
+        dopler_shift : ndarray
             Doppler shift of each atom in the ensemble in rad/s
         """
         # calculate two photon detuning for atoms' velocity (-v*k_eff)

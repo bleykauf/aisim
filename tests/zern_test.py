@@ -97,3 +97,7 @@ def test_j_to_n_m():
 
     with pytest.raises(ValueError):
         j_to_n_m(-1, ZernikeOrder.ANSI)
+
+
+def test_normalization():
+    pass
