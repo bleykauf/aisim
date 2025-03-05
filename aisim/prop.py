@@ -266,9 +266,9 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         return index_shift_matrix
 
     def _prop_matrix(self, atoms):
-        assert (
-            atoms.state_kets.shape[1] == 2 * self.n_pulses
-        ), "Number of states must be twice the number of pulses."
+        assert atoms.state_kets.shape[1] == 2 * self.n_pulses, (
+            "Number of states must be twice the number of pulses."
+        )
 
         u_two_level = super()._prop_matrix(atoms)
         u = self._block_diag(u_two_level, self.n_pulses)
