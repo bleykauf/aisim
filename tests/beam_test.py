@@ -6,7 +6,7 @@ import aisim as ais
 
 def test_wavefront():
     # test the methods of Wavefront that are not covered by wf_test.py
-    wf = ais.gen_wavefront(2, r_beam=1.0)
+    wf = ais.gen_wavefront(2, r_beam=1.0, seed=0)
     wf.plot()
     wf.plot_coeff()
     _, ax = plt.subplots()

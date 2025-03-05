@@ -240,6 +240,7 @@ def gen_wavefront(
     n_zern: int = 36,
     zern_order: ZernikeOrder = ZernikeOrder.NOLL,
     zern_norm: ZernikeNorm | None = None,
+    seed: int | None = None,
 ) -> Wavefront:
     """
     Create an artificial wavefront.
@@ -262,12 +263,16 @@ def gen_wavefront(
     zern_norm : ZernikeNorm, str or None
         Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
         values.
+    seed : int, optional
+        seed for the random number generator
 
     Returns
     -------
     wf : Wavefront
         artificial wavefront
     """
+    if seed is not None:
+        np.random.seed(seed)
     coeff = np.random.normal(0, std, size=n_zern)
     zern_coeff = {
         j: val for j, val in enumerate(coeff, start=FIRST_INDEX_J[zern_order])

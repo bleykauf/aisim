@@ -207,12 +207,13 @@ def zernike_term(
         case _:
             raise ValueError(f"Unknown normalization scheme {norm=}.")
     r = radial(rho, n, m)
+    r = r * norm
     if m == 0:
-        return r * norm
+        return r
     elif m < 0:
-        return r * np.sin(np.abs(m) * theta) * norm
+        return r * np.sin(np.abs(m) * theta)
     else:
-        return r * np.cos(m * theta) * norm
+        return r * np.cos(m * theta)
 
 
 class ZernikePolynomial:

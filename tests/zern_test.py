@@ -1,6 +1,7 @@
+import numpy as np
 import pytest
 
-from aisim.zern import ZernikeOrder, j_to_n_m
+from aisim.zern import ZernikeNorm, ZernikeOrder, j_to_n_m, zernike_term
 
 # Explicit test cases from https://en.wikipedia.org/wiki/Zernike_polynomials
 noll_mapping_examples = [
@@ -100,4 +101,6 @@ def test_j_to_n_m():
 
 
 def test_normalization():
-    pass
+    # Test for Example p. 110 of https://www.thorlabs.com/drawings/8b3619460cf44a9-01039B9C-E2C2-1948-D47C301CE6F71CB0/WFS40-5C-Manual.pdf
+    defocus = -1e-6 * zernike_term(np.array([0, 1]), 0, n=2, m=0, norm=ZernikeNorm.OSA)
+    assert np.round(1e6 * (defocus[0] - defocus[1]), 2) == 3.46
