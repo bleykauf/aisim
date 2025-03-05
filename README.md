@@ -1,4 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fbleykauf%2Faisim%2Frefs%2Fheads%2Fmaster%2Fpyproject.toml)
 ![Test Status](https://github.com/bleykauf/aisim/actions/workflows/workflow.yml/badge.svg)
 ![Test Coverage](https://raw.githubusercontent.com/bleykauf/aisim/master/docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
