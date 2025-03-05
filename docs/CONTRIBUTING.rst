@@ -7,7 +7,7 @@ We welcome everybody to help by reporting bugs or making suggestions via our
 
 Code style
 ----------
-We use the `black <https://black.readthedocs.io/en/stable/index.html>`__code style.
+We use the `ruff <https://github.com/astral-sh/ruff>`__code formatter and linter.
 
 Testing
 -------
