@@ -56,7 +56,7 @@ def test_two_level_transition_propagator_unitarity():
     atoms = create_random_thermal_atoms(100)
 
     intensity_profile = ais.IntensityProfile(1, 1)
-    wf = ais.gen_wavefront(10)
+    wf = ais.gen_wavefront(10, seed=1)
     wave_vectors = ais.Wavevectors()
 
     prop1 = ais.TwoLevelTransitionPropagator(
@@ -90,7 +90,7 @@ def test_spatial_superposition_transition_propagator_unitarity():
             atoms = create_random_thermal_atoms(100, state_kets=init_state)
 
         intensity_profile = ais.IntensityProfile(1, 1)
-        wf = ais.gen_wavefront(10)
+        wf = ais.gen_wavefront(10, seed=1)
         wave_vectors = ais.Wavevectors()
 
         for n_pulse in range(n_pulses):

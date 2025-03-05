@@ -14,9 +14,9 @@ class AtomicEnsemble:
     Parameters
     ----------
     phase_space_vectors : ndarray
-        n × 6 dimensional array representing the phase space vectors
+        n x 6 dimensional array representing the phase space vectors
         (x0, y0, z0, vx, vy, vz) of the atoms in an atomic ensemble
-    state_kets : m × 1 or n × m x 1 array or list, optional
+    state_kets : m x 1 or n x m x 1 array or list, optional
         vector(s) representing the `m` internal degrees of freedom of the atoms. If the
         list or array is one-dimensional, all atoms are initialized in the same internal
         state. Alternatively, each atom can be initialized with a different state vector
@@ -30,7 +30,7 @@ class AtomicEnsemble:
     Attributes
     ----------
     phase_space_vectors : ndarray
-        n × 6 dimensional array representing the phase space vectors
+        n x 6 dimensional array representing the phase space vectors
         (x0, y0, z0, vx, vy, vz) of the atoms in an atomic ensemble
     position
     velocity
@@ -90,7 +90,7 @@ class AtomicEnsemble:
 
     @property
     def state_kets(self):
-        """(n × m x 1) array: The ket vectors of the m level system."""
+        """(n x m x 1) array: The ket vectors of the m level system."""
         return self._state_kets
 
     @state_kets.setter
@@ -107,14 +107,14 @@ class AtomicEnsemble:
 
     @property
     def state_bras(self):
-        """(n × 1 x m) array: The bra vectors of the m level system."""
+        """(n x 1 x m) array: The bra vectors of the m level system."""
         # exchange second and third index, then complex conjugate
         return np.conjugate(np.einsum("ijk->ikj", self.state_kets))
 
     @property
     def density_matrices(self):
         """
-        (n × m x m) array: Density matrix of the m level system of the n atoms.
+        (n x m x m) array: Density matrix of the m level system of the n atoms.
 
         These are pure states.
         """
@@ -155,7 +155,7 @@ class AtomicEnsemble:
         Returns
         -------
         pos : array
-            n × 3 dimensional array of the positions (x, y, z)
+            n x 3 dimensional array of the positions (x, y, z)
         """
         return self.initial_position + self.initial_velocity * t
 

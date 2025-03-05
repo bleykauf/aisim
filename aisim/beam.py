@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from . import convert
+from .zern import FIRST_INDEX_J, ZernikeNorm, ZernikeOrder, ZernikePolynomial
 
 
 class Wavevectors:
@@ -37,7 +38,7 @@ class Wavevectors:
 
         Returns
         -------
-        dopler_shift : 1d array
+        dopler_shift : ndarray
             Doppler shift of each atom in the ensemble in rad/s
         """
         # calculate two photon detuning for atoms' velocity (-v*k_eff)
@@ -106,28 +107,51 @@ class Wavefront:
     ----------
     r_wf : float
         radius of the wavefront data in m
-    coeff : list of float
-        list of 36 Zernike coefficients in multiples of the wavelength
+    coeff : dict
+        Dictionary of the Zernike coefficients. The keys are the Zernike polynomial
+        single indices j and the values are the coefficients depends on the Zernike
+        order and normalization.
     r_beam : float (optional)
         Beam radius in m. Can be set if the beam is smaller than the wavefront data.
         Values outside of the beam will be set to NaN.
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
+        values.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
+        values.
 
     Attributes
     ----------
     r_wf : float
         radius of the wavefront data in m
-    coeff : list of float
-        list of 36 Zernike coefficients in multiples of the wavelength
+    coeff : dict
+        Dictionary of the Zernike coefficients. The keys are the Zernike polynomial
+        single indices j and the values are the coefficients depends on the Zernike
+        order and normalization.
     r_beam : float or None
         Beam radius in m. If set, values outside of the beam will be set to NaN.
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials.
     """
 
-    def __init__(self, r_wf, coeff, r_beam=None):
+    def __init__(
+        self,
+        r_wf: float,
+        coeff: dict[int, float],
+        r_beam: float | None = None,
+        zern_order: ZernikeOrder = ZernikeOrder.WYANT,
+        zern_norm: ZernikeNorm | None = None,
+    ) -> None:
         self.r_wf = r_wf
         self.coeff = coeff
         self.r_beam = r_beam
+        self.zern_order = zern_order
+        self.zern_norm = zern_norm
 
-    def get_value(self, pos):
+    def get_value(self, pos: np.ndarray) -> np.ndarray:
         """
         Get the wavefront at a position.
 
@@ -143,13 +167,16 @@ class Wavefront:
         """
         pos = convert.cart2pol(pos)
         rho = pos[:, 0]
+        rho = rho / self.r_wf
+        rho[rho > 1] = np.nan
         theta = pos[:, 1]
-        values = self.zern_iso(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
+        zern = ZernikePolynomial(self.coeff, self.zern_order, self.zern_norm)
+        values = zern.zern_sum(rho, theta)
         if self.r_beam is not None:
-            values[rho > self.r_beam] = np.nan
+            values[rho > self.r_beam / self.r_wf] = np.nan
         return values
 
-    def plot(self, ax=None):
+    def plot(self, ax: plt.Axes | None = None) -> tuple[plt.Figure, plt.Axes]:
         """
         Plot the wavefront data.
 
@@ -163,13 +190,20 @@ class Wavefront:
         azimuths = np.radians(np.linspace(0, 360, 180))
         zeniths = np.linspace(0, self.r_wf, 50)
         rho, theta = np.meshgrid(zeniths, azimuths)
-        values = self.zern_iso(rho, theta, coeff=self.coeff, r_wf=self.r_wf)
+        z = np.zeros_like(rho)
+
+        n_dim, m_dim = rho.shape
+        pos = np.array([rho.flatten(), theta.flatten(), z.flatten()]).T
+        values = self.get_value(convert.pol2cart(pos))
 
         if ax is None:
             fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
         else:
             fig = ax.figure
 
+        theta = theta.reshape(n_dim, m_dim)
+        rho = rho.reshape(n_dim, m_dim)
+        values = values.reshape(n_dim, m_dim)
         contour = ax.contourf(theta, rho, values)
         cbar = plt.colorbar(contour)
         cbar.set_label(r"Aberration / $\lambda$", rotation=90)
@@ -177,7 +211,7 @@ class Wavefront:
 
         return fig, ax
 
-    def plot_coeff(self, ax=None):
+    def plot_coeff(self, ax: plt.Axes | None = None) -> tuple[plt.Figure, plt.Axes]:
         """
         Plot the coefficients as a bar chart.
 
@@ -192,105 +226,22 @@ class Wavefront:
         else:
             fig = ax.figure
 
-        ax.bar(np.arange(len(self.coeff)), self.coeff)
-        ax.set_xlabel("Zernike polynomial $i$")
-        ax.set_ylabel(r"Zernike coefficient $Z_i$ / $\lambda$")
+        ax.bar(list(self.coeff.keys()), list(self.coeff.values()))
+        ax.set_xlabel("Zernike polynomial $j$")
+        ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
+        ax.set_xlim(min(self.coeff.keys()) - 1, max(self.coeff.keys()) + 1)
         return fig, ax
 
-    @staticmethod
-    def zern_iso(rho, theta, coeff, r_wf):
-        """
-        Calculate the sum of the first 36 Zernike polynomials.
 
-        Based on ISO24157:2008.
-
-        Parameters
-        ----------
-        rho, theta : float or array of float
-            Polar coordinates of the position where the sum of Zernike polynomials
-            should be calculated.
-        coeff : array
-            first 36 Zernike coefficients
-        r_beam : float
-            radius of the wavefront
-
-        Returns
-        -------
-        values : float or array of float
-            value(s) of the wavefront at the probed position
-        """
-        rho = rho / r_wf
-        # Make sure rho outside of the beam are NaN
-        rho[rho > 1] = np.nan
-        # precalculating values
-        # powers of rho
-        rho2 = rho * rho
-        rho3 = rho2 * rho
-        rho4 = rho3 * rho
-        rho5 = rho4 * rho
-        rho6 = rho5 * rho
-        rho7 = rho6 * rho
-        rho8 = rho7 * rho
-        rho9 = rho8 * rho
-        # cos and sin of n*theta
-        costh = np.cos(theta)
-        sinth = np.sin(theta)
-        cos2th = np.cos(2 * theta)
-        sin2th = np.sin(2 * theta)
-        cos3th = np.cos(3 * theta)
-        sin3th = np.sin(3 * theta)
-        cos4th = np.cos(4 * theta)
-        sin4th = np.sin(4 * theta)
-
-        coeff = np.array(coeff)
-
-        zern_vals = (
-            coeff[0] * np.ones(rho.shape)
-            + coeff[1] * rho * costh
-            + coeff[2] * rho * sinth
-            + coeff[3] * (2 * rho2 - 1)
-            + coeff[4] * rho2 * cos2th
-            + coeff[5] * rho2 * sin2th
-            + coeff[6] * (3 * rho3 - 2 * rho) * costh
-            + coeff[7] * (3 * rho3 - 2 * rho) * sinth
-            + coeff[8] * (6 * rho4 - 6 * rho2 + 1)
-            + coeff[9] * rho3 * cos3th
-            + coeff[10] * rho3 * sin3th
-            + coeff[11] * (4 * rho4 - 3 * rho2) * cos2th
-            + coeff[12] * (4 * rho4 - 3 * rho2) * sin2th
-            + coeff[13] * (10 * rho5 - 12 * rho3 + 3 * rho) * costh
-            + coeff[14] * (10 * rho5 - 12 * rho3 + 3 * rho) * sinth
-            + coeff[15] * (20 * rho6 - 30 * rho4 + 12 * rho2 - 1)
-            + coeff[16] * rho4 * cos4th
-            + coeff[17] * rho4 * sin4th
-            + coeff[18] * (5 * rho5 - 4 * rho3) * cos3th
-            + coeff[19] * (5 * rho5 - 4 * rho3) * sin3th
-            + coeff[20] * (15 * rho6 - 20 * rho4 + 6 * rho2) * cos2th
-            + coeff[21] * (15 * rho6 - 20 * rho4 + 6 * rho2) * sin2th
-            + coeff[22] * (35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho) * costh
-            + coeff[23] * (35 * rho7 - 60 * rho5 + 30 * rho3 - 4 * rho) * sinth
-            + coeff[24] * (70 * rho8 - 140 * rho6 + 90 * rho4 - 20 * rho2 + 1)
-            + coeff[25] * rho5 * np.cos(5 * theta)
-            + coeff[26] * rho5 * np.sin(5 * theta)
-            + coeff[27] * (6 * rho6 - 5 * rho4) * cos4th
-            + coeff[28] * (6 * rho6 - 5 * rho4) * sin4th
-            + coeff[29] * (21 * rho7 - 30 * rho5 + 10 * rho3) * cos3th
-            + coeff[30] * (21 * rho7 - 30 * rho5 + 10 * rho3) * sin3th
-            + coeff[31] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * costh
-            + coeff[32] * (56 * rho8 - 105 * rho6 + 60 * rho4 - 10 * rho2) * sinth
-            + coeff[33]
-            * (126 * rho9 - 280 * rho7 + 210 * rho5 - 60 * rho3 + 5 * rho)
-            * costh
-            + coeff[34]
-            * (126 * rho9 - 280 * rho7 + 210 * rho5 - 60 * rho3 + 5 * rho)
-            * sinth
-            + coeff[35]
-            * (252 * rho**10 - 630 * rho8 + 560 * rho6 - 210 * rho4 + 30 * rho2 - 1)
-        )
-        return zern_vals
-
-
-def gen_wavefront(r_wf, std=0, r_beam=None):
+def gen_wavefront(
+    r_wf: float,
+    std: float = 0.0,
+    r_beam: float | None = None,
+    n_zern: int = 36,
+    zern_order: ZernikeOrder = ZernikeOrder.NOLL,
+    zern_norm: ZernikeNorm | None = None,
+    seed: int | None = None,
+) -> Wavefront:
     """
     Create an artificial wavefront.
 
@@ -304,11 +255,26 @@ def gen_wavefront(r_wf, std=0, r_beam=None):
     r_beam : float, optional
         Beam radius in m. Can be set if the beam is smaller than the wavefront data.
         Values outside of the beam will be set to NaN.
+    n_zern : int
+        number of Zernike polynomials to be used
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
+        values.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
+        values.
+    seed : int, optional
+        seed for the random number generator
 
     Returns
     -------
     wf : Wavefront
         artificial wavefront
     """
-    coeff = np.random.normal(0, std, size=36)
-    return Wavefront(r_wf, coeff, r_beam)
+    if seed is not None:
+        np.random.seed(seed)
+    coeff = np.random.normal(0, std, size=n_zern)
+    zern_coeff = {
+        j: val for j, val in enumerate(coeff, start=FIRST_INDEX_J[zern_order])
+    }
+    return Wavefront(r_wf, zern_coeff, r_beam, zern_order, zern_norm)

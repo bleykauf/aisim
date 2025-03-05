@@ -10,7 +10,7 @@ authors = [
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -20,8 +20,8 @@ classifiers = [
 dependencies = [
     "numpy>=1.26.4,<3.0.0",
     "scipy>=1.15.1,<2.0",
-    "matplotlib>=3.9.4,<4.0.0"
-    ]
+    "matplotlib>=3.9.4,<4.0.0",
+]
 dynamic = ["version"]
 
 [project.optional-dependencies]
