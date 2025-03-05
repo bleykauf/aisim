@@ -7,7 +7,7 @@ We welcome everybody to help by reporting bugs or making suggestions via our
 
 Code style
 ----------
-We use the `ruff <https://github.com/astral-sh/ruff>`__code formatter and linter.
+We use the `ruff <https://github.com/astral-sh/ruff>`__ code formatter and linter.
 
 Testing
 -------
