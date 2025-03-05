@@ -3,7 +3,6 @@
 ![Test Status](https://github.com/bleykauf/aisim/actions/workflows/workflow.yml/badge.svg)
 ![Test Coverage](https://raw.githubusercontent.com/bleykauf/aisim/master/docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================
