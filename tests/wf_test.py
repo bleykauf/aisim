@@ -10,11 +10,14 @@ def test_wf():
     r_dets = np.array(data["r_det"])
     grav_data = np.array(data["g"])
 
-    coeff_window = np.loadtxt("docs/examples/data/wavefront.txt")
+    coeff_window = {
+        j: val for j, val in enumerate(np.loadtxt("docs/examples/data/wavefront.txt"))
+    }
     wf = ais.Wavefront(
         10.91e-3, coeff_window, zern_norm=None, zern_order=ais.ZernikeOrder.WYANT
     )
-    wf.coeff[0:2] = 0  # remove piston, tip and tilt
+    for n in [0, 1, 2]:
+        wf.coeff[n] = 0  # remove piston, tip and tilt
 
     pos_params = {
         "mean_x": 0.0,

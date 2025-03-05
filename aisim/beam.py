@@ -2,7 +2,6 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy.typing import ArrayLike
 
 from . import convert
 from .zern import FIRST_INDEX_J, ZernikeNorm, ZernikeOrder, ZernikePolynomial
@@ -108,32 +107,46 @@ class Wavefront:
     ----------
     r_wf : float
         radius of the wavefront data in m
-    coeff : list of float
-        list of 36 Zernike coefficients in multiples of the wavelength
+    coeff : dict
+        Dictionary of the Zernike coefficients. The keys are the Zernike polynomial
+        single indices j and the values are the coefficients depends on the Zernike
+        order and normalization.
     r_beam : float (optional)
         Beam radius in m. Can be set if the beam is smaller than the wavefront data.
         Values outside of the beam will be set to NaN.
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
+        values.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
+        values.
 
     Attributes
     ----------
     r_wf : float
         radius of the wavefront data in m
-    coeff : list of float
-        list of 36 Zernike coefficients in multiples of the wavelength
+    coeff : dict
+        Dictionary of the Zernike coefficients. The keys are the Zernike polynomial
+        single indices j and the values are the coefficients depends on the Zernike
+        order and normalization.
     r_beam : float or None
         Beam radius in m. If set, values outside of the beam will be set to NaN.
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials.
     """
 
     def __init__(
         self,
         r_wf: float,
-        coeff: ArrayLike,
+        coeff: dict[int, float],
         r_beam: float | None = None,
         zern_order: ZernikeOrder = ZernikeOrder.WYANT,
         zern_norm: ZernikeNorm | None = None,
     ) -> None:
         self.r_wf = r_wf
-        self.coeff = np.array(coeff)
+        self.coeff = coeff
         self.r_beam = r_beam
         self.zern_order = zern_order
         self.zern_norm = zern_norm
@@ -213,9 +226,10 @@ class Wavefront:
         else:
             fig = ax.figure
 
-        ax.bar(np.arange(len(self.coeff)) + FIRST_INDEX_J[self.zern_order], self.coeff)
+        ax.bar(list(self.coeff.keys()), list(self.coeff.values()))
         ax.set_xlabel("Zernike polynomial $j$")
         ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
+        ax.set_xlim(min(self.coeff.keys()) - 1, max(self.coeff.keys()) + 1)
         return fig, ax
 
 
@@ -223,6 +237,7 @@ def gen_wavefront(
     r_wf: float,
     std: float = 0.0,
     r_beam: float | None = None,
+    n_zern: int = 36,
     zern_order: ZernikeOrder = ZernikeOrder.NOLL,
     zern_norm: ZernikeNorm | None = None,
 ) -> Wavefront:
@@ -239,11 +254,22 @@ def gen_wavefront(
     r_beam : float, optional
         Beam radius in m. Can be set if the beam is smaller than the wavefront data.
         Values outside of the beam will be set to NaN.
+    n_zern : int
+        number of Zernike polynomials to be used
+    zern_order : ZernikeOrder or str
+        Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
+        values.
+    zern_norm : ZernikeNorm, str or None
+        Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
+        values.
 
     Returns
     -------
     wf : Wavefront
         artificial wavefront
     """
-    coeff = np.random.normal(0, std, size=36)
-    return Wavefront(r_wf, coeff, r_beam, zern_order, zern_norm)
+    coeff = np.random.normal(0, std, size=n_zern)
+    zern_coeff = {
+        j: val for j, val in enumerate(coeff, start=FIRST_INDEX_J[zern_order])
+    }
+    return Wavefront(r_wf, zern_coeff, r_beam, zern_order, zern_norm)

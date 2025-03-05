@@ -1,8 +1,8 @@
 from enum import StrEnum
 from functools import partial
+from typing import Callable
 
 import numpy as np
-import numpy.typing as npt
 from scipy.special import eval_jacobi
 
 
@@ -21,6 +21,9 @@ for n in range(100):
             j = int(_n_m_to_j_wyant(n, m))
             _wyant_j_to_n_m_lookup_table[j - 1] = (n, m)
 _wyant_j_to_n_m_lookup_table = dict(sorted(_wyant_j_to_n_m_lookup_table.items()))
+_fringe_j_to_n_m_lookup_table = {
+    idx + 1: val for idx, val in _wyant_j_to_n_m_lookup_table.items()
+}
 
 
 class ZernikeOrder(StrEnum):
@@ -30,11 +33,6 @@ class ZernikeOrder(StrEnum):
     most common conventions are the OSA or ANSI convention [1, 2], the Noll
     convention [3], the Fringe/University of Arizona/Air Force convention [4],
     and the Wyant convention [5].
-
-    Note that some conventions start the index at 0, while others start at 1. In this
-    package, however, we always use 0-based indexing since Python uses 0-based indexing
-    for lists and arrays. That means that when using,e.g., the Noll convention, the
-    the first entry is the piston term, the second entry is the tip term, and so on.
 
     References
     ----------
@@ -74,11 +72,7 @@ FIRST_INDEX_J: dict[ZernikeOrder, int] = {
     ZernikeOrder.FRINGE: 1,
     ZernikeOrder.WYANT: 0,
 }
-"""First index j of the Zernike polynomials for each ordering scheme (1 or 0).
-
-Note that this package uses 0-based indexing for the Zernike polynomials independent of
-the ordering scheme. See
-"""
+"""First index j of the Zernike polynomials for each ordering scheme (1 or 0)."""
 
 
 class ZernikeNorm(StrEnum):
@@ -147,11 +141,14 @@ def j_to_n_m(j: int, order: ZernikeOrder) -> tuple[int, int]:
         case ZernikeOrder.ANSI:
             n = int((np.sqrt(8 * j + 1) - 1) / 2)
             m = 2 * j - n * (n + 2)
-        case ZernikeOrder.WYANT | ZernikeOrder.FRINGE:
-            j = j - FIRST_INDEX_J[order]
+        case ZernikeOrder.WYANT:
             if j >= len(_wyant_j_to_n_m_lookup_table):
                 raise ValueError(f"Fringe index {j=} is out of range.")
             n, m = _wyant_j_to_n_m_lookup_table[j]
+        case ZernikeOrder.FRINGE:
+            if j > len(_fringe_j_to_n_m_lookup_table):
+                raise ValueError(f"Fringe index {j=} is out of range.")
+            n, m = _fringe_j_to_n_m_lookup_table[j]
     return n, m
 
 
@@ -223,11 +220,10 @@ class ZernikePolynomial:
 
     Parameters
     ----------
-    coeffs : ndarray
-        Coefficients of the Zernike polynomial. The coefficients are ordered  and
-        normalized according to the given `order` and `norm` scheme. Note that the
-        first coefficient (at index 0) corresponds to the piston term, the second
-        coefficient to the tip term, and so on, independent of the ordering scheme.
+    coeffs : dict
+        Coefficients of the Zernike polynomial. The keys of the dict are the single
+        indices j of the Zernike polynomials according to the given ordering scheme. If
+        the ordering scheme starts at 1, index 0 (if present) is ignored.
     order : ZernikeOrder or str
         Ordering scheme for the Zernike polynomials. Default is ZernikeOrder.NOLL. See
         `ZernikeOrder` for possible values.
@@ -237,35 +233,34 @@ class ZernikePolynomial:
 
     Attributes
     ----------
-    coeffs : ndarray
-        Coefficients of the Zernike polynomial.
+    coeffs : dict
+        Coefficients of the Zernike polynomial with the single index j as keys.
     order : ZernikeOrder or str
         Ordering scheme for the Zernike polynomials. See `ZernikeOrder` for possible
         values.
     norm : ZernikeNorm, str or None
         Normalization scheme for the Zernike polynomials. See `ZernikeNorm` for possible
         values.
-    zernike_funcs : list of callable
-        List of Zernike polynomial functions for each coefficient.
+    zernike_funcs : dict
+        Dict of Zernike polynomial functions for each coefficient indexed by  the single
+        index j.
     """
 
     def __init__(
         self,
-        coeffs: npt.ArrayLike,
+        coeffs: dict[int, float],
         order: ZernikeOrder = ZernikeOrder.NOLL,
         norm: ZernikeNorm | None = None,
     ) -> None:
-        self.coeffs = np.asarray(coeffs)
+        self.coeffs = coeffs
         self.order = order
         self.norm = norm
-        self.zernike_funcs = []
-        for j in range(len(self.coeffs)):
-            if self.order == ZernikeOrder.NOLL or self.order == ZernikeOrder.FRINGE:
-                j += 1  # Indices start at 1
+        self.zernike_funcs: dict[int, Callable] = {}
+        for j in self.coeffs:
             n, m = j_to_n_m(j, order)
-            self.zernike_funcs.append(partial(zernike_term, n=n, m=m, norm=self.norm))
+            self.zernike_funcs[j] = partial(zernike_term, n=n, m=m, norm=self.norm)
 
-    def zern_terms(self, rho: np.ndarray, theta: np.ndarray) -> np.ndarray:
+    def zern_terms(self, rho: np.ndarray, theta: np.ndarray) -> dict[int, np.ndarray]:
         """Evaluate the Zernike polynomial terms at the given coordinates.
 
         Parameters
@@ -278,13 +273,15 @@ class ZernikePolynomial:
 
         Returns
         -------
-        ndarray
-            (n x m) dimensional array of the sum of the m Zernike polynomial terms at
-            the n coordinates.
+        dict
+            Dictionary with the Zernike polynomial terms for all coordinates and for
+            each coefficient. The keys are the single indices j depending on the
+            ordering scheme.
         """
-        return np.array(
-            [c * f(rho, theta) for c, f in zip(self.coeffs, self.zernike_funcs)]
-        )
+        terms = {}
+        for j in self.coeffs:
+            terms[j] = self.coeffs[j] * self.zernike_funcs[j](rho, theta)
+        return terms
 
     def zern_sum(self, rho: np.ndarray, theta: np.ndarray) -> np.ndarray:
         """Calculate the sum of the Zernike polynomials at the given coordinates.
@@ -303,4 +300,4 @@ class ZernikePolynomial:
             n dimensional array of the sum of the Zernike polynomial terms at the n
             coordinates.
         """
-        return np.sum(self.zern_terms(rho, theta), axis=0)
+        return np.sum(np.array(list(self.zern_terms(rho, theta).values())), axis=0)
