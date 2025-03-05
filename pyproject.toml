@@ -26,26 +26,20 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-    "black>=24.10.0",
-    "flake8>=7.1.1",
-    "flake8-pyproject>=1.2.3",
-    "isort>=5.13.2",
+    "ruff>=0.9.9",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
     "setuptools_scm>=8.1.0",
 ]
-docs = ["sphinx", "nbsphinx", "pygments>=2.4", "sphinx_rtd_theme"]
+docs = [
+    "sphinx>=8.2.1",
+    "nbsphinx>=0.9.6",
+    "pygments>=2.4",
+    "sphinx_rtd_theme>=3.0.2",
+]
 
 [tool.setuptools_scm]
 
 [project.urls]
 homepage = "https://github.com/bleykauf/aisim/"
 repository = "https://github.com/bleykauf/aisim/"
-
-[tool.flake8]
-max-line-length = 88
-extend-ignore = "E203"
-docstring-convention = "numpy"
-
-[tool.isort]
-profile = "black"
