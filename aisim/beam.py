@@ -181,7 +181,7 @@ class Wavefront:
         self,
         ax: plt.Axes | None = None,
         cmap: str | Colormap = "RdBu",
-        level: int = 100,
+        levels: int = 100,
         **kwargs,
     ) -> tuple[plt.Figure, plt.Axes]:
         """
@@ -221,7 +221,7 @@ class Wavefront:
         theta = theta.reshape(n_dim, m_dim)
         rho = rho.reshape(n_dim, m_dim)
         values = values.reshape(n_dim, m_dim)
-        contour = ax.contourf(theta, rho, values, cmap=cmap, **kwargs)
+        contour = ax.contourf(theta, rho, values, cmap=cmap, levels=levels, **kwargs)
         cbar = plt.colorbar(contour)
         cbar.set_label(r"Aberration / $\lambda$", rotation=90)
         plt.tight_layout()
