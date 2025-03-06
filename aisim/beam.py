@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import Colormap
 
 from . import convert
 from .zern import FIRST_INDEX_J, ZernikeNorm, ZernikeOrder, ZernikePolynomial
@@ -176,7 +177,13 @@ class Wavefront:
             values[rho > self.r_beam / self.r_wf] = np.nan
         return values
 
-    def plot(self, ax: plt.Axes | None = None) -> tuple[plt.Figure, plt.Axes]:
+    def plot(
+        self,
+        ax: plt.Axes | None = None,
+        cmap: str | Colormap = "RdBu",
+        levels: int = 100,
+        **kwargs,
+    ) -> tuple[plt.Figure, plt.Axes]:
         """
         Plot the wavefront data.
 
@@ -185,7 +192,17 @@ class Wavefront:
         ax : Axis , optional
             If axis is provided, they will be used for the plot. if not provided, a new
             plot will automatically be created.
+        cmap : str or Colormap
+            Colormap for the plot
+        level : int
+            Number of levels for the contour plot
+        **kwargs
+            Additional keyword arguments for the plot function
 
+        Returns
+        -------
+        fig, ax : tuple of plt.Figure and plt.Axes
+            The figure and axis of the plot
         """
         azimuths = np.radians(np.linspace(0, 360, 180))
         zeniths = np.linspace(0, self.r_wf, 50)
@@ -204,14 +221,16 @@ class Wavefront:
         theta = theta.reshape(n_dim, m_dim)
         rho = rho.reshape(n_dim, m_dim)
         values = values.reshape(n_dim, m_dim)
-        contour = ax.contourf(theta, rho, values)
+        contour = ax.contourf(theta, rho, values, cmap=cmap, levels=levels, **kwargs)
         cbar = plt.colorbar(contour)
         cbar.set_label(r"Aberration / $\lambda$", rotation=90)
         plt.tight_layout()
 
         return fig, ax
 
-    def plot_coeff(self, ax: plt.Axes | None = None) -> tuple[plt.Figure, plt.Axes]:
+    def plot_coeff(
+        self, ax: plt.Axes | None = None, **kwargs
+    ) -> tuple[plt.Figure, plt.Axes]:
         """
         Plot the coefficients as a bar chart.
 
@@ -220,13 +239,18 @@ class Wavefront:
         ax : Axis , optional
             If axis is provided, they will be used for the plot. if not provided, a new
             plot will automatically be created.
+
+        Returns
+        -------
+        fig, ax : tuple of plt.Figure and plt.Axes
+            The figure and axis of the plot
         """
         if ax is None:
             fig, ax = plt.subplots()
         else:
             fig = ax.figure
 
-        ax.bar(list(self.coeff.keys()), list(self.coeff.values()))
+        ax.bar(list(self.coeff.keys()), list(self.coeff.values()), **kwargs)
         ax.set_xlabel("Zernike polynomial $j$")
         ax.set_ylabel(r"Zernike coefficient $Z_j$ / $\lambda$")
         ax.set_xlim(min(self.coeff.keys()) - 1, max(self.coeff.keys()) + 1)

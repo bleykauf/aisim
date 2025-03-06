@@ -1,5 +1,8 @@
 """Classes and functions related to the atomic cloud."""
 
+from typing import Literal
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as splin
 
@@ -32,13 +35,6 @@ class AtomicEnsemble:
     phase_space_vectors : ndarray
         n x 6 dimensional array representing the phase space vectors
         (x0, y0, z0, vx, vy, vz) of the atoms in an atomic ensemble
-    position
-    velocity
-    state_kets
-    state_bras
-    density_matrices
-    density_matrix
-
     """
 
     def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0):
@@ -53,7 +49,7 @@ class AtomicEnsemble:
     def __getitem__(self, key):
         """Select  certain atoms "from the ensemble.
 
-            Parameters
+        Parameters
         ----------
             key : int or slice or bool map
                 for example 2, 1:15 or a boolean map
@@ -209,6 +205,49 @@ class AtomicEnsemble:
         [1] https://en.wikipedia.org/wiki/Fidelity_of_quantum_states
         """
         return _fidelity(self.density_matrix, rho_target)
+
+    def plot(
+        self,
+        ax: plt.Axes | None = None,
+        view_from: Literal["x", "y", "z"] = "z",
+        bins: int = 50,
+        **kwargs,
+    ) -> tuple[plt.Figure, plt.Axes]:
+        """Plot the positions of the atoms in the ensemble.
+
+        ax : Axis , optional
+            If axis is provided, they will be used for the plot. if not provided, a new
+            plot will automatically be created.
+        view_from : str
+            View from which direction the plot is created. Options are "x", "y", "z".
+        bins : int
+            Number of bins for the histogram
+        **kwargs
+            Additional keyword arguments for the plot function
+
+        Returns
+        -------
+        fig, ax : tuple of plt.Figure and plt.Axes
+            The figure and axis of the plot
+        """
+        if ax is None:
+            fig, ax = plt.subplots(subplot_kw=dict(projection="polar"))
+        else:
+            fig = ax.figure
+
+        view = {
+            "x": (1, 2),
+            "y": (0, 2),
+            "z": (0, 1),
+        }
+        ax.hist2d(
+            self.position[:, view[view_from][0]],
+            self.position[:, view[view_from][1]],
+            bins=bins,
+            **kwargs,
+        )
+
+        return fig, ax
 
 
 def create_random_ensemble_from_gaussian_distribution(
