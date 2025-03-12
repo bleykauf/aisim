@@ -1,4 +1,5 @@
 import json
+from functools import partial
 
 import numpy as np
 
@@ -19,31 +20,24 @@ def test_wf():
     for n in [0, 1, 2]:
         wf.coeff[n] = 0  # remove piston, tip and tilt
 
-    pos_params = {
-        "mean_x": 0.0,
-        "std_x": 3.0e-3,  # cloud radius in m
-        "mean_y": 0.0,
-        "std_y": 3.0e-3,  # cloud radius in m
-        "mean_z": 0.0,
-        "std_z": 0.0,  # ignore z dimension, its not relevant here
-    }
-    vel_params = {
-        "mean_vx": 0.0,
-        "std_vx": ais.convert.vel_from_temp(
-            3.5e-6
-        ),  # cloud velocity spread in m/s at tempearture of 3 uK
-        "mean_vy": 0.0,
-        "std_vy": ais.convert.vel_from_temp(
-            3.5e-6
-        ),  # cloud velocity spread in m/s at tempearture of 3 uK
-        "mean_vz": 0.0,
-        "std_vz": ais.convert.vel_from_temp(
-            160e-9
-        ),  # after velocity selection, velocity in z direction is 160 nK
-    }
-
-    atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, int(1e5), state_kets=[0, 1], seed=1
+    atoms = ais.create_random_ensemble(
+        int(1e5),
+        mean_x=0.0,
+        mean_y=0.0,
+        mean_z=0.0,
+        mean_vx=0.0,
+        mean_vy=0.0,
+        mean_vz=0.0,
+        x_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        y_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        z_dist=partial(ais.dist.position_dist_gaussian, std=0.0),
+        vx_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.5e-6),
+        vy_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.5e-6),
+        vz_dist=partial(
+            ais.dist.velocity_dist_for_gaussian_velsel, pulse_duration=60e-6
+        ),
+        state_kets=[0, 1],
+        seed=1,
     )
 
     t_det = 778e-3  # time of the detection in s

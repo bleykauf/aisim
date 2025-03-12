@@ -1,10 +1,13 @@
 """Classes and functions related to the atomic cloud."""
 
-from typing import Literal
+from functools import partial
+from typing import Callable, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as splin
+
+from .dist import position_dist_gaussian, velocity_dist_from_temp
 
 
 class AtomicEnsemble:
@@ -37,7 +40,7 @@ class AtomicEnsemble:
         (x0, y0, z0, vx, vy, vz) of the atoms in an atomic ensemble
     """
 
-    def __init__(self, phase_space_vectors, state_kets=[1, 0], time=0):
+    def __init__(self, phase_space_vectors, state_kets=[1, 0], time: float = 0.0):
         assert phase_space_vectors.shape[1] == 6
         self.phase_space_vectors = phase_space_vectors
         self.state_kets = state_kets
@@ -127,7 +130,7 @@ class AtomicEnsemble:
 
     @property
     def position(self):
-        """(n × 3) array: Positions (x, y, z) of the atoms in the ensemble."""
+        """(n x 3) array: Positions (x, y, z) of the atoms in the ensemble."""
         return self.phase_space_vectors[:, 0:3]
 
     @position.setter
@@ -136,8 +139,12 @@ class AtomicEnsemble:
 
     @property
     def velocity(self):
-        """array: Velocities of the atoms in the ensemble."""
+        """n x 3) array: Velocities (vx, vy, vz) of the atoms in the ensemble."""
         return self.phase_space_vectors[:, 3:6]
+
+    @velocity.setter
+    def velocity(self, new_velocity):
+        self.phase_space_vectors[:, 3:6] = new_velocity
 
     def calc_position(self, t):
         """
@@ -215,7 +222,7 @@ class AtomicEnsemble:
     ) -> tuple[plt.Figure, plt.Axes]:
         """Plot the positions of the atoms in the ensemble.
 
-        ax : Axis , optional
+        ax : Axis, optional
             If axis is provided, they will be used for the plot. if not provided, a new
             plot will automatically be created.
         view_from : str
@@ -250,21 +257,53 @@ class AtomicEnsemble:
         return fig, ax
 
 
-def create_random_ensemble_from_gaussian_distribution(
-    pos_params, vel_params, n_samples, seed=None, **kwargs
-):
-    """
-    Random atomic ensemble from normal position and velocity distributions.
+def create_random_ensemble(
+    n_samples: int,
+    *,
+    mean_x: float = 0.0,
+    mean_y: float = 0.0,
+    mean_z: float = 0.0,
+    mean_vx: float = 0.0,
+    mean_vy: float = 0.0,
+    mean_vz: float = 0.0,
+    x_dist: Callable[[int], np.ndarray] = partial(position_dist_gaussian, std=1.5e-3),
+    y_dist: Callable[[int], np.ndarray] = partial(position_dist_gaussian, std=1.5e-3),
+    z_dist: Callable[[int], np.ndarray] = partial(position_dist_gaussian, std=1.5e-3),
+    vx_dist: Callable[[int], np.ndarray] = partial(
+        velocity_dist_from_temp, temperature=3e-6
+    ),
+    vy_dist: Callable[[int], np.ndarray] = partial(
+        velocity_dist_from_temp, temperature=3e-6
+    ),
+    vz_dist: Callable[[int], np.ndarray] = partial(
+        velocity_dist_from_temp, temperature=160e-9
+    ),
+    seed: int | None = None,
+    **kwargs,
+) -> AtomicEnsemble:
+    """Create a random atomic ensemble from given distributions.
+
+    Have a look at the example notebooks to see how to use `partial` to create
+    distributions with different user defined parameters.
 
     Parameters
     ----------
-    pos_params, vel_params : dict
-        Dictionary containing the parameters determining the position and velocity
-        distributions of the atomic ensemble. Entries for position space are  'mean_x',
-        'std_x' ,'mean_y', 'std_y', 'mean_z', 'std_z'. Entries for velocity
-        space are 'mean_vx','std_vx', 'mean_vy', 'std_vy','mean_vz', 'std_vz'.
-    n_samples : float
+    n_samples : int
         number of random samples
+    mean_x, mean_y, mean_z : float, optional
+        mean position of the atomic ensemble in meters (default 0.0)
+    mean_vx, mean_vy, mean_vz : float, optional
+        mean velocity of the atomic ensemble in meters per second (default 0.0)
+    x_dist, y_dist, z_dist : callable
+        Function that returns a random position distribution. The function takes a
+        single integer argument `n` and returns a n-dimensional array of random samples.
+        To be used with `partial` to set the parameters of the distributions from the
+        `dist` module.
+    vx_dist, vy_dist, vz_dist : callable
+        Function that returns a random velocity distribution. The function takes a
+        single integer argument `n` and returns a n-dimensional array of random samples.
+        To be used with `partial` to set the parameters of the distributions from the
+        `dist` module.
     seed : int or 1-d array_like, optional
         Set the seed of the random number generator to get predictable samples. If set,
         this number is passed to `numpy.random.seed`.
@@ -276,29 +315,18 @@ def create_random_ensemble_from_gaussian_distribution(
     ensemble : AtomicEnsemble
         Atomic ensemble containing the generated phase space vectors.
     """
+
     if seed is not None:
         np.random.seed(seed)
 
     # initialize vector with phase-space entries and fill them
     phase_space_vectors = np.zeros((n_samples, 6))
-    phase_space_vectors[:, 0] = np.random.normal(
-        loc=pos_params["mean_x"], scale=pos_params["std_x"], size=n_samples
-    )
-    phase_space_vectors[:, 1] = np.random.normal(
-        loc=pos_params["mean_y"], scale=pos_params["std_y"], size=n_samples
-    )
-    phase_space_vectors[:, 2] = np.random.normal(
-        loc=pos_params["mean_z"], scale=pos_params["std_z"], size=n_samples
-    )
-    phase_space_vectors[:, 3] = np.random.normal(
-        loc=vel_params["mean_vx"], scale=vel_params["std_vx"], size=n_samples
-    )
-    phase_space_vectors[:, 4] = np.random.normal(
-        loc=vel_params["mean_vy"], scale=vel_params["std_vy"], size=n_samples
-    )
-    phase_space_vectors[:, 5] = np.random.normal(
-        loc=vel_params["mean_vz"], scale=vel_params["std_vz"], size=n_samples
-    )
+    phase_space_vectors[:, 0] = x_dist(n_samples) + mean_x
+    phase_space_vectors[:, 1] = y_dist(n_samples) + mean_y
+    phase_space_vectors[:, 2] = z_dist(n_samples) + mean_z
+    phase_space_vectors[:, 3] = vx_dist(n_samples) + mean_vx
+    phase_space_vectors[:, 4] = vy_dist(n_samples) + mean_vy
+    phase_space_vectors[:, 5] = vz_dist(n_samples) + mean_vz
     ensemble = AtomicEnsemble(phase_space_vectors, **kwargs)
     return ensemble
 

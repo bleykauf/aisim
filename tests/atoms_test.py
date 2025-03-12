@@ -1,3 +1,5 @@
+from functools import partial
+
 import numpy as np
 import pytest  # noqa
 
@@ -73,27 +75,22 @@ def test_atomic_ensemble_methods():
             sliced_atoms = random_atoms[0:5]
             assert len(sliced_atoms) == 5
 
-    # Test AtomicEnsemble from
-    # create_random_ensemble_from_gaussian_distribution method
-    pos_params = {
-        "mean_x": 1.0,
-        "std_x": 1.0,
-        "mean_y": 1.0,
-        "std_y": 1.0,
-        "mean_z": 1.0,
-        "std_z": 1.0,
-    }
-    vel_params = {
-        "mean_vx": 1.0,
-        "std_vx": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vy": 1.0,
-        "std_vy": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vz": 1.0,
-        "std_vz": ais.convert.vel_from_temp(0.2e-6),
-    }
-    atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_atom, state_kets=random_atoms.state_kets
+    # Create an ensemble of atoms
+    atoms = ais.create_random_ensemble(
+        n_atom,
+        mean_x=1.0,
+        mean_y=1.0,
+        mean_z=1.0,
+        x_dist=partial(ais.dist.position_dist_gaussian, std=1.0),
+        y_dist=partial(ais.dist.position_dist_gaussian, std=1.0),
+        z_dist=partial(ais.dist.position_dist_gaussian, std=1.0),
+        vx_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.0e-6),
+        vy_dist=partial(ais.dist.velocity_dist_from_temp, temperature=30.0e-6),
+        vz_dist=partial(ais.dist.velocity_dist_from_temp, temperature=0.2e-6),
+        seed=1,
+        state_kets=random_atoms.state_kets,
     )
+
     atomic_ensemble_test_function(atoms)
 
 

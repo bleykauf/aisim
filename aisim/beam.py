@@ -70,7 +70,6 @@ class IntensityProfile:
         Rabi frequency at center of intensity profile in rad/s
     r_beam : float or None
         Beam radius in m. If set, Rabi frequency will be set to 0 outside of the beam.
-
     """
 
     def __init__(self, r_profile, center_rabi_freq, r_beam=None):
