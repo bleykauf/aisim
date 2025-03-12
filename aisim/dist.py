@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 from .convert import vel_from_temp
 
 
-def position_dist_gaussian(n: int, std: float, seed: int | None = None) -> np.ndarray:
+def position_dist_gaussian(n: int, std: float) -> np.ndarray:
     """Create a random position distribution from a Gaussian distribution.
 
     Parameters
@@ -15,19 +15,11 @@ def position_dist_gaussian(n: int, std: float, seed: int | None = None) -> np.nd
         number of samples
     std : float
         standard deviation of the Gaussian distribution in meters
-    seed : int or 1-d array_like, optional
-        Set the seed of the random number generator to get predictable samples. If set,
-        this number is passed to `numpy.random.seed`.
     """
-    if seed is not None:
-        np.random.seed(seed)
-
     return np.random.normal(scale=std, size=n)
 
 
-def velocity_dist_from_temp(
-    n: int, temperature: float, seed: int | None = None
-) -> np.ndarray:
+def velocity_dist_from_temp(n: int, temperature: float) -> np.ndarray:
     """Create a random velocity distribution from a given temperature.
 
     Parameters
@@ -36,27 +28,17 @@ def velocity_dist_from_temp(
         number of samples
     temperature : float
         temperature of the atomic ensemble in Kelvin
-    seed : int or 1-d array_like, optional
-        Set the seed of the random number generator to get predictable samples. If set,
-        this number is passed to `numpy.random.seed`.
 
     Returns
     -------
     velocities : array
         n-dimensional array of the randomly selected velocities
     """
-    if seed is not None:
-        np.random.seed(seed)
-
     return np.random.normal(scale=vel_from_temp(temperature), size=n)
 
 
 def velocity_dist_for_box_pulse_velsel(
-    n: int,
-    pulse_duration: float,
-    wavelenth: float = 780e-9,
-    n_lobes: int = 3,
-    seed: int | None = None,
+    n: int, pulse_duration: float, wavelenth: float = 780e-9, n_lobes: int = 3
 ) -> np.ndarray:
     """Create a random velocity distribution for a box pulse velocity selection.
 
@@ -76,18 +58,12 @@ def velocity_dist_for_box_pulse_velsel(
         wavelength of the light in meters (default 780e-9)
     n_lobes : int, optional
         number of lobes of the sinc function that are sampled (default 3)
-    seed : int or 1-d array_like, optional
-        Set the seed of the random number generator to get predictable samples. If set,
-        this number is passed to `numpy.random.seed`.
 
     Returns
     -------
     velocities : array
         n-dimensional array of the randomly selected velocities
     """
-
-    if seed is not None:
-        np.random.seed(seed)
 
     def box_pulse_ft(x: np.ndarray, pulse_duration: float) -> np.ndarray:
         """Fourier transform of a box pulse."""
@@ -103,7 +79,7 @@ def velocity_dist_for_box_pulse_velsel(
 
 
 def velocity_dist_for_gaussian_velsel(
-    n: int, pulse_duration: float, wavelength: float = 780e-9, seed: int | None = None
+    n: int, pulse_duration: float, wavelength: float = 780e-9
 ):
     """Create a random velocity distribution for a Gaussian pulse velocity selection.
 
@@ -115,18 +91,12 @@ def velocity_dist_for_gaussian_velsel(
         duration of the Gaussian pulse in seconds (1/sqrt(2) full width, i.e. 2*sigma)
     wavelength : float, optional
         wavelength of the light in meters (default 780e-9)
-    seed : int or 1-d array_like, optional
-        Set the seed of the random number generator to get predictable samples. If set,
-        this number is passed to `numpy.random.seed
 
     Returns
     -------
     velocities : array
         n-dimensional array of the randomly selected velocities
     """
-
-    if seed is not None:
-        np.random.seed(seed)
 
     pulse_duration = pulse_duration / 2  # Convert to sigma
     sigma_nu = 1 / (2 * np.pi * pulse_duration)

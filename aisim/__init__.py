@@ -2,7 +2,7 @@
 
 from importlib.metadata import version
 
-from .atoms import AtomicEnsemble, create_random_ensemble_from_gaussian_distribution
+from .atoms import AtomicEnsemble, create_random_ensemble
 from .beam import IntensityProfile, Wavefront, Wavevectors, gen_wavefront
 from .convert import cart2pol, phase_error_to_grav, pol2cart, temp, vel_from_temp
 from .det import Detector, PolarDetector, SphericalDetector
@@ -19,7 +19,7 @@ __version__ = version("aisim")
 
 __all__ = [
     "AtomicEnsemble",
-    "create_random_ensemble_from_gaussian_distribution",
+    "create_random_ensemble",
     "IntensityProfile",
     "Wavefront",
     "Wavevectors",

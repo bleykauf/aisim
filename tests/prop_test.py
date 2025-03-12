@@ -1,30 +1,22 @@
+from functools import partial
+
 import numpy as np
-import pytest  # noqa
+import pytest
 
 import aisim as ais
 
 
 def create_random_thermal_atoms(n_atoms, state_kets=[1, 0]):
-    pos_params = {
-        "mean_x": 0.0,
-        "std_x": 3.0e-3,  # cloud radius in m
-        "mean_y": 0.0,
-        "std_y": 3.0e-3,  # cloud radius in m
-        "mean_z": 0.0,
-        "std_z": 3.0e-3,  # ignore z dimension, its not relevant here
-    }
-    vel_params = {
-        "mean_vx": 0.0,
-        # cloud velocity spread in m/s at tempearture of 3 uK
-        "std_vx": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vy": 0.0,
-        # cloud velocity spread in m/s at tempearture of 3 uK
-        "std_vy": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vz": 0.0,
-        "std_vz": ais.convert.vel_from_temp(280e-9),
-    }
-    return ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_atoms, state_kets=state_kets, seed=0
+    return ais.create_random_ensemble(
+        n_atoms,
+        x_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        y_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        z_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        vx_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.0e-6),
+        vy_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.0e-6),
+        vz_dist=partial(ais.dist.velocity_dist_from_temp, temperature=280e-9),
+        state_kets=state_kets,
+        seed=0,
     )
 
 

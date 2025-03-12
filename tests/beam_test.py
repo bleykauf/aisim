@@ -1,3 +1,5 @@
+from functools import partial
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -25,26 +27,25 @@ def test_wavevectors():
     wv1 = ais.Wavevectors(1, -1)
     wv2 = ais.Wavevectors(-1, 1)
 
-    pos_params = {
-        "mean_x": 1.0,
-        "std_x": 1.0,
-        "mean_y": 1.0,
-        "std_y": 1.0,
-        "mean_z": 1.0,
-        "std_z": 1.0,
-    }
-    vel_params = {
-        "mean_vx": 1.0,
-        "std_vx": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vy": 1.0,
-        "std_vy": ais.convert.vel_from_temp(3.0e-6),
-        "mean_vz": 1.0,
-        "std_vz": ais.convert.vel_from_temp(0.2e-6),
-    }
-
-    atoms = ais.create_random_ensemble_from_gaussian_distribution(
-        pos_params, vel_params, n_samples=10, seed=0
+    atoms = ais.create_random_ensemble(
+        10,
+        mean_x=1.0,
+        mean_y=1.0,
+        mean_z=1.0,
+        mean_vx=1.0,
+        mean_vy=1.0,
+        mean_vz=1.0,
+        x_dist=partial(ais.dist.position_dist_gaussian, std=1.0),
+        y_dist=partial(ais.dist.position_dist_gaussian, std=1.0),
+        z_dist=partial(ais.dist.position_dist_gaussian, std=3.0e-3),
+        vx_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.0e-6),
+        vy_dist=partial(ais.dist.velocity_dist_from_temp, temperature=3.0e-6),
+        vz_dist=partial(
+            ais.dist.velocity_dist_for_box_pulse_velsel, pulse_duration=100e-6
+        ),
+        seed=0,
     )
+
     diff = wv1.doppler_shift(atoms) + wv2.doppler_shift(atoms)
     assert diff.all() == 0
 
