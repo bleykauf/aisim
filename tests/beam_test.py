@@ -54,7 +54,7 @@ def test_intensity_profile():
     r_profile = 1
     pos1 = np.array([[0, 0, 0]])
     pos2 = np.array([[0, 1, 0]])
-    intensity_profile = ais.IntensityProfile(r_profile, 1)
+    intensity_profile = ais.IntensityProfile(r_profile=r_profile, center_rabi_freq=1)
 
     rabi1 = intensity_profile.get_rabi_freq(pos1)
     rabi2 = intensity_profile.get_rabi_freq(pos2)
@@ -63,7 +63,9 @@ def test_intensity_profile():
     np.testing.assert_almost_equal(ratio[0], 1 / np.e**2)
 
     # test that Rabi frequency is zero outside of the beam
-    intensity_profile2 = ais.IntensityProfile(r_profile, 1, r_beam=0.5)
+    intensity_profile2 = ais.IntensityProfile(
+        r_profile=r_profile, center_rabi_freq=1, r_beam=0.5
+    )
     rabi3 = intensity_profile2.get_rabi_freq(pos1)
     assert rabi3[0] == 1
     rabi4 = intensity_profile2.get_rabi_freq(pos2)

@@ -1,5 +1,7 @@
 """Classes and functions related to the interferometry lasers."""
 
+from functools import partial
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import Colormap
@@ -64,18 +66,19 @@ class IntensityProfile:
 
     Attributes
     ----------
-    r_profile : float
-        1/e² radius of the Gaussian intensity profile in m
-    center_rabi_freq : float
-        Rabi frequency at center of intensity profile in rad/s
     r_beam : float or None
         Beam radius in m. If set, Rabi frequency will be set to 0 outside of the beam.
+    profile_func : function
+        Function that calculates the Rabi frequency at a position of a Gaussian beam.
     """
 
-    def __init__(self, r_profile, center_rabi_freq, r_beam=None):
-        self.r_profile = r_profile
-        self.center_rabi_freq = center_rabi_freq
+    def __init__(self, *, r_profile, center_rabi_freq, r_beam=None):
         self.r_beam = r_beam
+        self.profile_func = partial(
+            self._gaussian_profile,
+            r_profile=r_profile,
+            center_rabi_freq=center_rabi_freq,
+        )
 
     def get_rabi_freq(self, pos):
         """
@@ -83,19 +86,42 @@ class IntensityProfile:
 
         Parameters
         ----------
-        pos : (n × 2) array or (n × 3) array
+        pos : (n x 2) array or (n x 3) array
             positions of the n atoms in two or three dimensions (x, y, [z]).
 
         Returns
         -------
         rabi_freqs : array of float
-            the Rabi frequencies for the n positions. If ``r_beam`` is set, the Rabi
+            the Rabi frequencies for the n positions. If `r_beam` is set, the Rabi
+            frequency will be set to 0 outside of the beam.
+        """
+        rabi_freqs = self.profile_func(pos)
+        if self.r_beam is not None:
+            rabi_freqs[pos[:, 0] ** 2 + pos[:, 1] ** 2 > self.r_beam] = 0.0
+        return rabi_freqs
+
+    @staticmethod
+    def _gaussian_profile(pos, r_profile: float, center_rabi_freq: float):
+        """
+        Rabi frequency at a position of a Gaussian beam.
+
+        Parameters
+        ----------
+        pos : (n x 2) array or (n x 3) array
+            positions of the n atoms in two or three dimensions (x, y, [z]).
+        r_profile : float
+            1/e² radius of the Gaussian intensity profile in m
+        center_rabi_freq : float
+            Rabi frequency at center of intensity profile in rad/s
+
+        Returns
+        -------
+        rabi_freqs : array of float
+            the Rabi frequencies for the n positions. If `r_beam` is set, the Rabi
             frequency will be set to 0 outside of the beam.
         """
         r_sq = pos[:, 0] ** 2 + pos[:, 1] ** 2
-        rabi_freqs = self.center_rabi_freq * np.exp(-2 * r_sq / (self.r_profile**2))
-        if self.r_beam is not None:
-            rabi_freqs[r_sq > self.r_beam] = 0.0
+        rabi_freqs = center_rabi_freq * np.exp(-2 * r_sq / (r_profile**2))
         return rabi_freqs
 
 
@@ -157,7 +183,7 @@ class Wavefront:
 
         Parameters
         ----------
-        pos : n × 3 array
+        pos : n x 3 array
             array of position vectors (x, y, z) where the wavefront is probed
 
         Returns
