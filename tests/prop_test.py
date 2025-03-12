@@ -47,7 +47,7 @@ def test_free_propagator():
 def test_two_level_transition_propagator_unitarity():
     atoms = create_random_thermal_atoms(100)
 
-    intensity_profile = ais.IntensityProfile(1, 1)
+    intensity_profile = ais.IntensityProfile(r_profile=1, center_rabi_freq=1)
     wf = ais.gen_wavefront(10, seed=1)
     wave_vectors = ais.Wavevectors()
 
@@ -81,7 +81,7 @@ def test_spatial_superposition_transition_propagator_unitarity():
             init_state.append(0)
             atoms = create_random_thermal_atoms(100, state_kets=init_state)
 
-        intensity_profile = ais.IntensityProfile(1, 1)
+        intensity_profile = ais.IntensityProfile(r_profile=1, center_rabi_freq=1)
         wf = ais.gen_wavefront(10, seed=1)
         wave_vectors = ais.Wavevectors()
 
@@ -114,7 +114,9 @@ def test_spatial_superposition_transition_propagator_time_reversal():
         r_beam = 29.5e-3 / 2  # 1/e^2 beam radius in m
         wave_vectors = ais.Wavevectors(k1=8.052945514e6, k2=-8.052802263e6)
         center_rabi_freq = 2 * np.pi / 4 / pi_half_time
-        intensity_profile = ais.IntensityProfile(r_beam, center_rabi_freq)
+        intensity_profile = ais.IntensityProfile(
+            r_profile=r_beam, center_rabi_freq=center_rabi_freq
+        )
 
         for n_pulse in range(0, n_pulses):
             propagator = ais.SpatialSuperpositionTransitionPropagator(
