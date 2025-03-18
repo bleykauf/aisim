@@ -1,13 +1,22 @@
 """Classes and functions related to the interferometry lasers."""
 
+from enum import Enum
 from functools import partial
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import Colormap
+from scipy.interpolate import RegularGridInterpolator
 
 from . import convert
 from .zern import FIRST_INDEX_J, ZernikeNorm, ZernikeOrder, ZernikePolynomial
+
+
+class IntensityProfileMethods(Enum):
+    GAUSSIAN = "GAUSSIAN"
+    """Gaussian intensity profile."""
+    REGULARGRID = "REGULARGRID"
+    """Interpolation of a regular grid of intensity profile data."""
 
 
 class Wavevectors:
@@ -51,15 +60,29 @@ class Wavevectors:
 
 
 class IntensityProfile:
-    """
-    Class that defines a Gaussian intensity profile in terms of the Rabi frequency.
+    """Class that defines a Gaussian intensity profile in terms of the Rabi frequency.
+
+    The parameters that have to be provided depend on the method that is used to define
+    the intensity profile.
 
     Parameters
     ----------
+    method : IntensityProfileMethods
+        Method to define the intensity profile. Other key-word arguments depend on the
+        method.
     r_profile : float
-        1/e² radius of the Gaussian intensity profile in m
+        1/e² radius of the Gaussian intensity profile in m (only for Gaussian profile,
+        default None)
     center_rabi_freq : float
-        Rabi frequency at center of intensity profile in rad/s
+        Rabi frequency at center of intensity profile in rad/s (only for Gaussian
+        profile, default None)
+    x : array of float of shape (n_x,)
+        x-coordinates of the regular grid (only for regular grid profile, default None)
+    y : array of float of shape (n_y,)
+        y-coordinates of the regular grid (only for regular grid profile, default None)
+    rabi_freqs : array of float of shape (n_x, n_y)
+        Rabi frequencies at the regular grid points (only for regular grid profile,
+        default None
     r_beam : float (optional)
         Beam radius in m. Can be set if the intensity profile is limited by an aperture.
         Rabi frequency will be set to 0 outside of the beam.
@@ -72,17 +95,39 @@ class IntensityProfile:
         Function that calculates the Rabi frequency at a position of a Gaussian beam.
     """
 
-    def __init__(self, *, r_profile, center_rabi_freq, r_beam=None):
+    def __init__(
+        self,
+        *,
+        method: IntensityProfileMethods = IntensityProfileMethods.GAUSSIAN,
+        r_profile: float | None = None,
+        center_rabi_freq: float | None = None,
+        r_beam: float | None = None,
+        x: np.ndarray | None = None,
+        y: np.ndarray | None = None,
+        rabi_freqs: np.ndarray | None = None,
+    ):
         self.r_beam = r_beam
-        self.profile_func = partial(
-            self._gaussian_profile,
-            r_profile=r_profile,
-            center_rabi_freq=center_rabi_freq,
-        )
+        match method:
+            case IntensityProfileMethods.GAUSSIAN:
+                if r_profile is None or center_rabi_freq is None:
+                    raise ValueError(
+                        "r_profile and center_rabi_freq must be set for Gaussian profile"
+                    )
+                self.profile_func = partial(
+                    self._gaussian_profile,
+                    r_profile=r_profile,
+                    center_rabi_freq=center_rabi_freq,
+                )
+            case IntensityProfileMethods.REGULARGRID:
+                self.profile_func = lambda pos: RegularGridInterpolator(
+                    (x, y),
+                    rabi_freqs,
+                    bounds_error=False,
+                    fill_value=0,
+                )(pos[:, :2])
 
     def get_rabi_freq(self, pos):
-        """
-        Rabi frequency at a position of a Gaussian beam.
+        """Rabi frequency at a position of a Gaussian beam.
 
         Parameters
         ----------
@@ -102,8 +147,7 @@ class IntensityProfile:
 
     @staticmethod
     def _gaussian_profile(pos, r_profile: float, center_rabi_freq: float):
-        """
-        Rabi frequency at a position of a Gaussian beam.
+        """Rabi frequency at a position of a Gaussian beam.
 
         Parameters
         ----------
@@ -126,8 +170,7 @@ class IntensityProfile:
 
 
 class Wavefront:
-    """
-    Class that defines a wavefront.
+    """Class that defines a wavefront.
 
     Parameters
     ----------
@@ -178,8 +221,7 @@ class Wavefront:
         self.zern_norm = zern_norm
 
     def get_value(self, pos: np.ndarray) -> np.ndarray:
-        """
-        Get the wavefront at a position.
+        """Get the wavefront at a position.
 
         Parameters
         ----------
@@ -209,8 +251,7 @@ class Wavefront:
         levels: int = 100,
         **kwargs,
     ) -> tuple[plt.Figure, plt.Axes]:
-        """
-        Plot the wavefront data.
+        """Plot the wavefront data.
 
         Parameters
         ----------
@@ -256,8 +297,7 @@ class Wavefront:
     def plot_coeff(
         self, ax: plt.Axes | None = None, **kwargs
     ) -> tuple[plt.Figure, plt.Axes]:
-        """
-        Plot the coefficients as a bar chart.
+        """Plot the coefficients as a bar chart.
 
         Parameters
         ----------
@@ -291,8 +331,7 @@ def gen_wavefront(
     zern_norm: ZernikeNorm | None = None,
     seed: int | None = None,
 ) -> Wavefront:
-    """
-    Create an artificial wavefront.
+    """Create an artificial wavefront.
 
     Parameters
     ----------

@@ -3,7 +3,13 @@
 from importlib.metadata import version
 
 from .atoms import AtomicEnsemble, create_random_ensemble
-from .beam import IntensityProfile, Wavefront, Wavevectors, gen_wavefront
+from .beam import (
+    IntensityProfile,
+    IntensityProfileMethods,
+    Wavefront,
+    Wavevectors,
+    gen_wavefront,
+)
 from .convert import cart2pol, phase_error_to_grav, pol2cart, temp, vel_from_temp
 from .det import Detector, PolarDetector, SphericalDetector
 from .dist import velocity_dist_for_box_pulse_velsel, velocity_dist_for_gaussian_velsel
@@ -21,6 +27,7 @@ __all__ = [
     "AtomicEnsemble",
     "create_random_ensemble",
     "IntensityProfile",
+    "IntensityProfileMethods",
     "Wavefront",
     "Wavevectors",
     "gen_wavefront",
