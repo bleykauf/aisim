@@ -120,8 +120,11 @@ class IntensityProfile:
                 )
             case IntensityProfileMethods.REGULARGRID:
                 self.profile_func = lambda pos: RegularGridInterpolator(
-                    (x, y), rabi_freqs, bounds_error=False, fill_value=0
-                )((pos[:, 0], pos[:, 1]))
+                    (x, y),
+                    rabi_freqs,
+                    bounds_error=False,
+                    fill_value=0,
+                )(pos[:, :2])
 
     def get_rabi_freq(self, pos):
         """Rabi frequency at a position of a Gaussian beam.
