@@ -102,8 +102,8 @@ class IntensityProfile:
         r_profile: float | None = None,
         center_rabi_freq: float | None = None,
         r_beam: float | None = None,
-        x: np.ndarray | None = None,
-        y: np.ndarray | None = None,
+        x_profile: np.ndarray | None = None,
+        y_profile: np.ndarray | None = None,
         rabi_freqs: np.ndarray | None = None,
     ):
         self.r_beam = r_beam
@@ -119,8 +119,13 @@ class IntensityProfile:
                     center_rabi_freq=center_rabi_freq,
                 )
             case IntensityProfileMethods.REGULARGRID:
+                if x_profile is None or y_profile is None or rabi_freqs is None:
+                    raise ValueError(
+                        "x, y and rabi_freqs must be set for regular grid profile"
+                    )
+                rabi_freqs[rabi_freqs < 0] = 0.0
                 self.profile_func = lambda pos: RegularGridInterpolator(
-                    (x, y),
+                    (x_profile, y_profile),
                     rabi_freqs,
                     bounds_error=False,
                     fill_value=0,
