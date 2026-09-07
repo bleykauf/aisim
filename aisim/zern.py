@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from enum import StrEnum
 from functools import partial
-from typing import Callable
 
 import numpy as np
 from scipy.special import eval_jacobi

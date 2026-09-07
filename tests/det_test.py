@@ -1,5 +1,5 @@
 import numpy as np
-import pytest  # noqa
+import pytest
 
 import aisim as ais
 
