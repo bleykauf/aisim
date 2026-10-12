@@ -240,7 +240,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         # Note that diag is a view of matrix, so matrix is changed. n is index for
         # atoms, m and k for the levels and i for num
         diag = np.einsum("nimik->nimk", matrix)
-        for i in range(0, n):
+        for i in range(n):
             # diag[i, :] has shape (num, n_int, n_int), u[i] has shape (n_int, n_int),
             # i.e. so u[i] is copied num times in each loop
             diag[i, :] = u[i]
@@ -258,7 +258,7 @@ class SpatialSuperpositionTransitionPropagator(TwoLevelTransitionPropagator):
         # Each pulse splits the initial state into two states (2 level system),
         # so we end up with 2*n_pulses output states
         index_shift_matrix = np.eye(2 * self.n_pulses)
-        for i in range(0, len(index_shift_matrix)):
+        for i in range(len(index_shift_matrix)):
             if i % 2 == 0:
                 # shift the index of one of the two interacting states;
                 # applying this matrix n_pulses times results again in a unity matrx
