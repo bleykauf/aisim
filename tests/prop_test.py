@@ -118,7 +118,7 @@ def test_spatial_superposition_transition_propagator_time_reversal():
             r_profile=r_beam, center_rabi_freq=center_rabi_freq
         )
 
-        for n_pulse in range(0, n_pulses):
+        for n_pulse in range(n_pulses):
             propagator = ais.SpatialSuperpositionTransitionPropagator(
                 pi_half_time, intensity_profile, n_pulses, n_pulse + 1, wave_vectors
             )
@@ -132,7 +132,7 @@ def test_spatial_superposition_transition_propagator_time_reversal():
             )
 
         # check for time-reversibility (unitarity)
-        for n_pulse in range(0, n_pulses):
+        for n_pulse in range(n_pulses):
             # change counting direction to descending, e.g. 3, 2, ...
             n_pulse = n_pulses - n_pulse
             propagator = ais.SpatialSuperpositionTransitionPropagator(
