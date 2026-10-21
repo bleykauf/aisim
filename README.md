@@ -1,9 +1,14 @@
-[![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
+[![PyPI](https://img.shields.io/pypi/v/sisim?color=blue)](https://pypi.org/project/sisim/)
 [![Conda](https://img.shields.io/conda/v/conda-forge/aisim?color=blue&label=conda-forge)](https://anaconda.org/conda-forge/aisim)
 ![Test Status](https://github.com/bleykauf/aisim/actions/workflows/workflow.yml/badge.svg)
 ![Test Coverage](https://raw.githubusercontent.com/bleykauf/aisim/master/docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+> [!IMPORTANT]
+> **The PyPI package has been renamed from `aisim` to `sisim`.** Please update your dependencies
+> (e.g. `requirements.txt`, `pyproject.toml`) to `sisim` and install it with `pip install sisim`.
+> The import name is unchanged: you still use `import aisim`.
 
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================
@@ -21,7 +26,7 @@ Installation
 
 The latest tagged release can installed via pip with
 
-    pip install aisim
+    pip install sisim
 
 or via conda with
 

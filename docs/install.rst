@@ -5,7 +5,7 @@ The latest tagged release can installed via pip:
 
 ::
 
-    pip install aisim
+    pip install sisim
 
 Alternatively, if you plan to make changes to the code, use
 
