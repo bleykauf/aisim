@@ -25,7 +25,7 @@ copyright = "2023, Bastian Leykauf, Sascha Vowe"
 author = "Bastian Leykauf, Sascha Vowe"
 
 # The full version, including alpha/beta/rc tags
-release: str = get_version("sisim")
+release: str = get_version("py-aisim")
 version = release.split("+")[0]
 
 # -- General configuration ---------------------------------------------------

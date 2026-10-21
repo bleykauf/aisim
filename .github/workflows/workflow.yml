@@ -100,7 +100,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/sisim
+      url: https://test.pypi.org/p/py-aisim
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/sisim
+      url: https://pypi.org/project/py-aisim
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
     steps:

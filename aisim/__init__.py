@@ -8,4 +8,4 @@ from .convert import *  # noqa
 from .det import *  # noqa
 from .prop import *  # noqa
 
-__version__ = version("sisim")
+__version__ = version("py-aisim")
