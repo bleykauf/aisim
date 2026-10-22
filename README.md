@@ -1,8 +1,13 @@
-[![PyPI](https://img.shields.io/pypi/v/aisim?color=blue)](https://pypi.org/project/aisim/)
+[![PyPI](https://img.shields.io/pypi/v/py-aisim?color=blue)](https://pypi.org/project/py-aisim/)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fbleykauf%2Faisim%2Frefs%2Fheads%2Fmaster%2Fpyproject.toml)
 ![Test Status](https://github.com/bleykauf/aisim/actions/workflows/workflow.yml/badge.svg)
 ![Test Coverage](https://raw.githubusercontent.com/bleykauf/aisim/master/docs/coverage.svg)
 [![Documentation Status](https://readthedocs.org/projects/aisim/badge/?version=latest)](https://aisim.readthedocs.io/en/latest/?badge=latest)
+
+> [!IMPORTANT]
+> **The PyPI package has been renamed from `aisim` to `py-aisim`.** Please update your dependencies
+> (e.g. `requirements.txt`, `pyproject.toml`) to `py-aisim` and install it with `pip install py-aisim`.
+> The import name is unchanged: you still use `import aisim`.
 
 AISim ‒ Simulations for light-pulse atom interferometry
 =======================================================
@@ -20,7 +25,7 @@ Installation
 
 The latest tagged release can installed via pip with
 
-    pip install aisim
+    pip install py-aisim
 
 
 Alternatively, if you plan to make changes to the code, use
