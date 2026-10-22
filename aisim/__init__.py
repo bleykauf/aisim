@@ -15,7 +15,7 @@ from .prop import (
 )
 from .zern import ZernikeNorm, ZernikeOrder, ZernikePolynomial, j_to_n_m
 
-__version__ = version("aisim")
+__version__ = version("py-aisim")
 
 __all__ = [
     "AtomicEnsemble",

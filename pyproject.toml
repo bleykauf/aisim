@@ -2,7 +2,7 @@
 requires = ["setuptools >= 75.8.0", "wheel", "setuptools_scm[toml]>=8.1.0"]
 
 [project]
-name = "aisim"
+name = "py-aisim"
 description = "Simulations for light-pulse atom interferometry"
 authors = [
     { name = "Bastian Leykauf" },
