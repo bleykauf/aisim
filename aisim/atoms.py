@@ -1,7 +1,8 @@
 """Classes and functions related to the atomic cloud."""
 
+from collections.abc import Callable
 from functools import partial
-from typing import Callable, Literal
+from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
